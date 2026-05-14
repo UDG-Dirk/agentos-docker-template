@@ -27,6 +27,9 @@ services:
     volumes:
       # Hot-reload: mount source code
       - .:/app
+    env_file:
+      - path: .env
+        required: false
     environment:
       - RUNTIME_ENV=dev
       - AGNO_DEBUG=True
