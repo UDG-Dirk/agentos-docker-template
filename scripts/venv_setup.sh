@@ -4,7 +4,7 @@
 #
 #    Agno Virtual Environment Setup
 #
-#    Usage: ./scripts/venv_setup.sh
+#    Usage: ./scripts/dev_setup.sh
 #
 ############################################################################
 
