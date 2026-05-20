@@ -20,17 +20,25 @@ services:
       dockerfile: Dockerfile
     image: ${IMAGE_NAME:-agno-agentos}:${IMAGE_TAG:-latest}
     container_name: agentos-api
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # --reload-dir limits the watcher to code dirs only, avoiding spurious
+    # restarts when editing docs/, scripts/, or temp files mid-conversation.
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      --reload-dir agents --reload-dir app --reload-dir db
     restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
       # Hot-reload: mount source code
       - .:/app
+    env_file:
+      - path: .env
+        required: false
     environment:
       - RUNTIME_ENV=dev
       - AGNO_DEBUG=True
       - PYTHONPATH=/app
+      - AGENTOS_URL=http://127.0.0.1:8000
       # Database
       - DB_HOST=agentos-db
       - DB_PORT=5432
