@@ -11,6 +11,7 @@ dependencies = [
   "agno[os,slack]",
   "aiohttp",
   "fastapi[standard]",
+  "fastmcp",
   "mcp",
   "openai",
   "parallel-web",
