@@ -71,6 +71,7 @@ agent_os = AgentOS(
     agents=[web_search, code_search],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
+    enable_mcp_server=True,
 )
 app = agent_os.get_app()
 
