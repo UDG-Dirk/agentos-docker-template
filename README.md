@@ -22,6 +22,10 @@ This codebase is designed primarily for coding agents. It comes with five prompt
 |-------|---------|-------------|
 | WebSearch | Direct tools | Search the web using Parallel SDK or keyless MCP. |
 | CodeSearch | Context provider | Answer questions about this codebase. |
+| Reasoning | Direct tools | Strategic advisor using `ReasoningTools` (`think`/`analyze`). |
+| Knowledge | Context provider | Answers grounded in the Dark Factory knowledge base (tool-free RAG). |
+
+> See [`CUSTOMIZATIONS.md`](CUSTOMIZATIONS.md) for how this repo diverges from the upstream agno-agi template (added agents, env-configurable embedder, deploy notes).
 
 ## Get Started
 
