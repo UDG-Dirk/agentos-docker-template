@@ -65,5 +65,10 @@ Thumbs.db
 tmp
 .claude
 
+# Agent tooling / local scratch — NOT part of the deployable template
+.omc/
+agents/--first-contact/
+standalone/
+
 # Optional: local PyPI creds (uncomment if you ever create it)
 # .pypirc

@@ -11,8 +11,11 @@ from agno.os import AgentOS
 from agno.utils.log import log_info
 
 from agents.code_search import code_search
+from agents.knowledge_agent import knowledge_agent
+from agents.reasoning_agent import reasoning_agent
 from agents.web_search import web_search
 from db import get_postgres_db
+from knowledge.dark_factory_kb import ingest as ingest_dark_factory_kb
 
 # ---------------------------------------------------------------------------
 # Environment
@@ -52,6 +55,11 @@ if SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET:
 async def lifespan(app):  # type: ignore[no-untyped-def]
     log_info("AgentOS lifespan: startup")
     try:
+        ingest_dark_factory_kb()  # idempotent (skip_if_exists)
+        log_info("Dark Factory knowledge base ingested.")
+    except Exception as e:  # never let KB ingest block startup
+        log_info(f"Dark Factory KB ingest skipped/failed: {e}")
+    try:
         yield
     finally:
         log_info("AgentOS lifespan: shutdown")
@@ -68,7 +76,7 @@ agent_os = AgentOS(
     authorization=runtime_env == "prd",
     lifespan=lifespan,
     db=get_postgres_db(),
-    agents=[web_search, code_search],
+    agents=[web_search, code_search, reasoning_agent, knowledge_agent],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
     enable_mcp_server=True,

@@ -8,3 +8,11 @@ chat:
       - "What agents are available in this project?"
       - "How does the database connection work?"
       - "Walk me through the main entry point"
+    reasoning-agent:
+      - "Should we build the Knowledge agent or the Reasoning agent next?"
+      - "Think through whether to use the Components API or code-defined agents."
+      - "Weigh the trade-offs of LiteLLM vs direct provider access."
+    knowledge-agent:
+      - "What is the Viable System Model in Dark Factory?"
+      - "Explain the FinOps-honest principle."
+      - "What is the L-shaped assembly-line architecture?"

@@ -3,24 +3,16 @@ WebSearch Agent
 ===============
 """
 
-from os import getenv
-
 from agno.agent import Agent
-from agno.tools.mcp import MCPTools
-from agno.tools.parallel import ParallelTools
 
 from app.settings import default_model
 from db import get_postgres_db
+from tools.parallel_search import get_web_search_tools
 
-# When PARALLEL_API_KEY is set, use the official parallel-web SDK —
-# the agent gets `parallel_search` and `parallel_extract` directly.
-# Without a key, fall back to the keyless MCP endpoint and the agent
-# gets `web_search` and `web_fetch` instead. AgentOS handles MCP
-# connect/close as part of its lifespan.
-if getenv("PARALLEL_API_KEY"):
-    web_tools: ParallelTools | MCPTools = ParallelTools()
-else:
-    web_tools = MCPTools(url="https://search.parallel.ai/mcp", transport="streamable-http")
+# Parallel SDK (when PARALLEL_API_KEY is set) or keyless MCP fallback.
+# See tools/parallel_search.py for the exact conditional. AgentOS handles
+# MCP connect/close as part of its lifespan.
+web_tools = get_web_search_tools()
 
 
 WEB_SEARCH_INSTRUCTIONS = """\
