@@ -1,0 +1,22 @@
+{
+  "tree": {
+    "status": 403,
+    "body": "{\"error\":\"insufficient_scope\",\"error_description\":\"The request requires higher privileges than provided by the access token.\",\"scope\":\"ai_workflows api read_api"
+  },
+  "branches_list": {
+    "status": 403,
+    "body": "{\"error\":\"insufficient_scope\",\"error_description\":\"The request requires higher privileges than provided by the access token.\",\"scope\":\"ai_workflows api read_api"
+  },
+  "create_branch_from_main": {
+    "status": 403,
+    "body": "{\"error\":\"insufficient_scope\",\"error_description\":\"The request requires higher privileges than provided by the access token.\",\"scope\":\"ai_workflows api read_api"
+  },
+  "create_branch_from_master": {
+    "status": 403,
+    "body": "{\"error\":\"insufficient_scope\",\"error_description\":\"The request requires higher privileges than provided by the access token.\",\"scope\":\"ai_workflows api read_api"
+  },
+  "create_commit": {
+    "status": 403,
+    "body": "{\"error\":\"insufficient_scope\",\"error_description\":\"The request requires higher privileges than provided by the access token.\",\"scope\":\"ai_workflows api read_api"
+  }
+}

@@ -1,0 +1,83 @@
+<!-- get_metadata fileKey=8qPSyetzviLR6eF6bkpL44 nodeId=86:985 (page canvas "FormField") -->
+<canvas id="86:985" name="FormField" x="0" y="0" width="0" height="0">
+  <section id="86:986" name="FormFiled" x="-50" y="376" width="2297" height="504">
+    <frame id="100:1466" name="FormField" x="93" y="127" width="1217" height="214">
+      <symbol id="100:1465" name="Type=Input" x="16" y="16" width="269" height="108" />
+      <symbol id="552:861" name="Type=InputArea" x="870" y="16" width="269" height="160" />
+      <symbol id="100:1467" name="Type=InputGroup" x="406" y="16" width="390" height="108" />
+    </frame>
+    <text id="552:945" name="Input" x="186" y="40" width="115" height="28" />
+    <text id="552:947" name="InputGroup" x="612" y="40" width="180" height="28" />
+    <text id="552:948" name="InputArea" x="1016" y="40" width="180" height="28" />
+  </section>
+  <section id="552:617" name=".elements" x="-50" y="976" width="2297" height="1726">
+    <frame id="86:1054" name="Input" x="199" y="131" width="1689" height="1382">
+      <symbol id="86:1047" name="Type=TextInput, State=Default, Size=lg" x="16" y="16" width="269" height="48" />
+      <symbol id="552:447" name="Type=TextArea, State=Default, Size=lg" x="16" y="556" width="269" height="100" />
+      <symbol id="552:472" name="Type=TextArea, State=Hover, Size=lg" x="16" y="672" width="269" height="100" />
+      <symbol id="552:522" name="Type=TextArea, State=Hover, Size=lg" x="16" y="904" width="269" height="100" />
+      <symbol id="552:547" name="Type=TextArea, State=Hover, Size=lg" x="16" y="1020" width="269" height="100" />
+      <symbol id="552:572" name="Type=TextArea, State=Hover, Size=lg" x="16" y="1136" width="269" height="100" />
+      <symbol id="552:597" name="Type=TextArea, State=Hover, Size=lg" x="16" y="1252" width="269" height="100" />
+      <symbol id="552:497" name="Type=TextArea, State=Hover, Size=lg" x="16" y="788" width="269" height="100" />
+      <symbol id="105:2661" name="Type=TextInput, State=Default, Size=md" x="330" y="16" width="269" height="40" />
+      <symbol id="86:1055" name="Type=TextInput, State=Hover, Size=lg" x="16" y="80" width="269" height="48" />
+      <symbol id="105:2670" name="Type=TextInput, State=Hover, Size=md" x="330" y="80" width="269" height="40" />
+      <symbol id="86:1064" name="Type=TextInput, State=Focused, Size=lg" x="16" y="144" width="269" height="48" />
+      <symbol id="105:2679" name="Type=TextInput, State=Focused, Size=md" x="330" y="144" width="269" height="40" />
+      <symbol id="86:1100" name="Type=TextInput, State=Disabled, Size=lg" x="16" y="400" width="269" height="48" />
+      <symbol id="105:2688" name="Type=TextInput, State=Disabled, Size=md" x="330" y="400" width="269" height="40" />
+      <symbol id="86:1073" name="Type=TextInput, State=Filled, Size=lg" x="16" y="208" width="269" height="48" />
+      <symbol id="105:2697" name="Type=TextInput, State=Filled, Size=md" x="330" y="208" width="269" height="40" />
+      <symbol id="86:1082" name="Type=TextInput, State=Error, Size=lg" x="16" y="272" width="269" height="48" />
+      <symbol id="105:2706" name="Type=TextInput, State=Error, Size=md" x="330" y="272" width="269" height="40" />
+      <symbol id="86:1091" name="Type=TextInput, State=Success, Size=lg" x="16" y="336" width="269" height="48" />
+      <symbol id="105:2715" name="Type=TextInput, State=Success, Size=md" x="330" y="336" width="269" height="40" />
+      <symbol id="93:1209" name="Type=TextInputGroup, State=Default, Size=lg" x="754" y="16" width="405" height="48" />
+      <symbol id="105:2724" name="Type=TextInputGroup, State=Default, Size=md" x="1204" y="16" width="405" height="40" />
+      <symbol id="93:1215" name="Type=TextInputGroup, State=Hover, Size=lg" x="754" y="80" width="405" height="48" />
+      <symbol id="105:2732" name="Type=TextInputGroup, State=Hover, Size=md" x="1204" y="80" width="405" height="40" />
+      <symbol id="93:1221" name="Type=TextInputGroup, State=Focused, Size=lg" x="754" y="144" width="405" height="48" />
+      <symbol id="105:2740" name="Type=TextInputGroup, State=Focused, Size=md" x="1204" y="144" width="405" height="40" />
+      <symbol id="93:1227" name="Type=TextInputGroup, State=Disabled, Size=lg" x="754" y="400" width="405" height="48" />
+      <symbol id="105:2748" name="Type=TextInputGroup, State=Disabled, Size=md" x="1204" y="400" width="405" height="40" />
+      <symbol id="93:1233" name="Type=TextInputGroup, State=Filled, Size=lg" x="754" y="208" width="405" height="48" />
+      <symbol id="105:2756" name="Type=TextInputGroup, State=Filled, Size=md" x="1204" y="208" width="405" height="40" />
+      <symbol id="93:1239" name="Type=TextInputGroup, State=Error, Size=lg" x="754" y="272" width="405" height="48" />
+      <symbol id="105:2764" name="Type=TextInputGroup, State=Error, Size=md" x="1204" y="272" width="405" height="40" />
+      <symbol id="93:1245" name="Type=TextInputGroup, State=Success, Size=lg" x="754" y="336" width="405" height="48" />
+      <symbol id="105:2772" name="Type=TextInputGroup, State=Success, Size=md" x="1204" y="336" width="405" height="40" />
+    </frame>
+    <text id="552:618" name="Default" x="119" y="153" width="52" height="24" />
+    <text id="552:619" name="Hover" x="119" y="220" width="42" height="24" />
+    <text id="552:620" name="Focus" x="119" y="283" width="44" height="24" />
+    <text id="552:621" name="Active" x="119" y="344" width="45" height="24" />
+    <text id="552:622" name="Error" x="119" y="411" width="35" height="24" />
+    <text id="552:623" name="Success" x="119" y="475" width="61" height="24" />
+    <text id="552:624" name="Disabled" x="119" y="539" width="62" height="24" />
+    <text id="552:625" name="Default" x="119" y="685" width="52" height="24" />
+    <text id="552:626" name="Hover" x="119" y="800" width="42" height="24" />
+    <text id="552:627" name="Focus" x="119" y="915" width="44" height="24" />
+    <text id="552:628" name="Active" x="119" y="1030" width="45" height="24" />
+    <text id="552:629" name="Error" x="119" y="1145" width="35" height="24" />
+    <text id="552:630" name="Success" x="119" y="1260" width="61" height="24" />
+    <text id="552:631" name="Disabled" x="119" y="1384" width="62" height="24" />
+    <text id="552:632" name="Size lg" x="220" y="71" width="47" height="24" />
+    <text id="552:633" name="Size lg" x="961" y="71" width="47" height="24" />
+    <text id="552:634" name="Size md" x="411" y="71" width="57" height="24" />
+    <text id="552:635" name="Size md" x="1152" y="71" width="57" height="24" />
+    <text id="552:636" name="TextInput" x="447" y="28" width="115" height="28" />
+    <text id="552:829" name="TextArea" x="447" y="1573" width="115" height="28" />
+    <text id="552:637" name="TextInputGroup" x="1304" y="28" width="192" height="28" />
+    <text id="552:638" name="Size lg" x="293" y="90" width="48" height="24" />
+    <text id="552:639" name="Size lg" x="1140" y="90" width="48" height="24" />
+    <text id="552:640" name="Size md" x="629" y="90" width="60" height="24" />
+    <vector id="552:642" name="Rectangle 1" x="199" y="80" width="611" height="18" />
+    <text id="552:641" name="Size md" x="1597" y="90" width="60" height="24" />
+    <vector id="552:830" name="Rectangle 3" x="199" y="1547" width="611" height="18" />
+    <vector id="552:643" name="Rectangle 2" x="940" y="80" width="885" height="18" />
+  </section>
+</canvas>
+
+<!-- get_metadata nodeId=100:1465 (Type=Input variant symbol) -->
+<symbol id="100:1465" name="Type=Input" x="16" y="16" width="269" height="108" />

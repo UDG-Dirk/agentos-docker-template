@@ -1,0 +1,9 @@
+<!-- get_metadata 57:645 (Button page). Variant matrix encoded in symbol names. -->
+<!-- AXES: Variant={Solid, Solid-Input, Outline, Ghost} x Size={xl,lg,md,sm} x State={Default,Hover,Active,Focus,Disabled} -->
+<!-- Two component sets: Button (57:766) and IconButton (182:4263), same axes. -->
+<!-- ButtonGroup (147:3678) with Spacing={0,sm,md}. Full symbol id list omitted for brevity; ~55 Button symbols + ~40 IconButton symbols. -->
+<section name="Button" id="57:646">
+  <frame name="Button" id="57:766"><!-- 55 variant symbols: Variant x Size x State --></frame>
+  <frame name="ButtonGroup" id="147:3678"><!-- Spacing=0|sm|md --></frame>
+  <section name="IconButton" id="182:4262"><frame id="182:4263"><!-- 40 variant symbols --></frame></section>
+</section>

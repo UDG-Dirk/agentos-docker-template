@@ -30,3 +30,10 @@ aienv*
 # Project-specific
 tmp/
 .claude/
+
+# Dev-only — never ship exploration/tests/run-artifacts in the deploy image
+spikes
+tests
+**/runs
+*.golden.json
+standalone

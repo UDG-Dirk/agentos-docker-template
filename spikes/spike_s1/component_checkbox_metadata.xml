@@ -1,0 +1,53 @@
+<canvas id="457:249" name="Checkbox" x="0" y="0" width="0" height="0">
+  <section id="457:250" name="Checkbox" x="-526" y="-565" width="1052" height="604">
+    <!-- Full labeled-variant container frame -->
+    <frame id="451:315" name="Checkbox" x="119" y="120" width="827" height="431">
+      <symbol id="451:294" name="State=Default, Selection=Unchecked" x="16" y="16" width="141" height="24" />
+      <symbol id="452:322" name="State=Default, Selection=Indetermined" x="494" y="16" width="141" height="24" />
+      <symbol id="451:380" name="State=Error, Selection=Unchecked" x="16" y="281" width="141" height="52" />
+      <symbol id="452:261" name="State=Error, Selection=Checked" x="247" y="281" width="141" height="52" />
+      <symbol id="451:390" name="State=Warning, Selection=Unchecked" x="16" y="362" width="141" height="52" />
+      <symbol id="451:316" name="State=Hover, Selection=Unchecked" x="16" y="69" width="141" height="24" />
+      <symbol id="452:237" name="State=Hover, Selection=Checked" x="247" y="69" width="141" height="24" />
+      <symbol id="452:340" name="State=Hover, Selection=Indetermined" x="494" y="69" width="141" height="24" />
+      <symbol id="451:326" name="State=Focus, Selection=Unchecked" x="16" y="122" width="141" height="24" />
+      <symbol id="452:247" name="State=Focus, Selection=Checked" x="247" y="122" width="141" height="24" />
+      <symbol id="452:352" name="State=Focus, Selection=Indetermined" x="494" y="122" width="141" height="24" />
+      <symbol id="451:336" name="State=Active, Selection=Unchecked" x="16" y="175" width="141" height="24" />
+      <symbol id="451:347" name="State=Disabled, Selection=Unchecked" x="16" y="228" width="141" height="24" />
+      <!-- (repetitive duplicate variant symbols trimmed: 452:481 Error/Checked, 452:373 Hover/Checked hidden, 452:453 Disabled/Unchecked) -->
+    </frame>
+    <!-- column header text labels: Default Hover Focus Active Disabled Error Warning / Unchecked Checked Indetermined -->
+  </section>
+  <section id="457:261" name=".elements" x="-526" y="102" width="761" height="463">
+    <!-- CORE icon-only container frame (used for variable_defs + design_context) -->
+    <frame id="448:587" name="Checkbox" x="122" y="97" width="558" height="299">
+      <symbol id="448:582" name="State=Default, Selection=Unchecked" x="52" y="16" width="24" height="24" />
+      <symbol id="448:588" name="State=Error, Selection=Unchecked" x="52" y="246" width="24" height="24" />
+      <symbol id="448:583" name="State=Hover, Selection=Unchecked" x="52" y="62" width="24" height="24" />
+      <symbol id="448:584" name="State=Focus, Selection=Unchecked" x="52" y="108" width="24" height="24" />
+      <symbol id="448:585" name="State=Active, Selection=Unchecked" x="219" y="154" width="24" height="24" />
+      <symbol id="448:606" name="State=Error, Selection=Checked" x="219" y="246" width="24" height="24" />
+      <symbol id="448:594" name="State=Active, Selection=Checked" x="219" y="62" width="24" height="24" />
+      <symbol id="452:301" name="State=Default, Selection=Indetermined" x="386" y="16" width="24" height="24" />
+      <symbol id="452:391" name="State=Default, Selection=Checked" x="219" y="16" width="24" height="24" hidden="true" />
+      <symbol id="452:307" name="State=Hover, Selection=Indetermined" x="386" y="62" width="24" height="24" />
+      <symbol id="452:313" name="State=Focus, Selection=Indetermined" x="386" y="108" width="24" height="24" />
+      <symbol id="448:609" name="State=Focus, Selection=Checked" x="219" y="108" width="24" height="24" />
+      <symbol id="448:586" name="State=Disabled, Selection=Unchecked" x="52" y="200" width="24" height="24" />
+      <symbol id="452:466" name="State=Disabled, Selection=Checked" x="219" y="200" width="24" height="24" />
+    </frame>
+    <!-- column header text labels: Default Hover Focus Active Disabled Error / Unchecked Checked Indetermined -->
+  </section>
+</canvas>
+
+<!--
+DISTINCT VARIANT AXES (encoded in symbol names):
+  State     = Default | Hover | Focus | Active | Disabled | Error | Warning
+              (Warning ONLY appears in the labeled frame 451:315, NOT in .elements core frame 448:587)
+  Selection = Unchecked | Checked | Indetermined  [sic: 'Indetermined', expected 'Indeterminate']
+
+CONTAINER FRAMES:
+  451:315  full labeled Checkbox variants (label + helper)
+  448:587  .elements core icon-only Checkbox variants  <- representative variant 448:582 used for design_context
+-->

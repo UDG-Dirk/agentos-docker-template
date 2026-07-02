@@ -1,0 +1,23 @@
+figma-developer-mcp v0.9.0
+
+[1mUsage:[22m
+  figma-developer-mcp [flags...]
+  figma-developer-mcp <command>
+
+[1mCommands:[22m
+  fetch        
+
+[1mFlags:[22m
+      --env <string>                      Path to custom .env file to load environment variables from
+      --figma-api-key <string>            Figma API key (Personal Access Token)
+      --figma-oauth-token <string>        Figma OAuth Bearer token
+  -h, --help                              Show help
+      --host <string>                     Host to run the server on
+      --image-dir <string>                Base directory for image downloads. The download tool will only write files within this directory. Defaults to the current working directory.
+      --json                              Output data from tools in JSON format instead of YAML
+      --port <number>                     Port to run the server on
+      --proxy <string>                    HTTP proxy URL for networks that require a proxy (e.g. http://proxy:8080)
+      --skip-image-downloads              Do not register the download_figma_images tool (skip image downloads)
+      --stdio                             Run in stdio transport mode for MCP clients
+      --version                           Show version
+

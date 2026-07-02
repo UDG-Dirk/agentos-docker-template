@@ -1,0 +1,59 @@
+<!--
+  TOGGLE COMPONENT — metadata extraction
+  File key: 8qPSyetzviLR6eF6bkpL44
+  Page node: 552:985 (name "Toggle")
+
+  Variant container frames (the auto-layout frames holding the variant <symbol>s):
+    633:752  "ToggelElements" — icon-thumb symbols. Variant axis: State
+             States: Active, Inactive, Variant2
+    633:913  "ToggleSwitch"   — the switch track+thumb. Variant axes: Type, State
+             Type=Inactive: State=Default, Disabled, Hover, Focus
+             Type=Active:   State=Default, Hover, Focus
+    648:253  "Toggle"         — full component (LabelRow + ToggleSwitch + label).
+             Variant axis: State. States: Active, Inactive, Disabled
+             (this frame unions the richest token set incl. typography)
+
+  Distinct variant-axis combinations preserved below (full symbol list trimmed
+  only of duplicate positional data; every distinct Variant/Type/State name kept).
+
+  Code Connect: get_code_connect_map(633:913) returned {} BUT get_design_context
+  on 648:238 surfaced a CodeConnectSnippet (import Icon from
+  "src/components/Icon/Icon.vue") and a designer description w/ "Agent instructions"
+  on node 86:941 (LabelRow, State=Default). Target framework in snippet = VUE.
+-->
+<canvas id="552:985" name="Toggle" x="0" y="0" width="0" height="0">
+  <section id="633:741" name="Section 1" x="-841" y="597" width="1191" height="863">
+
+    <frame id="633:752" name="ToggelElements" x="408" y="295" width="52" height="198">
+      <symbol id="633:751" name="State=Active"   x="16" y="16" width="20" height="20" />
+      <symbol id="633:907" name="State=Inactive" x="16" y="43" width="20" height="20" />
+      <symbol id="633:753" name="State=Variant2" x="18" y="73" width="16" height="16" />
+    </frame>
+
+    <frame id="633:913" name="ToggleSwitch" x="161" y="295" width="230" height="198">
+      <symbol id="633:912" name="Type=Inactive, State=Default"  x="35"  y="16"  width="48" height="24" />
+      <symbol id="648:271" name="Type=Inactive, State=Disabled" x="33"  y="136" width="48" height="24" />
+      <symbol id="633:914" name="Type=Inactive, State=Hover"    x="35"  y="56"  width="48" height="24" />
+      <symbol id="633:916" name="Type=Inactive, State=Focus"    x="35"  y="96"  width="48" height="24" />
+      <symbol id="633:918" name="Type=Active, State=Default"    x="140" y="16"  width="48" height="24" />
+      <symbol id="633:919" name="Type=Active, State=Hover"      x="140" y="56"  width="48" height="24" />
+      <symbol id="633:926" name="Type=Active, State=Focus"      x="140" y="96"  width="48" height="24" />
+    </frame>
+
+    <frame id="648:253" name="Toggle" x="161" y="98" width="941" height="116">
+      <symbol id="648:238" name="State=Active"   x="286" y="16" width="165" height="56" />
+      <symbol id="648:293" name="State=Inactive" x="29"  y="16" width="165" height="56" />
+      <symbol id="648:254" name="State=Disabled" x="543" y="16" width="165" height="56" />
+    </frame>
+
+    <!-- annotation text labels -->
+    <text id="648:349" name="Hover"    x="107" y="352" width="37"  height="24" />
+    <text id="648:350" name="Focus"    x="106" y="389" width="38"  height="24" />
+    <text id="648:351" name="Disabled" x="89"  y="432" width="55"  height="24" />
+    <text id="648:346" name="Inactive" x="224" y="51"  width="101" height="25" />
+    <text id="648:354" name="Active"   x="475" y="51"  width="101" height="25" />
+    <text id="648:355" name="Disabled" x="740" y="51"  width="101" height="25" />
+    <text id="648:352" name="Inactive" x="188" y="251" width="72"  height="28" />
+    <text id="648:353" name="Active"   x="289" y="251" width="58"  height="28" />
+  </section>
+</canvas>

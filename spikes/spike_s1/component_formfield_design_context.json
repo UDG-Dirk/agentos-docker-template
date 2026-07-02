@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "fileKey": "8qPSyetzviLR6eF6bkpL44",
+    "nodeId": "100:1465",
+    "nodeName": "FormField Type=Input variant",
+    "tool": "mcp__figma__get_design_context",
+    "params": { "clientFrameworks": "react", "clientLanguages": "typescript", "excludeScreenshot": true }
+  },
+  "code": "import Icon from \"src/components/Icon/Icon.vue\"\n\ntype HelperRowProps = {\n  className?: string;\n  state?: \"Default\";\n};\n\nfunction HelperRow({ className, state = \"Default\" }: HelperRowProps) {\n  return (\n    <div className={className || \"content-center flex flex-wrap gap-[var(--dimension\\\\/spacing\\\\/components\\\\/3xs,0px)] items-center pb-[var(--spacing\\\\/0,0px)] pt-[var(--dimension\\\\/spacing\\\\/components\\\\/4xs,4px)] relative\"} data-node-id=\"86:975\">\n      <p className=\"[word-break:break-word] font-[family-name:var(--font\\/family\\/heading,'roboto:Regular')] leading-[var(--dimension\\/typography\\/body\\/sm\\/lineheight,24px)] not-italic relative shrink-0 text-[color:var(--colors\\/text-icon\\/primary,#3a3a3a)] text-[length:var(--dimension\\/typography\\/body\\/sm\\/size,14px)] whitespace-nowrap\" data-node-id=\"86:977\">\n        Default\n      </p>\n    </div>\n  );\n}\n\ntype FormFieldProps = {\n  className?: string;\n  type?: \"Input\";\n};\n\nfunction FormField({ className, type = \"Input\" }: FormFieldProps) {\n  return (\n    <div className={className || \"content-stretch flex flex-col items-start relative w-[269px]\"} data-node-id=\"100:1465\">\n      <div className=\"content-center flex flex-wrap gap-[var(--dimension\\/spacing\\/components\\/3xs,0px_8px)] items-center pb-[var(--dimension\\/spacing\\/components\\/3xs,8px)] relative shrink-0\" data-node-id=\"86:987\" data-name=\"LabelRow\">\n        <div className=\"[word-break:break-word] content-stretch flex gap-[var(--spacing\\/1,4px)] items-center leading-[var(--dimension\\/typography\\/body\\/sm\\/lineheight,24px)] not-italic relative shrink-0 text-[color:var(--colors\\/text-icon\\/primary,#3a3a3a)] text-[length:var(--dimension\\/typography\\/body\\/sm\\/size,14px)] whitespace-nowrap\" data-node-id=\"I86:987;86:940\" data-name=\"LabelGroup\">\n          <p className=\"font-[family-name:var(--font\\/family\\/heading,'roboto:Regular')] relative shrink-0\" data-node-id=\"I86:987;86:936\">\n            Label\n          </p>\n          <p className=\"font-[family-name:var(--font\\/family\\/body,'dm_sans:Black')] relative shrink-0\" data-node-id=\"I86:987;86:937\">\n            *\n          </p>\n        </div>\n      </div>\n      <div className=\"bg-[var(--colors\\/control\\/background\\/default,white)] border-[length:var(--dimension\\/stroke-weight\\/sm,1px)] border-[var(--colors\\/control\\/border\\/default,#979797)] border-solid content-stretch flex gap-[var(--dimension\\/spacing\\/components\\/3xs,8px)] h-[48px] items-center px-[var(--dimension\\/spacing\\/components\\/xs,16px)] relative rounded-[var(--component\\/radius\\/input,4px)] shrink-0 w-full\" data-node-id=\"93:1135\" data-name=\"Input\">\n        <div className=\"content-stretch flex flex-[1_0_0] gap-[var(--spacing\\/2,8px)] items-center min-w-px relative\" data-node-id=\"I93:1135;86:1052\" data-name=\"InputGroup\">\n          <div className=\"content-stretch flex items-center relative shrink-0\" data-node-id=\"I93:1135;103:1505\" data-name=\"LeadingIcon\" />\n          <p className=\"[word-break:break-word] flex-[1_0_0] font-[family-name:var(--font\\/family\\/heading,'roboto:Regular')] leading-[var(--dimension\\/typography\\/body\\/md\\/lineheight,24px)] min-w-px not-italic relative text-[color:var(--colors\\/control\\/text-icon\\/muted,#979797)] text-[length:var(--dimension\\/typography\\/body\\/md\\/size,16px)]\" data-node-id=\"I93:1135;86:997\">\n            InputLabel\n          </p>\n          <div className=\"content-stretch flex items-center relative shrink-0\" data-node-id=\"I93:1135;103:1549\" data-name=\"ClearButton\" />\n        </div>\n      </div>\n      <HelperRow className=\"content-center flex flex-wrap gap-[var(--dimension\\/spacing\\/components\\/3xs,0px)] items-center pb-[var(--spacing\\/0,0px)] pt-[var(--dimension\\/spacing\\/components\\/4xs,4px)] relative shrink-0\" />\n    </div>\n  );\n}",
+  "code_connect_present": false,
+  "code_connect_note": "No CodeConnectSnippet wrapper returned; output is generated React+Tailwind reference code only. An Icon import (src/components/Icon/Icon.vue) appears in the generated code, suggesting the design system's target is Vue, not React.",
+  "contained_styles": [
+    "body/sm/regular: Font(family: \"font/family/heading\", style: Regular, size: dimension/typography/body/sm/size, weight: dimension/typography/heading/lg/regular, lineHeight: dimension/typography/body/sm/lineheight, letterSpacing: 0)",
+    "body/sm/strong: Font(family: \"font/family/body\", style: Black, size: dimension/typography/body/sm/size, weight: dimension/typography/body/lg/strong, lineHeight: dimension/typography/body/sm/lineheight, letterSpacing: 0)",
+    "body/md/regular: Font(family: \"font/family/heading\", style: Regular, size: dimension/typography/body/md/size, weight: dimension/typography/body/md/regular, lineHeight: dimension/typography/body/md/lineheight, letterSpacing: 0)"
+  ],
+  "component_descriptions": {
+    "FormField": {
+      "node_id": "100:1466",
+      "purpose": "A complete form field composing a label, input, and helper text into one reusable unit.",
+      "types": ["Input - standard text input", "InputGroup - text input with attached action button"],
+      "structure_top_to_bottom": ["1. <LabelRow> - label + optional required indicator + optional info icon", "2. <Input> - the text input field", "3. <HelperRow> - validation feedback text"],
+      "token_references": ["Spacing LabelRow -> Input: var(--space-2) (via LabelRow padding-bottom)", "Spacing Input -> HelperRow: var(--space-1) (via HelperRow padding-top)", "All further token references: see LabelRow, Input, HelperRow descriptions"],
+      "agent_instructions": ["Always compose existing <LabelRow>, <Input>, <HelperRow> - never re-implement their markup", "The helperState prop controls which HelperRow state is shown", "Accept: type, size, label, required, showInfoIcon, helperState, helperMessage, and all Input props"]
+    },
+    "LabelRow_State=Default": {
+      "node_id": "86:941",
+      "purpose": "A label row displayed above every input field. Part of every FormField.",
+      "structure": "A <div> with display: flex, flex-direction: row, align-items: center, gap: var(--space-2), padding-bottom: var(--space-2).",
+      "contains": ["Label text (always visible)", "Required indicator * (optional)", "Info icon circle-info, 16x16px (optional, right-aligned)"],
+      "token_references": ["Typography: var(--font-size-sm), var(--font-weight-regular)", "Required *: var(--font-weight-black)", "Color: var(--color-text-default)", "Gap: var(--space-2)", "Padding-bottom: var(--space-2)"],
+      "agent_instructions": ["Always sits directly above an Input component", "Info icon uses circle-info from the design system icon set - no external icons", "Accept: label, required (boolean), showInfoIcon (boolean) as props"]
+    },
+    "Input": {
+      "node_id": "86:1054",
+      "purpose": "A text input field for user data entry. Available standalone or with an attached action button.",
+      "types": ["Input - standalone text field", "InputGroup - text field with Solid-Input Button attached on the right"],
+      "sizes": ["md - height: var(--btn-height-md), font: var(--font-size-base)", "lg - height: var(--btn-height-lg), font: var(--font-size-base)"],
+      "states": ["Default", "Hover", "Focused", "Filled", "Error", "Success", "Disabled"],
+      "token_references": ["Height: var(--btn-height-md) / var(--btn-height-lg)", "Border radius: var(--radius-button)", "Typography: var(--font-size-base), var(--font-weight-regular)", "Placeholder: var(--color-text-placeholder)", "Text: var(--color-text-default)", "Border (Error): var(--color-error)", "Border (Success): var(--color-success)", "Background (Disabled): var(--color-disabled-bg)", "Padding: var(--space-3) horizontal", "Icon gap: var(--space-2)", "Transition: var(--transition-fast)"],
+      "agent_instructions": ["Never hardcode height - always use size tokens", "All border and text color changes between states must use token values", "Accept: type, size, state, leadingIcon, showClearButton, showPasswordToggle, placeholder, value as props"]
+    },
+    "HelperRow": {
+      "node_id": "86:957",
+      "purpose": "A helper text row displayed below every input field. Provides validation feedback.",
+      "variants_state_prop": ["Default - text only, no icon: color var(--color-text-default)", "Success - circle-check icon + text: color var(--color-success)", "Error - triangle-exclamation icon + text: color var(--color-error)"],
+      "structure": "A <div> with display: flex, flex-direction: row, align-items: center, gap: var(--space-2), padding-top: var(--space-1).",
+      "token_references": ["Typography: var(--font-size-sm), var(--font-weight-regular)", "Color (Default): var(--color-text-default)", "Color (Success): var(--color-success)", "Color (Error): var(--color-error)", "Gap: var(--space-2)", "Padding-top: var(--space-1)", "Icon size: 16x16px"],
+      "agent_instructions": ["Always sits directly below an Input component", "Icons come from the design system only: circle-check and triangle-exclamation", "Accept: state ('default' | 'success' | 'error'), message (string) as props"]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "_spike_note": "get_variable_defs raw result. Two calls made:",
+  "_call_1": {
+    "nodeId": "216:152 (page/canvas)",
+    "result": "ERROR: 'You currently have nothing selected. You need to select a layer first before using this tool.' — page/canvas node is not a selectable layer for this tool; it appears to fall back to Figma desktop selection state when the node is not a concrete frame/layer."
+  },
+  "_call_2": {
+    "nodeId": "216:157 (Cover frame, 1920x1080)",
+    "result": "{} (empty object)"
+  },
+  "variable_defs": {},
+  "_finding": "NO Figma Variables / bound design tokens exist on this node (or anywhere reachable from it). All visual values in the design are hardcoded literals (see design_context). Token extraction from this file yields nothing."
+}

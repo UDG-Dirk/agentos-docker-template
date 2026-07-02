@@ -1,0 +1,20 @@
+{
+  "_note": "No design context could be extracted for the Input component from this file. Page node 100:1426 ('Input') is EMPTY (zero children). Node 100:1427 is invalid/non-existent. The Input component is a published Helix_Design library component_set not instantiated in this working file.",
+  "_search_design_system_result_for_Input": {
+    "name": "Input",
+    "libraryName": "Helix_Design",
+    "libraryKey": "lk-279f36002b2fa98febcedf7bd643dde9a80b13b33141802ef0b474c54ed9ddd20c25066f8676105787aea3a36e652ab76bee4dcd6a0e2e2138f4d3ae533d3891",
+    "assetType": "component_set",
+    "updatedAt": "2026-05-13T06:02:17Z",
+    "componentKey": "a0933d5e0199ad689d45e7999eeec9d0ed47d66b",
+    "filePath": "design_systems/Helix_Design/components/Input"
+  },
+  "_code_connect": {
+    "get_code_connect_map_633_913": {},
+    "note": "Code Connect map returned empty {} for the Toggle frame; no Input node available to query in this file. However, related FormField/LabelRow nodes DO carry Code Connect + designer descriptions (see toggle design_context) and the LabelRow doc explicitly states it 'Always sits directly above an Input component'."
+  },
+  "code": null,
+  "codeConnectTarget": null,
+  "clientFrameworks": "react",
+  "clientLanguages": "typescript"
+}

@@ -70,8 +70,15 @@ tmp
 agents/--first-contact/
 standalone/
 
-# Figma Extractor runtime output (download_figma_images writes here at run time)
-agents/figma_extractor/runs/
+# Agent run outputs — ignore run artifacts/logs/assets, but KEEP the golden test fixtures
+agents/figma_extractor/runs/*
+!agents/figma_extractor/runs/run_sequential_003.json
+agents/token_normalizer/runs/*
+!agents/token_normalizer/runs/.golden.json
+
+# spikes/ exploration archive: keep the source, ignore caches/logs
+spikes/**/__pycache__/
+spikes/**/*.log
 
 # Optional: local PyPI creds (uncomment if you ever create it)
 # .pypirc

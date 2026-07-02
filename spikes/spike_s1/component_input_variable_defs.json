@@ -1,0 +1,22 @@
+{
+  "_note": "Input page node 100:1426 is EMPTY in this working file (no inner variant container frame). get_variable_defs requires a concrete frame target and fails on the empty page canvas ('nothing selected'). The Input component is a published Helix_Design library component_set (componentKey a0933d5e0199ad689d45e7999eeec9d0ed47d66b) not instantiated in this file, so its full token map cannot be unioned here.",
+  "_input_related_published_variables_from_search_design_system": {
+    "dimension/radius/input": {
+      "variableType": "FLOAT",
+      "scopes": ["CORNER_RADIUS"],
+      "variableCollectionName": "semantic",
+      "libraryName": "Helix_Design",
+      "key": "99dfc98302806389bfc9db1e867ac916703e8b72",
+      "variableSetKey": "faa5436b1d5cf6020beedab4c1d46b4b79dd5559"
+    },
+    "dimension/radius/control-input": {
+      "variableType": "FLOAT",
+      "scopes": ["CORNER_RADIUS"],
+      "variableCollectionName": "semantic",
+      "libraryName": "Helix_Design",
+      "key": "ae16dc32dca733f9e5029208c0b92743f5c3f59d",
+      "variableSetKey": "faa5436b1d5cf6020beedab4c1d46b4b79dd5559"
+    }
+  },
+  "_resolved_token_map": {}
+}

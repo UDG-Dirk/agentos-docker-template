@@ -1,0 +1,8 @@
+{
+  "_source": "get_design_context node 57:760 (Button Variant=Solid,Size=lg,State=Default), clientFrameworks=react",
+  "_finding": "Returns CODE CONNECT output (not Tailwind): Vue Icon import, CodeConnectSnippet wrapper, TS props type {size,state,variant}. Plus designer-authored component DESCRIPTION with Purpose/Variants/Sizes/States/Token-references/Agent-instructions. A single state symbol -> design_context returns THAT state only; full state set enumerated via metadata sibling symbols.",
+  "code": "import Icon from \"src/components/Icon/Icon.vue\"\n\ntype ButtonProps = { className?: string; size?: \"lg\"; state?: \"Default\"; variant?: \"Solid\"; };\n\nfunction Button({ className, size = \"lg\", state = \"Default\", variant = \"Solid\" }: ButtonProps) {\n  return (<CodeConnectSnippet data-node-id=\"57:760\" data-name=\"Variant=Solid, Size=lg, State=Default\"><Button><Icon /><Icon /></Button></CodeConnectSnippet>);\n}",
+  "code_connect": {"present": true, "target_framework": "Vue (import Icon from src/components/Icon/Icon.vue)"},
+  "component_description": "Purpose: primary interactive element. Variants: Solid/Outline/Ghost/Solid-Input. Sizes sm/md/lg/xl. States Default/Hover/Active/Focus/Disabled. Token refs use --color-primary-500/600/700, --radius-pill, --radius-button, --font-weight-semibold, --space-2, --color-focus-ring. AGENT INSTRUCTIONS: never hardcode color/spacing/size; Ghost wraps icon in circular pill; Disabled via --color-disabled-bg not CSS opacity; props: variant,size,disabled,leadingIcon,trailingIcon,label,onClick.",
+  "_naming_mismatch": "Variable slash-paths (colors/interactive/surface/default=#3388f0) vs description CSS contract (--color-primary-500). Token Normalizer must reconcile the two."
+}

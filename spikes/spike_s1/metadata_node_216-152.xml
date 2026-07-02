@@ -1,0 +1,28 @@
+<canvas id="216:152" name="Cover" x="0" y="0" width="0" height="0">
+  <frame id="216:157" name="Cover" x="0" y="0" width="1920" height="1080">
+    <frame id="552:986" name="helix-svgrepo-com 1" x="398" y="-323" width="1725" height="1725">
+      <vector id="552:987" name="Vector" x="381.9927978515625" y="264.9923400878906" width="515.4732055664062" height="361.2801818847656" />
+      <vector id="552:988" name="Vector" x="591.3886108398438" y="475.8257141113281" width="338.6607360839844" height="248.2777862548828" />
+      <vector id="552:989" name="Vector" x="901.409423828125" y="1087.2420654296875" width="515.473388671875" height="361.2803649902344" />
+      <vector id="552:990" name="Vector" x="863.076171875" y="994.7232666015625" width="338.9400634765625" height="248.23672485351562" />
+      <vector id="552:991" name="Vector" x="587.4583740234375" y="95.35419464111328" width="567.9508056640625" height="623.3958740234375" />
+      <vector id="552:992" name="Vector" x="178.94512939453125" y="88.56143951416016" width="1411.07470703125" height="1540.6270751953125" />
+      <vector id="552:993" name="Vector" x="0" y="0" width="1725" height="1725" />
+    </frame>
+    <frame id="552:1002" name="Group 1" x="0" y="-323" width="2123" height="1725">
+      <rounded-rectangle id="216:158" name="Rectangle 1" x="0" y="470" width="1920" height="478" />
+      <rounded-rectangle id="552:1003" name="Rectangle 2" x="0" y="470" width="1920" height="478" />
+      <frame id="552:994" name="helix-svgrepo-com 2" x="398" y="-323" width="1725" height="1725">
+        <vector id="552:995" name="Vector" x="381.9927978515625" y="264.9923400878906" width="515.4732055664062" height="361.2801818847656" />
+        <vector id="552:996" name="Vector" x="591.3886108398438" y="475.8257141113281" width="338.6607360839844" height="248.2777862548828" />
+        <vector id="552:997" name="Vector" x="901.409423828125" y="1087.2420654296875" width="515.473388671875" height="361.2803649902344" />
+        <vector id="552:998" name="Vector" x="863.076171875" y="994.7232666015625" width="338.9400634765625" height="248.23672485351562" />
+        <vector id="552:999" name="Vector" x="587.4583740234375" y="95.35419464111328" width="567.9508056640625" height="623.3958740234375" />
+        <vector id="552:1000" name="Vector" x="178.94512939453125" y="88.56143951416016" width="1411.07470703125" height="1540.6270751953125" />
+        <vector id="552:1001" name="Vector" x="0" y="0" width="1725" height="1725" />
+      </frame>
+    </frame>
+    <text id="216:159" name="HELIX Design" x="95" y="536" width="1501" height="266" />
+    <text id="216:160" name="AI ENABLED" x="95" y="747" width="860" height="177" />
+  </frame>
+</canvas>

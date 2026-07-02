@@ -1,0 +1,73 @@
+{
+  "spike": "S1 Track A — official Figma MCP extraction",
+  "captured_at": "2026-06-29",
+  "mcp_server": {
+    "name": "figma",
+    "type": "http",
+    "url": "https://mcp.figma.com/mcp",
+    "scope": "user (global, ~/.claude.json) + project (.mcp.json)",
+    "auth": "OAuth browser flow (one-time, cached) — confirmed LIVE this session"
+  },
+  "target": {
+    "file_url": "https://www.figma.com/design/8qPSyetzviLR6eF6bkpL44/Helix_Design?node-id=216-152&m=dev",
+    "fileKey": "8qPSyetzviLR6eF6bkpL44",
+    "nodeId": "216-152 (MCP form: 216:152)"
+  },
+  "extraction_tools": [
+    {
+      "name": "mcp__figma__get_metadata",
+      "purpose": "Structural overview of a node/page in XML: node IDs, layer types, names, positions, sizes. No styles/values. Used to discover child node IDs to drill into.",
+      "params": {
+        "fileKey": "required string",
+        "nodeId": "optional string ^\\d+[:-]\\d+$ — omit to list top-level pages (guid+name)",
+        "clientFrameworks": "logging only",
+        "clientLanguages": "logging only"
+      },
+      "returns": "XML structure (overview only)",
+      "design_file_only": true
+    },
+    {
+      "name": "mcp__figma__get_design_context",
+      "purpose": "PRIMARY design-to-code tool. Returns reference code + screenshot + contextual metadata + asset download URLs. Uses Code Connect if mapped.",
+      "params": {
+        "fileKey": "required string",
+        "nodeId": "required string ^\\d+[:-]\\d+$",
+        "excludeScreenshot": "optional bool (default false)",
+        "forceCode": "optional bool — return code even if large (else metadata-only fallback)",
+        "disableCodeConnect": "optional bool",
+        "clientFrameworks": "logging only",
+        "clientLanguages": "logging only"
+      },
+      "returns": "code string + assets JSON (download URLs) + screenshot (default)"
+    },
+    {
+      "name": "mcp__figma__get_variable_defs",
+      "purpose": "Variable (design token) definitions for a node, e.g. {'icon/default/secondary': '#949494'}. Covers fonts, colors, sizes, spacings.",
+      "params": {
+        "fileKey": "required string",
+        "nodeId": "required string ^\\d+[:-]\\d+$ — requires concrete node target",
+        "clientFrameworks": "logging only",
+        "clientLanguages": "logging only"
+      },
+      "returns": "variable name -> value map"
+    },
+    {
+      "name": "mcp__figma__get_screenshot",
+      "purpose": "Render PNG of a node. Returns short-lived URL + curl by default (token-cheap); base64 inline only if enableBase64Response.",
+      "params": {
+        "fileKey": "required string",
+        "nodeId": "required string ^\\d+[:-]\\d+$",
+        "maxDimension": "optional int (default 1024, max 65536)",
+        "contentsOnly": "optional bool (isolate node)",
+        "enableBase64Response": "optional bool (default false)"
+      },
+      "returns": "short-lived URL + curl instructions + metadata (width/height, original_width/original_height); optional inline base64"
+    }
+  ],
+  "other_figma_tools_present_not_used": [
+    "get_figjam", "get_motion_context", "get_code_connect_map", "get_variable_defs",
+    "search_design_system", "get_design_system_rules", "create_new_file", "use_figma",
+    "generate_figma_design (write tools — out of scope, read-only spike)"
+  ],
+  "notes": "Track A = official MCP called directly by Claude Code (not Agno, not PAT). Read-only. nodeId regex accepts both 216-152 and 216:152 forms."
+}

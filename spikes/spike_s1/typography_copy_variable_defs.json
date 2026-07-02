@@ -1,0 +1,16 @@
+{
+  "colors/control/text-icon/primary": "#3a3a3a",
+  "dimension/typography/body/md/size": "16",
+  "font/family/heading": "roboto",
+  "dimension/typography/body/md/lineheight-paragraph": "14",
+  "dimension/typography/body/md/lineheight": "24",
+  "dimension/typography/body/md/regular": "400",
+  "body/md/regular": "Font(family: \"font/family/heading\", style: Regular, size: dimension/typography/body/md/size, weight: dimension/typography/body/md/regular, lineHeight: dimension/typography/body/md/lineheight, letterSpacing: 0)",
+  "dimension/spacing/components/md": "24",
+  "dimension/size/icon/2xs": "8",
+  "colors/text-icon/brand": "#125e9d",
+  "dimension/size/icon/lg": "24",
+  "dimension/spacing/components/3xs": "8",
+  "dimension/spacing/components/xs": "16",
+  "dimension/spacing/components/0": "0"
+}

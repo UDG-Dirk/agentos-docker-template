@@ -1,0 +1,5 @@
+<canvas id="360:38" name="Colors">
+  <symbol id="360:52" name="Color Swatch Template" x="0" y="0" width="200" height="200" />
+</canvas>
+<!-- get_variable_defs on 360:52 (Color Swatch Template) => {} EMPTY -->
+<!-- Colors page contains ONLY a swatch template symbol; no instances, no palette frames visible in metadata. -->

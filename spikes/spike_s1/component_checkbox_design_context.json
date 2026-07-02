@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "fileKey": "8qPSyetzviLR6eF6bkpL44",
+    "nodeId": "448:582",
+    "variant": "State=Default, Selection=Unchecked",
+    "clientFrameworks": "react",
+    "clientLanguages": "typescript",
+    "disableCodeConnect": true,
+    "codeConnectMapped": false,
+    "note": "First call (Code Connect enabled) returned ONLY a 'components missing code connect mappings' prompt — NO Code Connect snippet exists for this component. Output below is the generic React+Tailwind fallback codegen produced with disableCodeConnect:true."
+  },
+  "code": "type CheckboxProps = {\n  className?: string;\n  selection?: \"Unchecked\";\n  state?: \"Default\";\n};\n\nfunction Checkbox({ className, selection = \"Unchecked\", state = \"Default\" }: CheckboxProps) {\n  return <div className={className || \"bg-[var(--colors\\\\/control\\\\/background\\\\/default,white)] border-[length:var(--dimension\\\\/stroke-weight\\\\/md,2px)] border-[var(--colors\\\\/control\\\\/border\\\\/default,#979797)] border-solid content-stretch flex h-[24px] items-center justify-center relative rounded-[var(--component\\\\/radius\\\\/checkbox,4px)] w-[var(--dimension\\\\/size\\\\/control\\\\/xs,24px)]\"} data-node-id=\"448:582\" />;\n}",
+  "additionalOutputs": [
+    "SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.",
+    "Node ids have been added to the code as data attributes, e.g. data-node-id=\"1:2\".",
+    "Images and SVGs will be stored as constants (figma.com/api/mcp/asset/... URLs, 7-day expiry)."
+  ]
+}

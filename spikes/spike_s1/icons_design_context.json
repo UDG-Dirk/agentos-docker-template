@@ -1,0 +1,19 @@
+{
+  "_note": "get_design_context on node 79:173 (icons frame, 20 icons, all 16x16). Icons are individual Figma symbol components rendered as SVG <img> assets. Most are wired to a codebase Vue component via Code Connect (import Icon from 'src/components/Icon/Icon.vue', wrapped in <CodeConnectSnippet><Icon /></CodeConnectSnippet>). A few (Overflow, RadioBullet, Minus, Check, CircleExclamation) emit inline SVG-asset markup. get_variable_defs on 79:173 returned only: colors/text-icon/primary=#3a3a3a, dimension/size/icon/sm=16. Output shape: SVG assets + React/Vue component references.",
+  "nodeId": "79:173",
+  "name": "icons",
+  "variable_defs": {
+    "colors/text-icon/primary": "#3a3a3a",
+    "dimension/size/icon/sm": "16"
+  },
+  "code_connect": "import Icon from \"src/components/Icon/Icon.vue\"",
+  "icon_names": ["arrow-up","arrow-down","arrow-left","arrow-right","chevron-down","chevron-up","circle-info","triangle-exclamation","circle-exclamation","circle-check","check","minus","radio-bullet","circle-x","pen","search","xmark","eye","eye-slash","Overflow"],
+  "asset_urls": {
+    "imgVector_Overflow": "https://www.figma.com/api/mcp/asset/f7100a70-9156-4170-b52b-1230b8ba5f3a",
+    "imgVector1_radio-bullet": "https://www.figma.com/api/mcp/asset/bd03c701-e240-4141-b484-12592174156d",
+    "imgVector2_minus": "https://www.figma.com/api/mcp/asset/1b25dde6-c1be-4d01-a697-c96efdedd09d",
+    "imgVector3_check": "https://www.figma.com/api/mcp/asset/7c7b5892-42b3-4499-9705-f03c1ead8db6",
+    "imgCircleExclamation": "https://www.figma.com/api/mcp/asset/f3aa8732-7b02-4a89-b0aa-25cb74d985c3"
+  },
+  "react_reference_code_excerpt": "import Icon from \"src/components/Icon/Icon.vue\"\n\nfunction Overflow({ className }: { className?: string }) {\n  return (\n    <div className={className || \"h-[16px] relative w-[var(--dimension\\\\/size\\\\/icon\\\\/sm,16px)]\"} data-node-id=\"552:382\" data-name=\"Overflow\">\n      <div className=\"absolute inset-[4.69%_6.81%_6.81%_4.69%]\" data-node-id=\"552:398\" data-name=\"Vector\">\n        <img alt=\"\" className=\"absolute block inset-0 max-w-none size-full\" src={imgVector} />\n      </div>\n    </div>\n  );\n}\n\nexport default function ArrowUp() {\n  return (\n    <CodeConnectSnippet data-node-id=\"79:150\" data-name=\"arrow-up\">\n      <Icon />\n    </CodeConnectSnippet>\n  );\n}\n// ...20 icons total, each 16x16; most wrapped in CodeConnectSnippet -> <Icon /> (src/components/Icon/Icon.vue)"
+}

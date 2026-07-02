@@ -1,0 +1,25 @@
+{
+  "_spike_note": "get_design_context raw output. nodeId 216:152 is a page/canvas; targeted the content frame 216:157 (Cover, 1920x1080). excludeScreenshot=true for this capture (screenshot saved separately).",
+  "nodeId_used": "216:157",
+  "output_shape": "React + Tailwind JSX code string + asset URL constants + adaptation instructions",
+  "code": "const imgHelixSvgrepoCom1 = \"https://www.figma.com/api/mcp/asset/f09411d1-dada-49cf-9bdd-cac26b571272\";\nconst imgRectangle2 = \"https://www.figma.com/api/mcp/asset/72329e38-3c72-420f-8aa5-f5e34fb1d4ee\";\nconst imgHelixSvgrepoCom2 = \"https://www.figma.com/api/mcp/asset/e9215ac9-1ed1-41f5-bb29-78007c23b09a\";\n\nexport default function Cover() {\n  return (\n    <div className=\"bg-black relative size-full\" data-node-id=\"216:157\" data-name=\"Cover\">\n      <div className=\"absolute left-[398px] size-[1725px] top-[-323px]\" data-node-id=\"552:986\" data-name=\"helix-svgrepo-com 1\">\n        <img alt=\"\" className=\"absolute block inset-0 max-w-none size-full\" src={imgHelixSvgrepoCom1} />\n      </div>\n      <div className=\"absolute contents left-0 top-[-323px]\" data-node-id=\"552:1002\">\n        <div className=\"absolute bg-white h-[478px] left-0 mask-alpha mask-intersect mask-no-clip mask-no-repeat mask-size-[1920px_478px] top-[470px] w-[1920px]\" data-node-id=\"552:1003\" style={{ maskImage: `url(\"${imgRectangle2}\")` }} />\n        <div className=\"absolute left-[398px] mask-alpha mask-intersect mask-no-clip mask-no-repeat mask-position-[-398px_793px] mask-size-[1920px_478px] size-[1725px] top-[-323px]\" data-node-id=\"552:994\" style={{ maskImage: `url(\"${imgRectangle2}\")` }} data-name=\"helix-svgrepo-com 2\">\n        <img alt=\"\" className=\"absolute block inset-0 max-w-none size-full\" src={imgHelixSvgrepoCom2} />\n        </div>\n      </div>\n      <p className=\"[word-break:break-word] absolute font-['Science_Gothic:Bold'] leading-[normal] left-[95px] not-italic text-[180px] text-black top-[536px] whitespace-nowrap\" data-node-id=\"216:159\">\n        HELIX Design\n      </p>\n      <p className=\"[word-break:break-word] absolute font-['Science_Gothic:Regular'] leading-[normal] left-[95px] not-italic text-[#b5df2d] text-[120px] top-[747px] whitespace-nowrap\" data-node-id=\"216:160\">\n        AI ENABLED\n      </p>\n    </div>\n  );\n}",
+  "asset_urls": {
+    "imgHelixSvgrepoCom1": "https://www.figma.com/api/mcp/asset/f09411d1-dada-49cf-9bdd-cac26b571272",
+    "imgRectangle2": "https://www.figma.com/api/mcp/asset/72329e38-3c72-420f-8aa5-f5e34fb1d4ee",
+    "imgHelixSvgrepoCom2": "https://www.figma.com/api/mcp/asset/e9215ac9-1ed1-41f5-bb29-78007c23b09a"
+  },
+  "server_instructions_returned": [
+    "Generated React+Tailwind MUST be converted to target stack/styling system (analyze target codebase, convert framework, transform Tailwind, follow conventions).",
+    "Node ids added as data-node-id attributes.",
+    "Image/SVG assets stored as remote constants, URLs valid ~7 days then expire."
+  ],
+  "extracted_literals": {
+    "background": "black",
+    "accent_color": "#b5df2d (lime green)",
+    "panel_color": "white (masked rectangle)",
+    "font_family": "Science Gothic (Bold + Regular)",
+    "font_sizes_px": [180, 120],
+    "text_layers": ["HELIX Design", "AI ENABLED"],
+    "frame_size": "1920x1080"
+  }
+}

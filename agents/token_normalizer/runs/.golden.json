@@ -1,0 +1,2094 @@
+{
+  "color": {
+    "control": {
+      "background": {
+        "default": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "hex": "#ffffff"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-background-default",
+              "enrichmentPath": "colors/control/background/default",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "hover": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9059,
+              0.9608,
+              1.0
+            ],
+            "hex": "#e7f5ff"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-background-hover",
+              "enrichmentPath": "colors/control/background/hover",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "active": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.098,
+              0.4431,
+              0.7608
+            ],
+            "hex": "#1971c2"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-background-active",
+              "enrichmentPath": "colors/control/background/active",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "disabled": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9176,
+              0.9176,
+              0.9176
+            ],
+            "hex": "#eaeaea"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-background-disabled",
+              "enrichmentPath": "colors/control/background/disabled",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "neutral": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "hex": "#ffffff"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-background-neutral",
+              "enrichmentPath": "colors/control/background/neutral",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "border": {
+        "default": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5922,
+              0.5922,
+              0.5922
+            ],
+            "hex": "#979797"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-border-default",
+              "enrichmentPath": "colors/control/border/default",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "active": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0941,
+              0.3922,
+              0.6706
+            ],
+            "hex": "#1864ab"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-border-active",
+              "enrichmentPath": "colors/control/border/active",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "hover": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.098,
+              0.4431,
+              0.7608
+            ],
+            "hex": "#1971c2"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-border-hover",
+              "enrichmentPath": "colors/control/border/hover",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "disbled": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8353,
+              0.8353,
+              0.8353
+            ],
+            "hex": "#d5d5d5"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-border-disbled",
+              "enrichmentPath": "colors/control/border/disbled",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "text-icon": {
+        "inverse": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "hex": "#ffffff"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-text-icon-inverse",
+              "enrichmentPath": "colors/control/text-icon/inverse",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "hover": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.098,
+              0.4431,
+              0.7608
+            ],
+            "hex": "#1971c2"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-text-icon-hover",
+              "enrichmentPath": "colors/control/text-icon/hover",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "bold": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "hex": "#000000"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-text-icon-bold",
+              "enrichmentPath": "colors/control/text-icon/bold",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "disabled": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7569,
+              0.7569,
+              0.7569
+            ],
+            "hex": "#c1c1c1"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-text-icon-disabled",
+              "enrichmentPath": "colors/control/text-icon/disabled",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "primary": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2275,
+              0.2275,
+              0.2275
+            ],
+            "hex": "#3a3a3a"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-text-icon-primary",
+              "enrichmentPath": "colors/control/text-icon/primary",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "muted": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5922,
+              0.5922,
+              0.5922
+            ],
+            "hex": "#979797"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-control-text-icon-muted",
+              "enrichmentPath": "colors/control/text-icon/muted",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "border": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.7882,
+            0.1647,
+            0.1647
+          ],
+          "hex": "#c92a2a"
+        },
+        "$type": "color",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--color-error-border",
+            "enrichmentPath": "colors/error/border",
+            "originalCategory": "color",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "borde-subtle": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            0.7882,
+            0.7882
+          ],
+          "hex": "#ffc9c9"
+        },
+        "$type": "color",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--color-error-borde-subtle",
+            "enrichmentPath": "colors/error/borde-subtle",
+            "originalCategory": "color",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "icon": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.7882,
+            0.1647,
+            0.1647
+          ],
+          "hex": "#c92a2a"
+        },
+        "$type": "color",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--color-error-icon",
+            "enrichmentPath": "colors/error/icon",
+            "originalCategory": "color",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "surfac-subtle": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            0.8902,
+            0.8902
+          ],
+          "hex": "#ffe3e3"
+        },
+        "$type": "color",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--color-error-surfac-subtle",
+            "enrichmentPath": "colors/error/surfac-subtle",
+            "originalCategory": "color",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    },
+    "interactive": {
+      "focus": {
+        "inner": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "hex": "#ffffff"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-interactive-focus-inner",
+              "enrichmentPath": "colors/interactive/focus/inner",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "outer": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8275,
+              0.502,
+              0.0431
+            ],
+            "hex": "#d3800b"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-interactive-focus-outer",
+              "enrichmentPath": "colors/interactive/focus/outer",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "surface": {
+        "inverse": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "hex": "#ffffff"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-interactive-surface-inverse",
+              "enrichmentPath": "colors/interactive/surface/inverse",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "subtle-hover": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9059,
+              0.9608,
+              1.0
+            ],
+            "hex": "#e7f5ff"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-interactive-surface-subtle-hover",
+              "enrichmentPath": "colors/interactive/surface/subtle-hover",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "disabled": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9176,
+              0.9176,
+              0.9176
+            ],
+            "hex": "#eaeaea"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-interactive-surface-disabled",
+              "enrichmentPath": "colors/interactive/surface/disabled",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "icon": {
+        "disabled": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7569,
+              0.7569,
+              0.7569
+            ],
+            "hex": "#c1c1c1"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-interactive-icon-disabled",
+              "enrichmentPath": "colors/interactive/icon/disabled",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "link": {
+        "disabled": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7569,
+              0.7569,
+              0.7569
+            ],
+            "hex": "#c1c1c1"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-interactive-link-disabled",
+              "enrichmentPath": "colors/interactive/link/disabled",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "border": {
+        "disbled": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8353,
+              0.8353,
+              0.8353
+            ],
+            "hex": "#d5d5d5"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--color-interactive-border-disbled",
+              "enrichmentPath": "colors/interactive/border/disbled",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      }
+    },
+    "text-icon": {
+      "primary": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.2275,
+            0.2275,
+            0.2275
+          ],
+          "hex": "#3a3a3a"
+        },
+        "$type": "color",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--color-text-icon-primary",
+            "enrichmentPath": "colors/text-icon/primary",
+            "originalCategory": "color",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "disabled": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.7569,
+            0.7569,
+            0.7569
+          ],
+          "hex": "#c1c1c1"
+        },
+        "$type": "color",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--color-text-icon-disabled",
+            "enrichmentPath": "colors/text-icon/disabled",
+            "originalCategory": "color",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "muted": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.5922,
+            0.5922,
+            0.5922
+          ],
+          "hex": "#979797"
+        },
+        "$type": "color",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--color-text-icon-muted",
+            "enrichmentPath": "colors/text-icon/muted",
+            "originalCategory": "color",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "brand": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.0706,
+            0.3686,
+            0.6157
+          ],
+          "hex": "#125e9d"
+        },
+        "$type": "color",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--color-text-icon-brand",
+            "enrichmentPath": "colors/text-icon/brand",
+            "originalCategory": "color",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    },
+    "button": {
+      "solid": {
+        "default": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2,
+              0.5333,
+              0.9412
+            ],
+            "hex": "#3388f0"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-button-solid-default",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "hover": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.098,
+              0.4431,
+              0.7608
+            ],
+            "hex": "#1971c2"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-button-solid-hover",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "active": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0941,
+              0.3922,
+              0.6706
+            ],
+            "hex": "#1864ab"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-button-solid-active",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "disabled": {
+          "bg": {
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [
+                0.9176,
+                0.9176,
+                0.9176
+              ],
+              "hex": "#eaeaea"
+            },
+            "$type": "color",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "high",
+                "sourceName": "--color-button-solid-disabled-bg",
+                "originalCategory": "color",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "border": {
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [
+                0.8353,
+                0.8353,
+                0.8353
+              ],
+              "hex": "#d5d5d5"
+            },
+            "$type": "color",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "high",
+                "sourceName": "--color-button-solid-disabled-border",
+                "originalCategory": "color",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        }
+      }
+    },
+    "toggle": {
+      "active": {
+        "default": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1843,
+              0.6196,
+              0.2667
+            ],
+            "hex": "#2f9e44"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-toggle-active-default",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "hover": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1255,
+              0.502,
+              0.1961
+            ],
+            "hex": "#208032"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-toggle-active-hover",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "inactive": {
+        "default": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.6745,
+              0.6745,
+              0.6745
+            ],
+            "hex": "#acacac"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-toggle-inactive-default",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      }
+    },
+    "input": {
+      "hover": {
+        "bg": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9059,
+              0.9608,
+              1.0
+            ],
+            "hex": "#e7f5ff"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-input-hover-bg",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "border": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.098,
+              0.4431,
+              0.7608
+            ],
+            "hex": "#1971c2"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-input-hover-border",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "filled": {
+        "border": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0941,
+              0.3922,
+              0.6706
+            ],
+            "hex": "#1864ab"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-input-filled-border",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "error": {
+        "bg": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1.0,
+              0.8902,
+              0.8902
+            ],
+            "hex": "#ffe3e3"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-input-error-bg",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "border": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7882,
+              0.1647,
+              0.1647
+            ],
+            "hex": "#c92a2a"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-input-error-border",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "success": {
+        "bg": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8275,
+              0.9765,
+              0.8471
+            ],
+            "hex": "#d3f9d8"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-input-success-bg",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "border": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1843,
+              0.6196,
+              0.2667
+            ],
+            "hex": "#2f9e44"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-input-success-border",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "disabled": {
+        "border": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8353,
+              0.8353,
+              0.8353
+            ],
+            "hex": "#d5d5d5"
+          },
+          "$type": "color",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--color-input-disabled-border",
+              "originalCategory": "color",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      }
+    },
+    "dropdown": {
+      "option": {
+        "hover": {
+          "bg": {
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [
+                0.9059,
+                0.9608,
+                1.0
+              ],
+              "hex": "#e7f5ff"
+            },
+            "$type": "color",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "high",
+                "sourceName": "--color-dropdown-option-hover-bg",
+                "originalCategory": "color",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        }
+      },
+      "active": {
+        "option": {
+          "bg": {
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [
+                0.098,
+                0.4431,
+                0.7608
+              ],
+              "hex": "#1971c2"
+            },
+            "$type": "color",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "high",
+                "sourceName": "--color-dropdown-active-option-bg",
+                "originalCategory": "color",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        }
+      },
+      "trigger": {
+        "border": {
+          "default": {
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [
+                0.5922,
+                0.5922,
+                0.5922
+              ],
+              "hex": "#979797"
+            },
+            "$type": "color",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "high",
+                "sourceName": "--color-dropdown-trigger-border-default",
+                "originalCategory": "color",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "active": {
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [
+                0.0941,
+                0.3922,
+                0.6706
+              ],
+              "hex": "#1864ab"
+            },
+            "$type": "color",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "high",
+                "sourceName": "--color-dropdown-trigger-border-active",
+                "originalCategory": "color",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "disabled": {
+            "$value": {
+              "colorSpace": "srgb",
+              "components": [
+                0.8353,
+                0.8353,
+                0.8353
+              ],
+              "hex": "#d5d5d5"
+            },
+            "$type": "color",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "high",
+                "sourceName": "--color-dropdown-trigger-border-disabled",
+                "originalCategory": "color",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "dimension": {
+    "size": {
+      "icon": {
+        "sm": {
+          "$value": {
+            "value": 16.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-size-icon-sm",
+              "enrichmentPath": "dimension/size/icon/sm",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "2xs": {
+          "$value": {
+            "value": 8.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-size-icon-2xs",
+              "enrichmentPath": "dimension/size/icon/2xs",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "lg": {
+          "$value": {
+            "value": 24.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-size-icon-lg",
+              "enrichmentPath": "dimension/size/icon/lg",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      },
+      "control": {
+        "lg": {
+          "$value": {
+            "value": 48.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-size-control-lg",
+              "enrichmentPath": "dimension/size/control/lg",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "md": {
+          "$value": {
+            "value": 40.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-size-control-md",
+              "enrichmentPath": "dimension/size/control/md",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "xs": {
+          "$value": {
+            "value": 24.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-size-control-xs",
+              "enrichmentPath": "dimension/size/control/xs",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      }
+    },
+    "typography": {
+      "body": {
+        "sm": {
+          "size": {
+            "$value": {
+              "value": 14.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-body-sm-size",
+                "enrichmentPath": "dimension/typography/body/sm/size",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "lineheight-paragraph": {
+            "$value": {
+              "value": 12.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-body-sm-lineheight-paragraph",
+                "enrichmentPath": "dimension/typography/body/sm/lineheight-paragraph",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "lineheight": {
+            "$value": {
+              "value": 24.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-body-sm-lineheight",
+                "enrichmentPath": "dimension/typography/body/sm/lineheight",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        },
+        "lg": {
+          "strong": {
+            "$value": {
+              "value": 900
+            },
+            "$type": "fontWeight",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-body-lg-strong",
+                "enrichmentPath": "dimension/typography/body/lg/strong",
+                "originalCategory": "fontWeight",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        },
+        "md": {
+          "size": {
+            "$value": {
+              "value": 16.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-body-md-size",
+                "enrichmentPath": "dimension/typography/body/md/size",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "lineheight-paragraph": {
+            "$value": {
+              "value": 14.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-body-md-lineheight-paragraph",
+                "enrichmentPath": "dimension/typography/body/md/lineheight-paragraph",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "lineheight": {
+            "$value": {
+              "value": 24.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-body-md-lineheight",
+                "enrichmentPath": "dimension/typography/body/md/lineheight",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "regular": {
+            "$value": {
+              "value": 400
+            },
+            "$type": "fontWeight",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-body-md-regular",
+                "enrichmentPath": "dimension/typography/body/md/regular",
+                "originalCategory": "fontWeight",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        }
+      },
+      "heading": {
+        "lg": {
+          "regular": {
+            "$value": {
+              "value": 400
+            },
+            "$type": "fontWeight",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-heading-lg-regular",
+                "enrichmentPath": "dimension/typography/heading/lg/regular",
+                "originalCategory": "fontWeight",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        }
+      },
+      "link": {
+        "md": {
+          "size": {
+            "$value": {
+              "value": 16.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-link-md-size",
+                "enrichmentPath": "dimension/typography/link/md/size",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "lineheight-paragraph": {
+            "$value": {
+              "value": 14.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-link-md-lineheight-paragraph",
+                "enrichmentPath": "dimension/typography/link/md/lineheight-paragraph",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          },
+          "lineheight": {
+            "$value": {
+              "value": 24.0,
+              "unit": "px"
+            },
+            "$type": "dimension",
+            "$extensions": {
+              "de.msqdx.helix": {
+                "confidence": "authoritative",
+                "sourceName": "--dimension-typography-link-md-lineheight",
+                "enrichmentPath": "dimension/typography/link/md/lineheight",
+                "originalCategory": "dimension",
+                "normalizerVersion": "0.1.0"
+              }
+            }
+          }
+        },
+        "weight": {
+          "$value": {
+            "value": 600
+          },
+          "$type": "fontWeight",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-typography-link-weight",
+              "enrichmentPath": "dimension/typography/link/weight",
+              "originalCategory": "fontWeight",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      }
+    },
+    "spacing": {
+      "components": {
+        "3xs": {
+          "$value": {
+            "value": 8.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-spacing-components-3xs",
+              "enrichmentPath": "dimension/spacing/components/3xs",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "xs": {
+          "$value": {
+            "value": 16.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-spacing-components-xs",
+              "enrichmentPath": "dimension/spacing/components/xs",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "2xs": {
+          "$value": {
+            "value": 12.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-spacing-components-2xs",
+              "enrichmentPath": "dimension/spacing/components/2xs",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "4xs": {
+          "$value": {
+            "value": 4.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-spacing-components-4xs",
+              "enrichmentPath": "dimension/spacing/components/4xs",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "md": {
+          "$value": {
+            "value": 24.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-spacing-components-md",
+              "enrichmentPath": "dimension/spacing/components/md",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        },
+        "0": {
+          "$value": {
+            "value": 0.0,
+            "unit": "px"
+          },
+          "$type": "dimension",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "authoritative",
+              "sourceName": "--dimension-spacing-components-0",
+              "enrichmentPath": "dimension/spacing/components/0",
+              "originalCategory": "dimension",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      }
+    },
+    "stroke-weight": {
+      "sm": {
+        "$value": {
+          "value": 1.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--dimension-stroke-weight-sm",
+            "enrichmentPath": "dimension/stroke-weight/sm",
+            "originalCategory": "dimension",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "md": {
+        "$value": {
+          "value": 2.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--dimension-stroke-weight-md",
+            "enrichmentPath": "dimension/stroke-weight/md",
+            "originalCategory": "dimension",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    },
+    "radius": {
+      "sm": {
+        "$value": {
+          "value": 4.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--dimension-radius-sm",
+            "enrichmentPath": "dimension/radius/sm",
+            "originalCategory": "borderRadius",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    }
+  },
+  "font": {
+    "family": {
+      "heading": {
+        "$value": {
+          "value": "roboto"
+        },
+        "$type": "fontFamily",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--font-family-heading",
+            "enrichmentPath": "font/family/heading",
+            "originalCategory": "fontFamily",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "body": {
+        "$value": {
+          "value": "dm sans"
+        },
+        "$type": "fontFamily",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--font-family-body",
+            "enrichmentPath": "font/family/body",
+            "originalCategory": "fontFamily",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    }
+  },
+  "spacing": {
+    "1": {
+      "$value": {
+        "value": 4.0,
+        "unit": "px"
+      },
+      "$type": "dimension",
+      "$extensions": {
+        "de.msqdx.helix": {
+          "confidence": "authoritative",
+          "sourceName": "--spacing-1",
+          "enrichmentPath": "spacing/1",
+          "originalCategory": "dimension",
+          "normalizerVersion": "0.1.0"
+        }
+      }
+    },
+    "2": {
+      "$value": {
+        "value": 8.0,
+        "unit": "px"
+      },
+      "$type": "dimension",
+      "$extensions": {
+        "de.msqdx.helix": {
+          "confidence": "authoritative",
+          "sourceName": "--spacing-2",
+          "enrichmentPath": "spacing/2",
+          "originalCategory": "dimension",
+          "normalizerVersion": "0.1.0"
+        }
+      }
+    },
+    "0": {
+      "$value": {
+        "value": 0.0,
+        "unit": "px"
+      },
+      "$type": "dimension",
+      "$extensions": {
+        "de.msqdx.helix": {
+          "confidence": "authoritative",
+          "sourceName": "--spacing-0",
+          "enrichmentPath": "spacing/0",
+          "originalCategory": "dimension",
+          "normalizerVersion": "0.1.0"
+        }
+      }
+    }
+  },
+  "component": {
+    "radius": {
+      "input": {
+        "$value": {
+          "value": 4.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--component-radius-input",
+            "enrichmentPath": "component/radius/input",
+            "originalCategory": "borderRadius",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "button-input": {
+        "$value": {
+          "value": 4.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--component-radius-button-input",
+            "enrichmentPath": "component/radius/button-input",
+            "originalCategory": "borderRadius",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "checkbox": {
+        "$value": {
+          "value": 4.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--component-radius-checkbox",
+            "enrichmentPath": "component/radius/checkbox",
+            "originalCategory": "borderRadius",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    }
+  },
+  "stroke-weight": {
+    "md": {
+      "$value": {
+        "value": 2.0,
+        "unit": "px"
+      },
+      "$type": "dimension",
+      "$extensions": {
+        "de.msqdx.helix": {
+          "confidence": "authoritative",
+          "sourceName": "--stroke-weight-md",
+          "enrichmentPath": "stroke-weight/md",
+          "originalCategory": "dimension",
+          "normalizerVersion": "0.1.0"
+        }
+      }
+    }
+  },
+  "body": {
+    "sm": {
+      "regular": {
+        "$value": {
+          "fontFamily": "roboto",
+          "fontWeight": 400,
+          "fontSize": {
+            "value": 14.0,
+            "unit": "px"
+          },
+          "lineHeight": {
+            "value": 24.0,
+            "unit": "px"
+          },
+          "letterSpacing": {
+            "value": 0.0,
+            "unit": "px"
+          }
+        },
+        "$type": "typography",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--typography-body-sm-regular",
+            "enrichmentPath": "body/sm/regular",
+            "originalCategory": "fontStyle",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "strong": {
+        "$value": {
+          "fontFamily": "dm sans",
+          "fontWeight": 900,
+          "fontSize": {
+            "value": 14.0,
+            "unit": "px"
+          },
+          "lineHeight": {
+            "value": 24.0,
+            "unit": "px"
+          },
+          "letterSpacing": {
+            "value": 0.0,
+            "unit": "px"
+          }
+        },
+        "$type": "typography",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--typography-body-sm-strong",
+            "enrichmentPath": "body/sm/strong",
+            "originalCategory": "fontStyle",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    },
+    "md": {
+      "regular": {
+        "$value": {
+          "fontFamily": "roboto",
+          "fontWeight": 400,
+          "fontSize": {
+            "value": 16.0,
+            "unit": "px"
+          },
+          "lineHeight": {
+            "value": 24.0,
+            "unit": "px"
+          },
+          "letterSpacing": {
+            "value": 0.0,
+            "unit": "px"
+          }
+        },
+        "$type": "typography",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--typography-body-md-regular",
+            "enrichmentPath": "body/md/regular",
+            "originalCategory": "fontStyle",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    }
+  },
+  "link": {
+    "md": {
+      "regular": {
+        "$value": {
+          "fontFamily": "roboto",
+          "fontWeight": 600,
+          "fontSize": {
+            "value": 16.0,
+            "unit": "px"
+          },
+          "lineHeight": {
+            "value": 24.0,
+            "unit": "px"
+          },
+          "letterSpacing": {
+            "value": 0.0,
+            "unit": "px"
+          }
+        },
+        "$type": "typography",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "authoritative",
+            "sourceName": "--typography-link-md-regular",
+            "enrichmentPath": "link/md/regular",
+            "originalCategory": "fontStyle",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    }
+  },
+  "layout": {
+    "width": {
+      "desktop": {
+        "$value": {
+          "value": 1536.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "high",
+            "sourceName": "--layout-width-desktop",
+            "originalCategory": "sizing",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "wide": {
+        "$value": {
+          "value": 1920.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "high",
+            "sourceName": "--layout-width-wide",
+            "originalCategory": "sizing",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "tablet": {
+        "$value": {
+          "value": 768.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "high",
+            "sourceName": "--layout-width-tablet",
+            "originalCategory": "sizing",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      },
+      "phone": {
+        "$value": {
+          "value": 360.0,
+          "unit": "px"
+        },
+        "$type": "dimension",
+        "$extensions": {
+          "de.msqdx.helix": {
+            "confidence": "high",
+            "sourceName": "--layout-width-phone",
+            "originalCategory": "sizing",
+            "normalizerVersion": "0.1.0"
+          }
+        }
+      }
+    }
+  },
+  "focusring": {
+    "$value": [
+      {
+        "color": {
+          "colorSpace": "srgb",
+          "components": [
+            0.8275,
+            0.502,
+            0.0431
+          ],
+          "alpha": 1.0,
+          "hex": "#d3800b"
+        },
+        "offsetX": {
+          "value": 0.0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 0.0,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 0.0,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 4.0,
+          "unit": "px"
+        }
+      },
+      {
+        "color": {
+          "colorSpace": "srgb",
+          "components": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "alpha": 1.0,
+          "hex": "#ffffff"
+        },
+        "offsetX": {
+          "value": 0.0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 0.0,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 0.0,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 2.0,
+          "unit": "px"
+        }
+      }
+    ],
+    "$type": "shadow",
+    "$extensions": {
+      "de.msqdx.helix": {
+        "confidence": "authoritative",
+        "sourceName": "--effect-focus-ring",
+        "enrichmentPath": "FocusRing",
+        "originalCategory": "effect",
+        "normalizerVersion": "0.1.0"
+      }
+    }
+  },
+  "errorring": {
+    "$value": {
+      "color": {
+        "colorSpace": "srgb",
+        "components": [
+          1.0,
+          0.7882,
+          0.7882
+        ],
+        "alpha": 1.0,
+        "hex": "#ffc9c9"
+      },
+      "offsetX": {
+        "value": 0.0,
+        "unit": "px"
+      },
+      "offsetY": {
+        "value": 0.0,
+        "unit": "px"
+      },
+      "blur": {
+        "value": 0.0,
+        "unit": "px"
+      },
+      "spread": {
+        "value": 4.0,
+        "unit": "px"
+      }
+    },
+    "$type": "shadow",
+    "$extensions": {
+      "de.msqdx.helix": {
+        "confidence": "authoritative",
+        "sourceName": "--effect-error-ring",
+        "enrichmentPath": "ErrorRing",
+        "originalCategory": "effect",
+        "normalizerVersion": "0.1.0"
+      }
+    }
+  },
+  "typography": {
+    "heading": {
+      "xs": {
+        "strong": {
+          "$value": {
+            "fontFamily": "roboto",
+            "fontWeight": 900,
+            "fontSize": {
+              "value": 20.0,
+              "unit": "px"
+            },
+            "lineHeight": {
+              "value": 1.4,
+              "unit": "em"
+            }
+          },
+          "$type": "typography",
+          "$extensions": {
+            "de.msqdx.helix": {
+              "confidence": "high",
+              "sourceName": "--typography-heading-xs-strong",
+              "originalCategory": "typography",
+              "normalizerVersion": "0.1.0"
+            }
+          }
+        }
+      }
+    }
+  }
+}

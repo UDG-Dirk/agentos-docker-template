@@ -1,0 +1,9 @@
+{
+  "_note": "Phase 3 determinism run 1, get_design_context node 216:157 excludeScreenshot=true",
+  "code_body": "IDENTICAL across runs 1-3 and the Phase 2 call (see design_context_node_216-152.json for full verbatim code)",
+  "asset_urls_THIS_run": {
+    "imgHelixSvgrepoCom1": "https://www.figma.com/api/mcp/asset/c010a524-d2a7-4f64-8f02-bd03609cc74f",
+    "imgRectangle2": "https://www.figma.com/api/mcp/asset/108ac102-0e5f-4004-845c-982ca2c8994b",
+    "imgHelixSvgrepoCom2": "https://www.figma.com/api/mcp/asset/b1d078a5-e585-4c2a-8fea-8165740559db"
+  }
+}

@@ -1,0 +1,42 @@
+<!--
+  INPUT COMPONENT — metadata extraction
+  File key: 8qPSyetzviLR6eF6bkpL44
+  Page node requested: 100:1426 (name "Input")
+
+  ANOMALY: The "Input" page canvas (100:1426) is EMPTY in this working file.
+  get_metadata on 100:1426 returns a canvas with ZERO children on every attempt
+  (tried both 100:1426 and 100-1426 forms). Node 100:1427 does NOT exist
+  (get_design_context -> "node ID provided was invalid").
+
+  The actual Input component is a PUBLISHED LIBRARY asset in "Helix_Design",
+  NOT instantiated as a frame in this file. Found via search_design_system:
+    name:          "Input"
+    libraryName:   "Helix_Design"
+    assetType:     "component_set"
+    componentKey:  a0933d5e0199ad689d45e7999eeec9d0ed47d66b
+    filePath:      design_systems/Helix_Design/components/Input
+    updatedAt:     2026-05-13T06:02:17Z
+
+  Related published library components (same Helix_Design library):
+    FormField  -> componentKey 756e9a46a12e8bdbf1b9df79326d7410d9b53220
+    Button     -> componentKey 65c1f93f6c246d5757cbabdab0deb7a0353e9b72
+
+  Input-related published VARIABLES (from search_design_system):
+    dimension/radius/input          (FLOAT, CORNER_RADIUS, collection "semantic")
+                                     key 99dfc98302806389bfc9db1e867ac916703e8b72
+    dimension/radius/control-input  (FLOAT, CORNER_RADIUS, collection "semantic")
+                                     key ae16dc32dca733f9e5029208c0b92743f5c3f59d
+
+  CONSEQUENCE: No inner variant container frame exists under 100:1426 in this
+  file, so get_variable_defs and get_design_context cannot resolve Input here.
+  See component_input_variable_defs.json and component_input_design_context.json
+  for details / empty results.
+
+  Top-level pages of the document (get_metadata with no nodeId):
+    216:152  "Cover"   (only branding art; the canonical page list returned
+                        ONLY this page. The "Input"/"Toggle" canvases are
+                        reachable by node id but not listed as top-level pages.)
+-->
+<canvas id="100:1426" name="Input" x="0" y="0" width="0" height="0">
+  <!-- EMPTY: no child nodes returned by get_metadata -->
+</canvas>

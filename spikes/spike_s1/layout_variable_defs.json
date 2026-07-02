@@ -1,0 +1,10 @@
+{
+  "_source": "get_variable_defs on node 105:2148 (Layout > Desktop breakpoint frame)",
+  "_finding": "Layout/grid tokens, unitless. design_context on this frame was EMPTY (bg-white div) — breakpoint frames are empty guides; richness needs nodes with rendered content.",
+  "variables": {
+    "dimension/layout/breakpoint": "1536",
+    "dimension/layout/margin": "48",
+    "dimension/layout/gutter": "24",
+    "dimension/layout/columns": "12"
+  }
+}

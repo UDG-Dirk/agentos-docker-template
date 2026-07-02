@@ -1,0 +1,52 @@
+<canvas id="457:729" name="Drodown" x="0" y="0" width="0" height="0">
+  <!-- NOTE: page name 'Drodown' is a typo in Figma (expected 'Dropdown') -->
+  <section id="457:1144" name="DropDown" x="-546" y="-941" width="1980" height="741">
+    <!-- Top-level Dropdown variant container frame -->
+    <frame id="465:929" name="Dropdown" x="24" y="168" width="1501" height="449">
+      <symbol id="465:1050" name="State=Active" x="916" y="16" width="269" height="412" />
+      <symbol id="465:1201" name="State=Disabled" x="1216" y="16" width="269" height="108" />
+      <symbol id="465:1031" name="State=Focus" x="616" y="16" width="269" height="108" />
+      <symbol id="465:1012" name="State=Hover" x="316" y="16" width="269" height="108" />
+      <symbol id="461:784" name="State=Default" x="16" y="16" width="269" height="108" />
+    </frame>
+    <!-- header text labels: Default Hover Focus Active Disabeld[sic] / Dropdown -->
+  </section>
+  <section id="457:1148" name=".elements" x="-546" y="-148" width="1980" height="628">
+    <!-- OptionItem variant container frame -->
+    <frame id="457:1162" name="OptionItem" x="106" y="141" width="437" height="382">
+      <symbol id="457:1161" name="State=Default, Type=MultiSelect" x="16" y="16" width="180" height="48" />
+      <symbol id="457:1163" name="State=Hover, Type=MultiSelect" x="16" y="80" width="180" height="48" />
+      <symbol id="457:1171" name="State=Focus, Type=MultiSelect" x="16" y="144" width="180" height="48" />
+      <symbol id="457:1177" name="State=Active, Type=MultiSelect" x="16" y="208" width="180" height="48" />
+      <symbol id="457:1210" name="State=Default, Type=SingleSelect" x="237" y="16" width="148" height="48" />
+      <symbol id="457:1212" name="State=Hover, Type=SingleSelect" x="237" y="80" width="148" height="48" />
+      <symbol id="457:1214" name="State=Focus, Type=SingleSelect" x="237" y="144" width="148" height="48" />
+      <symbol id="457:1216" name="State=Active, Type=SingleSelect" x="237" y="208" width="148" height="48" />
+    </frame>
+    <!-- OptionList variant container frame -->
+    <frame id="460:496" name="OptionList" x="635" y="141" width="760" height="382">
+      <symbol id="460:495" name="Type=MultiSelect" x="32" y="28" width="307" height="304" />
+      <symbol id="466:1265" name="Type=SingleSelect" x="410" y="28" width="307" height="304" />
+    </frame>
+    <!-- TriggerRow variant container frame -->
+    <frame id="465:792" name="TriggerRow" x="1525" y="141" width="306" height="382">
+      <symbol id="465:791" name="State=Default" x="16" y="16" width="269" height="48" />
+      <symbol id="465:820" name="State=Disabled" x="16" y="272" width="269" height="48" />
+      <symbol id="465:808" name="State=Active" x="16" y="208" width="269" height="48" />
+      <symbol id="465:793" name="State=Hover" x="16" y="80" width="269" height="48" />
+      <symbol id="465:798" name="State=Focus" x="16" y="144" width="269" height="48" />
+    </frame>
+    <!-- header text labels: Multi Select / Single Select / OptionItem OptionList TriggerRow / Default Hover Focus Active Disabled -->
+  </section>
+</canvas>
+
+<!--
+DISTINCT VARIANT AXES (encoded in symbol names), per sub-component:
+  Dropdown (composite, frame 465:929):  State = Default | Hover | Focus | Active | Disabled
+  OptionItem (frame 457:1162):           State = Default | Hover | Focus | Active   x   Type = MultiSelect | SingleSelect
+  OptionList (frame 460:496):            Type  = MultiSelect | SingleSelect
+  TriggerRow (frame 465:792):            State = Default | Hover | Focus | Active | Disabled
+
+Representative variant used for design_context: 461:784 (Dropdown, State=Default)
+  -> design_context expanded the full composite: LabelRow + TriggerRow + HelperRow (and OptionItem/OptionList live in .elements).
+-->

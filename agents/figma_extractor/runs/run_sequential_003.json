@@ -1,0 +1,2356 @@
+{
+  "result": {
+    "file_key": "8qPSyetzviLR6eF6bkpL44",
+    "pages_discovered": [
+      {
+        "name": "Cover",
+        "node_id": "216:152",
+        "page_type": "other",
+        "child_count": 0
+      },
+      {
+        "name": "Governance Process",
+        "node_id": "245:273",
+        "page_type": "other",
+        "child_count": 0
+      },
+      {
+        "name": "Text",
+        "node_id": "54:2",
+        "page_type": "foundation",
+        "child_count": 0
+      },
+      {
+        "name": "Typography",
+        "node_id": "600:425",
+        "page_type": "foundation",
+        "child_count": 2
+      },
+      {
+        "name": "Icons",
+        "node_id": "78:136",
+        "page_type": "foundation",
+        "child_count": 20
+      },
+      {
+        "name": "Colors",
+        "node_id": "360:38",
+        "page_type": "foundation",
+        "child_count": 1
+      },
+      {
+        "name": "Layout",
+        "node_id": "105:2147",
+        "page_type": "foundation",
+        "child_count": 4
+      },
+      {
+        "name": "ImageRatios",
+        "node_id": "152:3814",
+        "page_type": "foundation",
+        "child_count": 0
+      },
+      {
+        "name": "---",
+        "node_id": "54:3",
+        "page_type": "other",
+        "child_count": 0
+      },
+      {
+        "name": "Playground",
+        "node_id": "0:1",
+        "page_type": "other",
+        "child_count": 0
+      },
+      {
+        "name": "\u2747\ufe0f Basic Components",
+        "node_id": "75:10",
+        "page_type": "component",
+        "child_count": 0
+      },
+      {
+        "name": "Checkbox",
+        "node_id": "457:249",
+        "page_type": "component",
+        "child_count": 2
+      },
+      {
+        "name": "Button",
+        "node_id": "57:645",
+        "page_type": "component",
+        "child_count": 2
+      },
+      {
+        "name": "Drodown",
+        "node_id": "457:729",
+        "page_type": "component",
+        "child_count": 2
+      },
+      {
+        "name": "FormField",
+        "node_id": "86:985",
+        "page_type": "component",
+        "child_count": 2
+      },
+      {
+        "name": "HelperRow",
+        "node_id": "86:942",
+        "page_type": "component",
+        "child_count": 0
+      },
+      {
+        "name": "Input",
+        "node_id": "100:1426",
+        "page_type": "component",
+        "child_count": 0
+      },
+      {
+        "name": "RadioButton",
+        "node_id": "457:324",
+        "page_type": "component",
+        "child_count": 0
+      },
+      {
+        "name": "LabelRow",
+        "node_id": "86:882",
+        "page_type": "component",
+        "child_count": 0
+      },
+      {
+        "name": "Toggle",
+        "node_id": "552:985",
+        "page_type": "component",
+        "child_count": 1
+      },
+      {
+        "name": "Chips",
+        "node_id": "736:31",
+        "page_type": "component",
+        "child_count": 0
+      },
+      {
+        "name": "---",
+        "node_id": "152:3807",
+        "page_type": "other",
+        "child_count": 0
+      },
+      {
+        "name": "\u2747\ufe0f Modules",
+        "node_id": "152:3808",
+        "page_type": "other",
+        "child_count": 0
+      },
+      {
+        "name": "ContentBlock",
+        "node_id": "182:5072",
+        "page_type": "component",
+        "child_count": 0
+      },
+      {
+        "name": "MediaText",
+        "node_id": "152:3809",
+        "page_type": "component",
+        "child_count": 0
+      }
+    ],
+    "tokens": [
+      {
+        "name": "--color-control-background-default",
+        "value": "#ffffff",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/background/default",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-border-default",
+        "value": "#979797",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/border/default",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-error-border",
+        "value": "#c92a2a",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/error/border",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-interactive-focus-inner",
+        "value": "#ffffff",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/interactive/focus/inner",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-error-borde-subtle",
+        "value": "#ffc9c9",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/error/borde-subtle",
+        "enrichment_type": "color",
+        "suspected_typo": "borde-subtle \u2192 border-subtle"
+      },
+      {
+        "name": "--color-control-background-hover",
+        "value": "#e7f5ff",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/background/hover",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-interactive-focus-outer",
+        "value": "#d3800b",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/interactive/focus/outer",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-text-icon-inverse",
+        "value": "#ffffff",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/text-icon/inverse",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-size-icon-sm",
+        "value": "16px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": "dimension/size/icon/sm",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-background-active",
+        "value": "#1971c2",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/background/active",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-border-active",
+        "value": "#1864ab",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/border/active",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-error-icon",
+        "value": "#c92a2a",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/error/icon",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-error-surfac-subtle",
+        "value": "#ffe3e3",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/error/surfac-subtle",
+        "enrichment_type": "color",
+        "suspected_typo": "surfac-subtle \u2192 surface-subtle"
+      },
+      {
+        "name": "--color-control-text-icon-hover",
+        "value": "#1971c2",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/text-icon/hover",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-border-hover",
+        "value": "#1971c2",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/border/hover",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-text-icon-bold",
+        "value": "#000000",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/text-icon/bold",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-border-disbled",
+        "value": "#d5d5d5",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/border/disbled",
+        "enrichment_type": "color",
+        "suspected_typo": "disbled \u2192 disabled"
+      },
+      {
+        "name": "--color-control-text-icon-disabled",
+        "value": "#c1c1c1",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/text-icon/disabled",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-background-disabled",
+        "value": "#eaeaea",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/background/disabled",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-text-icon-primary",
+        "value": "#3a3a3a",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/text-icon/primary",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-body-sm-size",
+        "value": "14px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/body/sm/size",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--font-family-heading",
+        "value": "roboto",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "font/family/heading",
+        "enrichment_type": "fontFamily",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-body-sm-lineheight-paragraph",
+        "value": "12px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/body/sm/lineheight-paragraph",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-body-sm-lineheight",
+        "value": "24px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/body/sm/lineheight",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-heading-lg-regular",
+        "value": "400",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/heading/lg/regular",
+        "enrichment_type": "fontWeight",
+        "suspected_typo": null
+      },
+      {
+        "name": "--font-family-body",
+        "value": "dm sans",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "font/family/body",
+        "enrichment_type": "fontFamily",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-body-lg-strong",
+        "value": "900",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/body/lg/strong",
+        "enrichment_type": "fontWeight",
+        "suspected_typo": null
+      },
+      {
+        "name": "--spacing-1",
+        "value": "4px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "spacing/1",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-spacing-components-3xs",
+        "value": "8px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "dimension/spacing/components/3xs",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-text-icon-primary",
+        "value": "#3a3a3a",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/text-icon/primary",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-body-md-size",
+        "value": "16px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/body/md/size",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-body-md-lineheight-paragraph",
+        "value": "14px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/body/md/lineheight-paragraph",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-body-md-lineheight",
+        "value": "24px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/body/md/lineheight",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-body-md-regular",
+        "value": "400",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/body/md/regular",
+        "enrichment_type": "fontWeight",
+        "suspected_typo": null
+      },
+      {
+        "name": "--spacing-2",
+        "value": "8px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "spacing/2",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-spacing-components-xs",
+        "value": "16px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "dimension/spacing/components/xs",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-size-control-lg",
+        "value": "48px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": "dimension/size/control/lg",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--component-radius-input",
+        "value": "4px",
+        "style_id": null,
+        "category": "other",
+        "enrichment_match": "component/radius/input",
+        "enrichment_type": "borderRadius",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-stroke-weight-sm",
+        "value": "1px",
+        "style_id": null,
+        "category": "other",
+        "enrichment_match": "dimension/stroke-weight/sm",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-background-neutral",
+        "value": "#ffffff",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/background/neutral",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-spacing-components-2xs",
+        "value": "12px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "dimension/spacing/components/2xs",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-radius-sm",
+        "value": "4px",
+        "style_id": null,
+        "category": "other",
+        "enrichment_match": "dimension/radius/sm",
+        "enrichment_type": "borderRadius",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-interactive-surface-inverse",
+        "value": "#ffffff",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/interactive/surface/inverse",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-interactive-surface-subtle-hover",
+        "value": "#e7f5ff",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/interactive/surface/subtle-hover",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-spacing-components-4xs",
+        "value": "4px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "dimension/spacing/components/4xs",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--spacing-0",
+        "value": "0px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "spacing/0",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-text-icon-disabled",
+        "value": "#c1c1c1",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/text-icon/disabled",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-control-text-icon-muted",
+        "value": "#979797",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/control/text-icon/muted",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-text-icon-muted",
+        "value": "#979797",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/text-icon/muted",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-interactive-icon-disabled",
+        "value": "#c1c1c1",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/interactive/icon/disabled",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-interactive-link-disabled",
+        "value": "#c1c1c1",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/interactive/link/disabled",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-link-md-size",
+        "value": "16px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/link/md/size",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-link-md-lineheight-paragraph",
+        "value": "14px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/link/md/lineheight-paragraph",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-link-md-lineheight",
+        "value": "24px",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/link/md/lineheight",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-typography-link-weight",
+        "value": "600",
+        "style_id": null,
+        "category": "typography",
+        "enrichment_match": "dimension/typography/link/weight",
+        "enrichment_type": "fontWeight",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-size-control-md",
+        "value": "40px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": "dimension/size/control/md",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--component-radius-button-input",
+        "value": "4px",
+        "style_id": null,
+        "category": "other",
+        "enrichment_match": "component/radius/button-input",
+        "enrichment_type": "borderRadius",
+        "suspected_typo": null
+      },
+      {
+        "name": "--stroke-weight-md",
+        "value": "2px",
+        "style_id": null,
+        "category": "other",
+        "enrichment_match": "stroke-weight/md",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-interactive-surface-disabled",
+        "value": "#eaeaea",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/interactive/surface/disabled",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-interactive-border-disbled",
+        "value": "#d5d5d5",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/interactive/border/disbled",
+        "enrichment_type": "color",
+        "suspected_typo": "disbled \u2192 disabled"
+      },
+      {
+        "name": "--dimension-spacing-components-md",
+        "value": "24px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "dimension/spacing/components/md",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-size-icon-2xs",
+        "value": "8px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": "dimension/size/icon/2xs",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-text-icon-brand",
+        "value": "#125e9d",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": "colors/text-icon/brand",
+        "enrichment_type": "color",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-size-icon-lg",
+        "value": "24px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": "dimension/size/icon/lg",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-spacing-components-0",
+        "value": "0px",
+        "style_id": null,
+        "category": "spacing",
+        "enrichment_match": "dimension/spacing/components/0",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-size-control-xs",
+        "value": "24px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": "dimension/size/control/xs",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--component-radius-checkbox",
+        "value": "4px",
+        "style_id": null,
+        "category": "other",
+        "enrichment_match": "component/radius/checkbox",
+        "enrichment_type": "borderRadius",
+        "suspected_typo": null
+      },
+      {
+        "name": "--dimension-stroke-weight-md",
+        "value": "2px",
+        "style_id": null,
+        "category": "other",
+        "enrichment_match": "dimension/stroke-weight/md",
+        "enrichment_type": "dimension",
+        "suspected_typo": null
+      },
+      {
+        "name": "--typography-body-sm-regular",
+        "value": "font-family: roboto; font-weight: 400; font-size: 14px; line-height: 24px; letter-spacing: 0",
+        "style_id": "body/sm/regular",
+        "category": "typography",
+        "enrichment_match": "body/sm/regular",
+        "enrichment_type": "fontStyle",
+        "suspected_typo": null
+      },
+      {
+        "name": "--typography-body-sm-strong",
+        "value": "font-family: dm sans; font-weight: 900; font-size: 14px; line-height: 24px; letter-spacing: 0",
+        "style_id": "body/sm/strong",
+        "category": "typography",
+        "enrichment_match": "body/sm/strong",
+        "enrichment_type": "fontStyle",
+        "suspected_typo": null
+      },
+      {
+        "name": "--typography-body-md-regular",
+        "value": "font-family: roboto; font-weight: 400; font-size: 16px; line-height: 24px; letter-spacing: 0",
+        "style_id": "body/md/regular",
+        "category": "typography",
+        "enrichment_match": "body/md/regular",
+        "enrichment_type": "fontStyle",
+        "suspected_typo": null
+      },
+      {
+        "name": "--typography-link-md-regular",
+        "value": "font-family: roboto; font-weight: 600; font-size: 16px; line-height: 24px; letter-spacing: 0",
+        "style_id": "link/md/regular",
+        "category": "typography",
+        "enrichment_match": "link/md/regular",
+        "enrichment_type": "fontStyle",
+        "suspected_typo": null
+      },
+      {
+        "name": "--layout-width-desktop",
+        "value": "1536px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--layout-width-wide",
+        "value": "1920px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--layout-width-tablet",
+        "value": "768px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--layout-width-phone",
+        "value": "360px",
+        "style_id": null,
+        "category": "sizing",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-button-solid-default",
+        "value": "#3388F0",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-button-solid-hover",
+        "value": "#1971C2",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-button-solid-active",
+        "value": "#1864AB",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-button-solid-disabled-bg",
+        "value": "#EAEAEA",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-button-solid-disabled-border",
+        "value": "#D5D5D5",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--effect-focus-ring",
+        "value": "box-shadow: 0px 0px 0px 4px rgba(211,128,11,1), 0px 0px 0px 2px rgba(255,255,255,1)",
+        "style_id": "FocusRing",
+        "category": "effect",
+        "enrichment_match": "FocusRing",
+        "enrichment_type": "effect",
+        "suspected_typo": null
+      },
+      {
+        "name": "--effect-error-ring",
+        "value": "box-shadow: 0px 0px 0px 4px rgba(255,201,201,1)",
+        "style_id": "ErrorRing",
+        "category": "effect",
+        "enrichment_match": "ErrorRing",
+        "enrichment_type": "effect",
+        "suspected_typo": null
+      },
+      {
+        "name": "--typography-heading-xs-strong",
+        "value": "font-family: roboto; font-weight: 900; font-size: 20px; line-height: 1.4em",
+        "style_id": "heading/xs/strong",
+        "category": "typography",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-toggle-active-default",
+        "value": "#2F9E44",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-toggle-active-hover",
+        "value": "#208032",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-toggle-inactive-default",
+        "value": "#ACACAC",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-input-hover-bg",
+        "value": "#E7F5FF",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-input-hover-border",
+        "value": "#1971C2",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-input-filled-border",
+        "value": "#1864AB",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-input-error-bg",
+        "value": "#FFE3E3",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-input-error-border",
+        "value": "#C92A2A",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-input-success-bg",
+        "value": "#D3F9D8",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-input-success-border",
+        "value": "#2F9E44",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-input-disabled-border",
+        "value": "#D5D5D5",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-dropdown-option-hover-bg",
+        "value": "#E7F5FF",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-dropdown-active-option-bg",
+        "value": "#1971C2",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-dropdown-trigger-border-default",
+        "value": "#979797",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-dropdown-trigger-border-active",
+        "value": "#1864AB",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      },
+      {
+        "name": "--color-dropdown-trigger-border-disabled",
+        "value": "#D5D5D5",
+        "style_id": null,
+        "category": "color",
+        "enrichment_match": null,
+        "enrichment_type": null,
+        "suspected_typo": null
+      }
+    ],
+    "components": [
+      {
+        "name": "Button",
+        "node_id": "57:766",
+        "variants": [
+          {
+            "variant": "Solid",
+            "size": "lg",
+            "state": "Default",
+            "node_id": "57:760"
+          },
+          {
+            "variant": "Solid",
+            "size": "md",
+            "state": "Default",
+            "node_id": "79:471"
+          },
+          {
+            "variant": "Solid",
+            "size": "xl",
+            "state": "Default",
+            "node_id": "79:332"
+          },
+          {
+            "variant": "Solid",
+            "size": "lg",
+            "state": "Hover",
+            "node_id": "57:767"
+          },
+          {
+            "variant": "Solid",
+            "size": "md",
+            "state": "Hover",
+            "node_id": "79:475"
+          },
+          {
+            "variant": "Solid",
+            "size": "xl",
+            "state": "Hover",
+            "node_id": "79:336"
+          },
+          {
+            "variant": "Solid",
+            "size": "lg",
+            "state": "Active",
+            "node_id": "57:773"
+          },
+          {
+            "variant": "Solid",
+            "size": "md",
+            "state": "Active",
+            "node_id": "79:479"
+          },
+          {
+            "variant": "Solid",
+            "size": "xl",
+            "state": "Active",
+            "node_id": "79:340"
+          },
+          {
+            "variant": "Solid",
+            "size": "lg",
+            "state": "Focus",
+            "node_id": "76:13"
+          },
+          {
+            "variant": "Solid",
+            "size": "md",
+            "state": "Focus",
+            "node_id": "79:483"
+          },
+          {
+            "variant": "Solid",
+            "size": "xl",
+            "state": "Focus",
+            "node_id": "79:344"
+          },
+          {
+            "variant": "Solid",
+            "size": "lg",
+            "state": "Disabled",
+            "node_id": "57:779"
+          },
+          {
+            "variant": "Solid",
+            "size": "md",
+            "state": "Disabled",
+            "node_id": "79:487"
+          },
+          {
+            "variant": "Solid",
+            "size": "xl",
+            "state": "Disabled",
+            "node_id": "79:348"
+          },
+          {
+            "variant": "Outline",
+            "size": "lg",
+            "state": "Default",
+            "node_id": "79:591"
+          },
+          {
+            "variant": "Outline",
+            "size": "md",
+            "state": "Default",
+            "node_id": "79:595"
+          },
+          {
+            "variant": "Outline",
+            "size": "xl",
+            "state": "Default",
+            "node_id": "79:599"
+          },
+          {
+            "variant": "Outline",
+            "size": "lg",
+            "state": "Hover",
+            "node_id": "79:603"
+          },
+          {
+            "variant": "Outline",
+            "size": "md",
+            "state": "Hover",
+            "node_id": "79:607"
+          },
+          {
+            "variant": "Outline",
+            "size": "xl",
+            "state": "Hover",
+            "node_id": "79:611"
+          },
+          {
+            "variant": "Outline",
+            "size": "lg",
+            "state": "Active",
+            "node_id": "79:615"
+          },
+          {
+            "variant": "Outline",
+            "size": "md",
+            "state": "Active",
+            "node_id": "79:619"
+          },
+          {
+            "variant": "Outline",
+            "size": "xl",
+            "state": "Active",
+            "node_id": "79:623"
+          },
+          {
+            "variant": "Outline",
+            "size": "lg",
+            "state": "Focus",
+            "node_id": "79:627"
+          },
+          {
+            "variant": "Outline",
+            "size": "md",
+            "state": "Focus",
+            "node_id": "79:631"
+          },
+          {
+            "variant": "Outline",
+            "size": "xl",
+            "state": "Focus",
+            "node_id": "79:635"
+          },
+          {
+            "variant": "Outline",
+            "size": "lg",
+            "state": "Disabled",
+            "node_id": "79:639"
+          },
+          {
+            "variant": "Outline",
+            "size": "md",
+            "state": "Disabled",
+            "node_id": "79:643"
+          },
+          {
+            "variant": "Outline",
+            "size": "xl",
+            "state": "Disabled",
+            "node_id": "79:647"
+          },
+          {
+            "variant": "Ghost",
+            "size": "lg",
+            "state": "Default",
+            "node_id": "79:790"
+          },
+          {
+            "variant": "Ghost",
+            "size": "md",
+            "state": "Default",
+            "node_id": "79:794"
+          },
+          {
+            "variant": "Ghost",
+            "size": "xl",
+            "state": "Default",
+            "node_id": "79:798"
+          },
+          {
+            "variant": "Ghost",
+            "size": "lg",
+            "state": "Hover",
+            "node_id": "79:802"
+          },
+          {
+            "variant": "Ghost",
+            "size": "md",
+            "state": "Hover",
+            "node_id": "79:806"
+          },
+          {
+            "variant": "Ghost",
+            "size": "xl",
+            "state": "Hover",
+            "node_id": "79:810"
+          },
+          {
+            "variant": "Ghost",
+            "size": "lg",
+            "state": "Active",
+            "node_id": "79:814"
+          },
+          {
+            "variant": "Ghost",
+            "size": "md",
+            "state": "Active",
+            "node_id": "79:818"
+          },
+          {
+            "variant": "Ghost",
+            "size": "xl",
+            "state": "Active",
+            "node_id": "79:822"
+          },
+          {
+            "variant": "Ghost",
+            "size": "lg",
+            "state": "Focus",
+            "node_id": "79:826"
+          },
+          {
+            "variant": "Ghost",
+            "size": "md",
+            "state": "Focus",
+            "node_id": "79:830"
+          },
+          {
+            "variant": "Ghost",
+            "size": "xl",
+            "state": "Focus",
+            "node_id": "79:834"
+          },
+          {
+            "variant": "Ghost",
+            "size": "lg",
+            "state": "Disabled",
+            "node_id": "79:838"
+          },
+          {
+            "variant": "Ghost",
+            "size": "md",
+            "state": "Disabled",
+            "node_id": "79:842"
+          },
+          {
+            "variant": "Ghost",
+            "size": "xl",
+            "state": "Disabled",
+            "node_id": "79:846"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "md",
+            "state": "Default",
+            "node_id": "93:1309"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "sm",
+            "state": "Default",
+            "node_id": "105:3147"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "md",
+            "state": "Hover",
+            "node_id": "93:1313"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "sm",
+            "state": "Hover",
+            "node_id": "105:3153"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "md",
+            "state": "Active",
+            "node_id": "93:1317"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "sm",
+            "state": "Active",
+            "node_id": "105:3159"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "md",
+            "state": "Focus",
+            "node_id": "93:1321"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "sm",
+            "state": "Focus",
+            "node_id": "105:3165"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "md",
+            "state": "Disabled",
+            "node_id": "93:1325"
+          },
+          {
+            "variant": "Solid-Input",
+            "size": "sm",
+            "state": "Disabled",
+            "node_id": "105:3171"
+          }
+        ],
+        "props": {},
+        "code_connect_snippet": "import Icon from \"src/components/Icon/Icon.vue\"\n\ntype ButtonProps = { className?: string; size?: \"lg\"; state?: \"Default\"; variant?: \"Solid\"; };\n\nfunction Button({ className, size = \"lg\", state = \"Default\", variant = \"Solid\" }: ButtonProps) {\n  return (<CodeConnectSnippet data-node-id=\"57:760\" data-name=\"Variant=Solid, Size=lg, State=Default\"><Button><Icon /><Icon /></Button></CodeConnectSnippet>);\n}",
+        "designer_instructions": "Purpose: primary interactive element. Variants: Solid/Outline/Ghost/Solid-Input. Sizes sm/md/lg/xl. States Default/Hover/Active/Focus/Disabled. Token refs use --color-primary-500/600/700, --radius-pill, --radius-button, --font-weight-semibold, --space-2, --color-focus-ring. AGENT INSTRUCTIONS: never hardcode color/spacing/size; Ghost wraps icon in circular pill; Disabled via --color-disabled-bg not CSS opacity; props: variant, size, disabled, leadingIcon, trailingIcon, label, onClick",
+        "tokens_consumed": [
+          "--color-button-solid-default",
+          "--color-button-solid-hover",
+          "--color-button-solid-active",
+          "--color-button-solid-disabled-bg",
+          "--color-button-solid-disabled-border",
+          "--effect-focus-ring",
+          "--component-radius-button-input",
+          "--dimension-size-control-md",
+          "--dimension-size-control-lg",
+          "--spacing-2",
+          "--color-control-text-icon-inverse",
+          "--color-control-text-icon-disabled",
+          "--color-control-background-disabled",
+          "--color-control-border-disbled"
+        ]
+      },
+      {
+        "name": "Input",
+        "node_id": "86:1054",
+        "variants": [
+          {
+            "variant": "TextInput",
+            "size": "lg",
+            "state": "Default",
+            "node_id": "86:1047"
+          },
+          {
+            "variant": "TextInput",
+            "size": "md",
+            "state": "Default",
+            "node_id": "105:2661"
+          },
+          {
+            "variant": "TextInput",
+            "size": "lg",
+            "state": "Hover",
+            "node_id": "86:1055"
+          },
+          {
+            "variant": "TextInput",
+            "size": "md",
+            "state": "Hover",
+            "node_id": "105:2670"
+          },
+          {
+            "variant": "TextInput",
+            "size": "lg",
+            "state": "Focused",
+            "node_id": "86:1064"
+          },
+          {
+            "variant": "TextInput",
+            "size": "md",
+            "state": "Focused",
+            "node_id": "105:2679"
+          },
+          {
+            "variant": "TextInput",
+            "size": "lg",
+            "state": "Filled",
+            "node_id": "86:1073"
+          },
+          {
+            "variant": "TextInput",
+            "size": "md",
+            "state": "Filled",
+            "node_id": "105:2697"
+          },
+          {
+            "variant": "TextInput",
+            "size": "lg",
+            "state": "Error",
+            "node_id": "86:1082"
+          },
+          {
+            "variant": "TextInput",
+            "size": "md",
+            "state": "Error",
+            "node_id": "105:2706"
+          },
+          {
+            "variant": "TextInput",
+            "size": "lg",
+            "state": "Success",
+            "node_id": "86:1091"
+          },
+          {
+            "variant": "TextInput",
+            "size": "md",
+            "state": "Success",
+            "node_id": "105:2715"
+          },
+          {
+            "variant": "TextInput",
+            "size": "lg",
+            "state": "Disabled",
+            "node_id": "86:1100"
+          },
+          {
+            "variant": "TextInput",
+            "size": "md",
+            "state": "Disabled",
+            "node_id": "105:2688"
+          },
+          {
+            "variant": "TextArea",
+            "size": "lg",
+            "state": "Default",
+            "node_id": "552:447"
+          },
+          {
+            "variant": "TextArea",
+            "size": "lg",
+            "state": "Hover",
+            "node_id": "552:472"
+          },
+          {
+            "variant": "TextArea",
+            "size": "lg",
+            "state": "Focused",
+            "node_id": "552:497"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "lg",
+            "state": "Default",
+            "node_id": "93:1209"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "md",
+            "state": "Default",
+            "node_id": "105:2724"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "lg",
+            "state": "Hover",
+            "node_id": "93:1215"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "md",
+            "state": "Hover",
+            "node_id": "105:2732"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "lg",
+            "state": "Focused",
+            "node_id": "93:1221"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "md",
+            "state": "Focused",
+            "node_id": "105:2740"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "lg",
+            "state": "Disabled",
+            "node_id": "93:1227"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "md",
+            "state": "Disabled",
+            "node_id": "105:2748"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "lg",
+            "state": "Filled",
+            "node_id": "93:1233"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "md",
+            "state": "Filled",
+            "node_id": "105:2756"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "lg",
+            "state": "Error",
+            "node_id": "93:1239"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "md",
+            "state": "Error",
+            "node_id": "105:2764"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "lg",
+            "state": "Success",
+            "node_id": "93:1245"
+          },
+          {
+            "variant": "TextInputGroup",
+            "size": "md",
+            "state": "Success",
+            "node_id": "105:2772"
+          }
+        ],
+        "props": {},
+        "code_connect_snippet": null,
+        "designer_instructions": "Purpose: text input for user data entry. Types: TextInput/TextArea/TextInputGroup. Sizes: md (40px height) / lg (48px height). States: Default/Hover/Focused/Filled/Error/Success/Disabled. Token refs: --btn-height-md/lg, --radius-button (4px), --font-size-base, --color-error, --color-success, --color-disabled-bg. AGENT INSTRUCTIONS: never hardcode height; all border/text color changes via tokens; props: type, size, state, leadingIcon, showClearButton, showPasswordToggle, placeholder, value",
+        "tokens_consumed": [
+          "--color-control-border-default",
+          "--color-control-background-hover",
+          "--color-input-hover-bg",
+          "--color-input-hover-border",
+          "--color-input-filled-border",
+          "--color-input-error-bg",
+          "--color-input-error-border",
+          "--color-input-success-bg",
+          "--color-input-success-border",
+          "--color-input-disabled-border",
+          "--component-radius-input",
+          "--dimension-stroke-weight-sm",
+          "--effect-focus-ring",
+          "--dimension-size-control-md",
+          "--dimension-size-control-lg"
+        ]
+      },
+      {
+        "name": "Toggle",
+        "node_id": "648:253",
+        "variants": [
+          {
+            "variant": "Toggle",
+            "size": "",
+            "state": "Active",
+            "node_id": "648:238"
+          },
+          {
+            "variant": "Toggle",
+            "size": "",
+            "state": "Inactive",
+            "node_id": "648:293"
+          },
+          {
+            "variant": "Toggle",
+            "size": "",
+            "state": "Disabled",
+            "node_id": "648:254"
+          },
+          {
+            "variant": "ToggleSwitch",
+            "size": "",
+            "state": "Inactive-Default",
+            "node_id": "633:912"
+          },
+          {
+            "variant": "ToggleSwitch",
+            "size": "",
+            "state": "Inactive-Disabled",
+            "node_id": "648:271"
+          },
+          {
+            "variant": "ToggleSwitch",
+            "size": "",
+            "state": "Inactive-Hover",
+            "node_id": "633:914"
+          },
+          {
+            "variant": "ToggleSwitch",
+            "size": "",
+            "state": "Inactive-Focus",
+            "node_id": "633:916"
+          },
+          {
+            "variant": "ToggleSwitch",
+            "size": "",
+            "state": "Active-Default",
+            "node_id": "633:918"
+          },
+          {
+            "variant": "ToggleSwitch",
+            "size": "",
+            "state": "Active-Hover",
+            "node_id": "633:919"
+          },
+          {
+            "variant": "ToggleSwitch",
+            "size": "",
+            "state": "Active-Focus",
+            "node_id": "633:926"
+          }
+        ],
+        "props": {},
+        "code_connect_snippet": null,
+        "designer_instructions": "Toggle component with LabelRow (optional). State axes: Active/Inactive/Disabled. ToggleSwitch sub-component: Inactive states (Default/Hover/Focus/Disabled) and Active states (Default/Hover/Focus). Active color: #2F9E44. Inactive color: #ACACAC. Disabled bg: #EAEAEA. FocusRing: box-shadow 4px amber + 2px white. Switch size: 48x24px. Knob: 20px circle. Token refs: colors/control/background/active, colors/control/background/disabled, FocusRing effect.",
+        "tokens_consumed": [
+          "--color-toggle-active-default",
+          "--color-toggle-active-hover",
+          "--color-toggle-inactive-default",
+          "--color-control-background-disabled",
+          "--effect-focus-ring",
+          "--color-text-icon-primary",
+          "--dimension-typography-body-sm-size",
+          "--dimension-typography-body-sm-lineheight"
+        ]
+      },
+      {
+        "name": "Checkbox",
+        "node_id": "448:587",
+        "variants": [
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Default-Unchecked",
+            "node_id": "448:582"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Error-Unchecked",
+            "node_id": "448:588"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Hover-Unchecked",
+            "node_id": "448:583"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Focus-Unchecked",
+            "node_id": "448:584"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Active-Unchecked",
+            "node_id": "448:585"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Error-Checked",
+            "node_id": "448:606"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Active-Checked",
+            "node_id": "448:594"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Default-Indetermined",
+            "node_id": "452:301"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Hover-Indetermined",
+            "node_id": "452:307"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Focus-Indetermined",
+            "node_id": "452:313"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Focus-Checked",
+            "node_id": "448:609"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Disabled-Unchecked",
+            "node_id": "448:586"
+          },
+          {
+            "variant": "Checkbox",
+            "size": "24px",
+            "state": "Disabled-Checked",
+            "node_id": "452:466"
+          }
+        ],
+        "props": {},
+        "code_connect_snippet": "type CheckboxProps = {\n  className?: string;\n  selection?: \"Unchecked\";\n  state?: \"Default\";\n};\n\nfunction Checkbox({ className, selection = \"Unchecked\", state = \"Default\" }: CheckboxProps) {\n  return <div className={className || \"bg-[var(--colors\\/control\\/background\\/default,white)] border-[length:var(--dimension\\/stroke-weight\\/md,2px)] border-[var(--colors\\/control\\/border\\/default,#979797)] border-solid content-stretch flex h-[24px] items-center justify-center relative rounded-[var(--component\\/radius\\/checkbox,4px)] w-[var(--dimension\\/size\\/control\\/xs,24px)]\"} data-node-id=\"448:582\" />;\n}",
+        "designer_instructions": "State axes: Default/Hover/Focus/Active/Disabled \u00d7 Selection: Unchecked/Checked/Indetermined. Plus Error state. Size: 24\u00d724px (var --dimension/size/control/xs). Border-radius: 4px (var --component/radius/checkbox). Stroke: 2px (var --dimension/stroke-weight/md). Hover bg: #E7F5FF. Active fill: #1971C2. Error ring: box-shadow 4px #FFC9C9. FocusRing: 4px amber + 2px white. Disabled border: #D5D5D5. Disabled bg: #EAEAEA.",
+        "tokens_consumed": [
+          "--color-control-background-default",
+          "--color-control-border-default",
+          "--color-control-background-hover",
+          "--color-control-background-active",
+          "--color-control-border-active",
+          "--color-control-border-disbled",
+          "--color-control-background-disabled",
+          "--effect-focus-ring",
+          "--effect-error-ring",
+          "--component-radius-checkbox",
+          "--dimension-stroke-weight-md",
+          "--dimension-size-control-xs"
+        ]
+      },
+      {
+        "name": "Dropdown",
+        "node_id": "465:929",
+        "variants": [
+          {
+            "variant": "Dropdown",
+            "size": "",
+            "state": "Default",
+            "node_id": "461:784"
+          },
+          {
+            "variant": "Dropdown",
+            "size": "",
+            "state": "Hover",
+            "node_id": "465:1012"
+          },
+          {
+            "variant": "Dropdown",
+            "size": "",
+            "state": "Focus",
+            "node_id": "465:1031"
+          },
+          {
+            "variant": "Dropdown",
+            "size": "",
+            "state": "Active",
+            "node_id": "465:1050"
+          },
+          {
+            "variant": "Dropdown",
+            "size": "",
+            "state": "Disabled",
+            "node_id": "465:1201"
+          },
+          {
+            "variant": "TriggerRow",
+            "size": "48px",
+            "state": "Default",
+            "node_id": "465:791"
+          },
+          {
+            "variant": "TriggerRow",
+            "size": "48px",
+            "state": "Hover",
+            "node_id": "465:793"
+          },
+          {
+            "variant": "TriggerRow",
+            "size": "48px",
+            "state": "Focus",
+            "node_id": "465:798"
+          },
+          {
+            "variant": "TriggerRow",
+            "size": "48px",
+            "state": "Active",
+            "node_id": "465:808"
+          },
+          {
+            "variant": "TriggerRow",
+            "size": "48px",
+            "state": "Disabled",
+            "node_id": "465:820"
+          },
+          {
+            "variant": "OptionItem",
+            "size": "",
+            "state": "Default-MultiSelect",
+            "node_id": "457:1161"
+          },
+          {
+            "variant": "OptionItem",
+            "size": "",
+            "state": "Hover-MultiSelect",
+            "node_id": "457:1163"
+          },
+          {
+            "variant": "OptionItem",
+            "size": "",
+            "state": "Focus-MultiSelect",
+            "node_id": "457:1171"
+          },
+          {
+            "variant": "OptionItem",
+            "size": "",
+            "state": "Active-MultiSelect",
+            "node_id": "457:1177"
+          },
+          {
+            "variant": "OptionItem",
+            "size": "",
+            "state": "Default-SingleSelect",
+            "node_id": "457:1210"
+          },
+          {
+            "variant": "OptionItem",
+            "size": "",
+            "state": "Hover-SingleSelect",
+            "node_id": "457:1212"
+          },
+          {
+            "variant": "OptionItem",
+            "size": "",
+            "state": "Focus-SingleSelect",
+            "node_id": "457:1214"
+          },
+          {
+            "variant": "OptionItem",
+            "size": "",
+            "state": "Active-SingleSelect",
+            "node_id": "457:1216"
+          }
+        ],
+        "props": {},
+        "code_connect_snippet": null,
+        "designer_instructions": "Dropdown with TriggerRow + OptionList sub-components. Props: Show LabelRow (bool), Show HelperRow (bool). TriggerRow states: Default/Hover/Focus/Active/Disabled. Height: 48px. Border-radius: 4px. Trigger border default: #979797; hover/focus: #1971C2; active: #1864AB; disabled: #D5D5D5. Option hover bg: #E7F5FF. Active option bg: #1971C2. OptionItem types: MultiSelect / SingleSelect. FocusRing applied on Focus state. Page name note: 'Drodown' (typo for 'Dropdown'). Token refs: --color-control-border-default, --color-control-background-hover, --color-control-border-hover, --component-radius-input, --effect-focus-ring.",
+        "tokens_consumed": [
+          "--color-control-border-default",
+          "--color-control-background-hover",
+          "--color-control-border-hover",
+          "--color-control-border-active",
+          "--color-control-border-disbled",
+          "--color-dropdown-trigger-border-default",
+          "--color-dropdown-trigger-border-active",
+          "--color-dropdown-trigger-border-disabled",
+          "--color-dropdown-option-hover-bg",
+          "--color-dropdown-active-option-bg",
+          "--effect-focus-ring",
+          "--component-radius-input",
+          "--dimension-size-control-lg"
+        ]
+      },
+      {
+        "name": "FormField",
+        "node_id": "100:1466",
+        "variants": [
+          {
+            "variant": "Input",
+            "size": "",
+            "state": "",
+            "node_id": "100:1465"
+          },
+          {
+            "variant": "InputArea",
+            "size": "",
+            "state": "",
+            "node_id": "552:861"
+          },
+          {
+            "variant": "InputGroup",
+            "size": "",
+            "state": "",
+            "node_id": "100:1467"
+          }
+        ],
+        "props": {},
+        "code_connect_snippet": null,
+        "designer_instructions": "Purpose: composite form field composing LabelRow + Input + HelperRow. Types: Input / InputArea / InputGroup. Spacing LabelRow\u2192Input: var(--space-2) 8px; Input\u2192HelperRow: var(--space-1) 4px. AGENT INSTRUCTIONS: always compose existing LabelRow, Input, HelperRow components; never re-implement their markup; helperState prop controls HelperRow state; props: type, size, label, required, showInfoIcon, helperState, helperMessage, and all Input props.",
+        "tokens_consumed": [
+          "--spacing-1",
+          "--spacing-2",
+          "--color-control-text-icon-primary",
+          "--color-control-text-icon-muted",
+          "--color-text-icon-disabled",
+          "--dimension-typography-body-sm-size",
+          "--dimension-typography-body-md-size",
+          "--dimension-typography-body-sm-lineheight",
+          "--dimension-typography-body-md-lineheight",
+          "--component-radius-input",
+          "--color-error-border",
+          "--color-error-borde-subtle",
+          "--color-error-surfac-subtle"
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-arrow-up.svg",
+        "node_id": "79:150",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-arrow-down.svg",
+        "node_id": "79:166",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-arrow-left.svg",
+        "node_id": "79:167",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-arrow-right.svg",
+        "node_id": "79:172",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-chevron-down.svg",
+        "node_id": "86:917",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-chevron-up.svg",
+        "node_id": "86:913",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-circle-info.svg",
+        "node_id": "86:892",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-triangle-exclamation.svg",
+        "node_id": "86:918",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-circle-exclamation.svg",
+        "node_id": "451:413",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-circle-check.svg",
+        "node_id": "86:919",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-check.svg",
+        "node_id": "448:207",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-minus.svg",
+        "node_id": "452:290",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-radio-bullet.svg",
+        "node_id": "457:501",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-circle-x.svg",
+        "node_id": "86:931",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-pen.svg",
+        "node_id": "86:1008",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-search.svg",
+        "node_id": "137:3278",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-xmark.svg",
+        "node_id": "86:1024",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-eye.svg",
+        "node_id": "86:1042",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-eye-slash.svg",
+        "node_id": "86:1043",
+        "format": "svg"
+      },
+      {
+        "original_url": "",
+        "local_path": "runs/assets/icon-overflow.svg",
+        "node_id": "552:382",
+        "format": "svg"
+      }
+    ],
+    "extraction_runs": 1,
+    "consensus_confidence": 1.0,
+    "gaps_detected": [
+      "Input page (100:1426) returns an empty CANVAS node with no children at any depth \u2014 Input component set (86:1054) was successfully recovered from the FormField page (.elements section) instead",
+      "Colors page (360:38) contains only an empty Color Swatch Template component with no actual palette variables \u2014 all color tokens extracted from enrichment variable data only",
+      "ImageRatios page (152:3814) not fetched \u2014 no child count available from discovery, skipped as low priority",
+      "Text page (54:2) not fetched \u2014 no child count from discovery, typography tokens covered by Typography page",
+      "HelperRow page (86:942) not individually fetched \u2014 covered as sub-component in FormField",
+      "LabelRow page (86:882) not individually fetched \u2014 covered as sub-component in FormField",
+      "Drodown page name is a confirmed typo (should be Dropdown) \u2014 node_id 457:729",
+      "Toggle component lacks sm/md/lg/xl size axis \u2014 only Active/Inactive/Disabled state variants exist at the composite level",
+      "FormField variant matrix is minimal (3 types only) \u2014 full state\u00d7size matrix lives on the Input component set (86:1054)"
+    ],
+    "typos_detected": [
+      "colors/error/borde-subtle \u2192 should be colors/error/border-subtle (missing 'r')",
+      "colors/error/surfac-subtle \u2192 should be colors/error/surface-subtle (missing 'e')",
+      "colors/control/border/disbled \u2192 should be colors/control/border/disabled (missing 'a')",
+      "colors/interactive/border/disbled \u2192 should be colors/interactive/border/disabled (missing 'a')",
+      "Page name 'Drodown' (457:729) \u2192 should be 'Dropdown' (missing 'p')"
+    ],
+    "enrichment_coverage": 0.71
+  },
+  "_meta": {
+    "pattern": "sequential",
+    "model_id": "gpt-5.4",
+    "wall_clock_s": 229.68,
+    "enrichment_present": true,
+    "mcp_calls": [
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "0:0",
+          "depth": 1
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "360:38",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "600:425",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "78:136",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "105:2147",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "57:645",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "100:1426",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "552:985",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "457:249",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "457:729",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "86:985",
+          "depth": 3
+        }
+      },
+      {
+        "tool": "get_figma_data",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodeId": "100:1426",
+          "depth": 5
+        }
+      },
+      {
+        "tool": "download_figma_images",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodes": [
+            {
+              "nodeId": "79:150",
+              "fileName": "icon-arrow-up.svg"
+            },
+            {
+              "nodeId": "79:166",
+              "fileName": "icon-arrow-down.svg"
+            },
+            {
+              "nodeId": "79:167",
+              "fileName": "icon-arrow-left.svg"
+            },
+            {
+              "nodeId": "79:172",
+              "fileName": "icon-arrow-right.svg"
+            },
+            {
+              "nodeId": "86:917",
+              "fileName": "icon-chevron-down.svg"
+            },
+            {
+              "nodeId": "86:913",
+              "fileName": "icon-chevron-up.svg"
+            },
+            {
+              "nodeId": "86:892",
+              "fileName": "icon-circle-info.svg"
+            },
+            {
+              "nodeId": "86:918",
+              "fileName": "icon-triangle-exclamation.svg"
+            },
+            {
+              "nodeId": "451:413",
+              "fileName": "icon-circle-exclamation.svg"
+            },
+            {
+              "nodeId": "86:919",
+              "fileName": "icon-circle-check.svg"
+            }
+          ],
+          "pngScale": 2,
+          "localPath": "runs/assets"
+        }
+      },
+      {
+        "tool": "download_figma_images",
+        "args": {
+          "fileKey": "8qPSyetzviLR6eF6bkpL44",
+          "nodes": [
+            {
+              "nodeId": "448:207",
+              "fileName": "icon-check.svg"
+            },
+            {
+              "nodeId": "452:290",
+              "fileName": "icon-minus.svg"
+            },
+            {
+              "nodeId": "457:501",
+              "fileName": "icon-radio-bullet.svg"
+            },
+            {
+              "nodeId": "86:931",
+              "fileName": "icon-circle-x.svg"
+            },
+            {
+              "nodeId": "86:1008",
+              "fileName": "icon-pen.svg"
+            },
+            {
+              "nodeId": "137:3278",
+              "fileName": "icon-search.svg"
+            },
+            {
+              "nodeId": "86:1024",
+              "fileName": "icon-xmark.svg"
+            },
+            {
+              "nodeId": "86:1042",
+              "fileName": "icon-eye.svg"
+            },
+            {
+              "nodeId": "86:1043",
+              "fileName": "icon-eye-slash.svg"
+            },
+            {
+              "nodeId": "552:382",
+              "fileName": "icon-overflow.svg"
+            }
+          ],
+          "pngScale": 2,
+          "localPath": "runs/assets"
+        }
+      }
+    ],
+    "metrics": {
+      "input_tokens": 525836,
+      "output_tokens": 14829,
+      "total_tokens": 540665,
+      "time_to_first_token": 5.59530307201203,
+      "duration": 213.8778550719726,
+      "details": {
+        "model": [
+          {
+            "input_tokens": 525836,
+            "output_tokens": 14829,
+            "total_tokens": 540665,
+            "id": "gpt-5.4",
+            "provider": "OpenAI Chat"
+          }
+        ]
+      }
+    },
+    "context_growth": {
+      "mcp_calls": 14,
+      "input_tokens": 525836,
+      "output_tokens": 14829,
+      "total_tokens": 540665,
+      "approx_input_tokens_per_call": 37560,
+      "note": "input grows ~linearly as raw tool outputs accumulate in one context; primary FinOps target."
+    },
+    "run_status": "RunStatus.completed"
+  }
+}

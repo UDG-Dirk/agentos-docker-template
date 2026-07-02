@@ -1,0 +1,11 @@
+{
+  "pat_present": true,
+  "ssl_verify_used": true,
+  "project_GET_status": 200,
+  "project_id": 2545,
+  "project_path": "customer-udg-ai/projects/helix-poc-agno",
+  "default_branch": "main",
+  "empty_repo": true,
+  "branches_GET_status": 200,
+  "branches": []
+}

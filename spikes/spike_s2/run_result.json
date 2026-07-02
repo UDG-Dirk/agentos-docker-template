@@ -1,0 +1,30 @@
+{
+  "after_run": {
+    "status": "PAUSED",
+    "steps_ran": [
+      "figma_extraction",
+      "token_normalization"
+    ],
+    "is_paused": true,
+    "run_id": "3c5336e6-0202-45f2-845d-59fb34dd72c0",
+    "content_head": "None",
+    "paused_step_name": "token_normalization",
+    "pause_kind": "PauseKind.STEP"
+  },
+  "hitl_review_payload_head": "StepOutput(step_name='token_normalization', step_id='b5dca322-8f08-4268-a5d1-88e4ef961571', step_type=<StepType.STEP: 'Step'>, executor_type='agent', executor_name='token-normalizer', content=NormalizedTokens(dtcg_tokens={}, typos_detected=['disbled -> disabled'], token_count=0), step_run_id='67532f5e-6302-4f54-9ded-96018b0904c6', images=None, videos=None, audio=None, files=None, metrics=RunMetric",
+  "after_continue": {
+    "status": "COMPLETED",
+    "steps_ran": [
+      "figma_extraction",
+      "token_normalization",
+      "scaffolding"
+    ],
+    "is_paused": false,
+    "run_id": "3c5336e6-0202-45f2-845d-59fb34dd72c0",
+    "content_head": "vue_components=[] storybook_stories=[] cms_bloks=[]",
+    "paused_step_name": null,
+    "pause_kind": "None"
+  },
+  "session_state_echo_seen": true,
+  "final_content_head": "vue_components=[] storybook_stories=[] cms_bloks=[]"
+}

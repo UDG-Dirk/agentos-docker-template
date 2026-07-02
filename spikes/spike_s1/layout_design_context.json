@@ -1,0 +1,5 @@
+{
+  "_source": "get_design_context node 105:2148 (Layout Desktop), excludeScreenshot=true",
+  "code": "export default function Desktop() { return <div className=\"bg-white relative size-full\" data-node-id=\"105:2148\" data-name=\"Desktop\" />; }",
+  "_finding": "EMPTY frame — breakpoint guide with no content. design_context returns nothing useful for empty nodes, even though get_variable_defs on the SAME node returned the layout grid tokens. KEY: variable_defs and design_context surface different things; query both."
+}

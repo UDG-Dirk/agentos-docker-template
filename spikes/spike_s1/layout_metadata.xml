@@ -1,0 +1,7 @@
+<canvas id="105:2147" name="Layout">
+  <frame id="105:2148" name="Desktop" x="-404" y="0" width="1536" height="1036" />
+  <frame id="161:4256" name="Wide"    x="-2364" y="0" width="1920" height="1036" />
+  <frame id="105:2150" name="Tablet"  x="1192" y="0" width="768" height="1036" />
+  <frame id="105:2151" name="Phone"   x="2000" y="0" width="360" height="1036" />
+</canvas>
+<!-- Breakpoints: Wide 1920, Desktop 1536, Tablet 768, Phone 360 (all height 1036). -->

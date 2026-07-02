@@ -1,0 +1,10 @@
+{
+  "server": "figma-developer-mcp (Framelink / GLips)",
+  "version_cached": "0.9.0 (npx -y resolves latest 0.13.2)",
+  "transport": "stdio (StdioServerParameters command=npx)",
+  "auth": "PAT via --figma-api-key flag (or FIGMA_API_KEY env). NO OAuth, NO browser. CONFIRMED headless.",
+  "tools": ["get_figma_data", "download_figma_images"],
+  "get_figma_data": "fileKey + nodeId + depth -> rich YAML: metadata, componentSets, components, nodes, globalVars (resolved style values + style ids like fill_1DOTQ5)",
+  "download_figma_images": "downloads image/SVG assets to a local dir",
+  "verified_via": "Agno agent (OpenAIChat, MCPTools+StdioServerParameters), real call api.figma.com/v1/files/.../nodes?ids=57:645 -> 1 node, 148 styles"
+}

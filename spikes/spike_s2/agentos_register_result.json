@@ -1,0 +1,12 @@
+{
+  "GET /workflows status": 200,
+  "workflow_registered": true,
+  "workflow_ids": [
+    "helix-pipeline-plumbing-test"
+  ],
+  "POST runs status": 200,
+  "run_status": "PAUSED",
+  "run_is_paused": true,
+  "run_id": "1ef0eb52-5320-4f6e-8a0c-e744d7e3fc14",
+  "post_runs_body_head": "{\"input\": \"Run HELIX pipeline via REST (dummy).\", \"content_type\": \"str\", \"workflow_id\": \"helix-pipeline-plumbing-test\", \"workflow_name\": \"helix-pipeline-plumbing-test\", \"run_id\": \"1ef0eb52-5320-4f6e-8a0c-e744d7e3fc14\", \"session_id\": \"38403597-351c-4f96-bdcc-83f563b51820\", \"created_at\": 1782738518, \"status\": \"PAUSED\", \"paused_step_index\": 1, \"paused_step_name\": \"token_normalization\", \"pause_kind\": \"step\", \"step_results\": [{\"content\": {\"tokens_raw\": {}, \"components_raw\": [], \"extraction_runs\": 0, "
+}
