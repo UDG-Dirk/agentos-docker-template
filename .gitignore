@@ -70,5 +70,8 @@ tmp
 agents/--first-contact/
 standalone/
 
+# Figma Extractor runtime output (download_figma_images writes here at run time)
+agents/figma_extractor/runs/
+
 # Optional: local PyPI creds (uncomment if you ever create it)
 # .pypirc
