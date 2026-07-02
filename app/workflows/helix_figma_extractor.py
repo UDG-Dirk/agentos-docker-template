@@ -1,34 +1,40 @@
 """
-HELIX Figma Extractor Workflow
-==============================
+HELIX Figma Extractor Workflow (two-step)
+=========================================
 
-Single-step AgentOS Workflow wrapping the Figma Extractor agent (HELIX UC2
-pipeline Step 1), with:
+Step 1 — extract  : Figma Extractor agent, wrapped in a retry-on-empty guard
+                    (extract_with_retry). Non-deterministic model sometimes
+                    finalizes after discovery with an empty result; the guard
+                    re-invokes until tokens/components are non-empty. No HITL
+                    gate here so the pipeline flows straight into Step 2.
+Step 2 — normalize: Token Normalizer (pure Python, zero LLM / zero MCP). Reads
+                    Step 1's FigmaExtractionResult via previous_step_content,
+                    converts to DTCG NormalizedTokens. HITL output-review gate
+                    lives here — the reviewer sees the normalization_report
+                    (confidence distribution, unresolved tokens, composites).
 
-  * a deterministic RETRY-ON-EMPTY guard, and
-  * a human-in-the-loop review gate (``requires_output_review=True``).
+Rollback: remove normalize_step from steps=[...] (and optionally restore the
+extract HITL) to return to the single-step workflow — one revert.
 
-Why the guard: the extractor is non-deterministic — the model sometimes finalizes
-right after the Phase-1 discovery call and returns an EMPTY result (0 tokens,
-0 components) despite the prompt's ">=7 calls / empty = FAILURE" rule. This was
-observed on DEV (run_sequential_001: 1 MCP call, empty) and again on the first
-prod run. ``Step.max_retries`` does NOT help — an empty result is a *successful*
-run, not an error. So the step's executor is a function that re-invokes the agent
-(with a stronger continuation nudge) until the extraction is non-empty or the
-attempt budget is exhausted. The HITL gate then reviews the final result.
-
-Registered in ``app/main.py`` via ``AgentOS(workflows=[...])``.
+Registered in ``app/main.py`` via ``AgentOS(workflows=[...])`` — id unchanged.
 """
 
 from __future__ import annotations
+
+import json
 
 from agno.workflow import Step, Workflow
 from agno.workflow.types import StepInput, StepOutput
 
 from agents.figma_extractor.agent import figma_extractor_agent
 from agents.figma_extractor.models import FigmaExtractionResult
+from agents.token_normalizer.normalizer import FigmaExtractionResult as _NormalizerFER
+from agents.token_normalizer.normalizer import normalize_tokens
 from db import get_postgres_db
 
+# ---------------------------------------------------------------------------
+# Step 1 — extract (retry-on-empty guard)
+# ---------------------------------------------------------------------------
 MAX_EXTRACTION_ATTEMPTS = 3
 
 _CONTINUE_NUDGE = (
@@ -42,12 +48,11 @@ _CONTINUE_NUDGE = (
 )
 
 
-def _coerce(content) -> FigmaExtractionResult | None:
-    """Best-effort coerce an agent response payload to FigmaExtractionResult."""
+def _coerce_figma(content) -> FigmaExtractionResult | None:
     if isinstance(content, FigmaExtractionResult):
         return content
     try:
-        if hasattr(content, "model_dump"):  # another pydantic model
+        if hasattr(content, "model_dump"):
             return FigmaExtractionResult(**content.model_dump())
         if isinstance(content, dict):
             return FigmaExtractionResult(**content)
@@ -57,7 +62,6 @@ def _coerce(content) -> FigmaExtractionResult | None:
 
 
 def _is_empty(result: FigmaExtractionResult | None) -> bool:
-    """A discovery-only / premature-finalize result: pages found but nothing extracted."""
     if result is None:
         return True
     return not result.tokens and not result.components
@@ -75,11 +79,10 @@ async def extract_with_retry(step_input: StepInput, **kwargs) -> StepOutput:
         if session_id:
             run_kwargs["session_id"] = session_id
         response = await figma_extractor_agent.arun(**run_kwargs)
-        last_result = _coerce(getattr(response, "content", response))
+        last_result = _coerce_figma(getattr(response, "content", response))
         if not _is_empty(last_result):
-            return StepOutput(content=last_result)  # non-empty extraction -> success
+            return StepOutput(content=last_result)
 
-    # All attempts empty: surface the last result, flagged, for human review.
     if last_result is not None:
         note = (
             f"extraction returned empty (no tokens/components) after "
@@ -91,16 +94,74 @@ async def extract_with_retry(step_input: StepInput, **kwargs) -> StepOutput:
     return StepOutput(content=None, success=False, error="extraction produced no parseable result")
 
 
+# ---------------------------------------------------------------------------
+# Step 2 — normalize (pure-Python DTCG normalization + HITL review)
+# ---------------------------------------------------------------------------
+_REVIEW_MESSAGE = (
+    "Token normalization complete. Review the NormalizationReport: confidence "
+    "distribution, type distribution, unresolved tokens, and composite "
+    "decompositions before advancing."
+)
+
+
+def _coerce_extraction_for_normalizer(raw):
+    """Coerce Step 1's output into the normalizer's FigmaExtractionResult, regardless
+    of how agno delivers it across the step boundary (pydantic object, dict, or JSON
+    string — the latter can occur after DB persist / continue-run resume)."""
+    if raw is None:
+        return None
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except Exception:
+            return None
+    if hasattr(raw, "model_dump"):
+        raw = raw.model_dump()
+    if isinstance(raw, dict):
+        data = raw.get("result", raw)  # tolerate a {result: ...} wrapper
+        try:
+            return _NormalizerFER(**data)
+        except Exception:
+            return None
+    # already a duck-typed extraction object with .tokens/.components
+    return raw if hasattr(raw, "tokens") else None
+
+
+def normalize_step_executor(step_input: StepInput, **kwargs) -> StepOutput:
+    """Step 2 — normalize the FigmaExtractionResult produced by Step 1."""
+    extraction = _coerce_extraction_for_normalizer(getattr(step_input, "previous_step_content", None))
+    if extraction is None:
+        return StepOutput(
+            content="normalization failed: no usable FigmaExtractionResult from Step 1",
+            success=False,
+            stop=True,
+        )
+    try:
+        normalized = normalize_tokens(extraction)
+    except Exception as e:  # keep the pipeline observable rather than 500-ing
+        return StepOutput(content=f"normalization failed: {e!r}", success=False, stop=True)
+    return StepOutput(content=normalized.model_dump())
+
+
+# ---------------------------------------------------------------------------
+# Workflow
+# ---------------------------------------------------------------------------
 extract_step = Step(
     name="extract",
     executor=extract_with_retry,
-    requires_output_review=True,  # HITL gate on the (retried) extraction result
+)
+
+normalize_step = Step(
+    name="normalize",
+    executor=normalize_step_executor,
+    requires_output_review=True,  # single HITL gate, on the final normalized output
+    output_review_message=_REVIEW_MESSAGE,
 )
 
 helix_figma_extractor_workflow = Workflow(
     id="helix-figma-extractor",
     name="HELIX Figma Extractor",
-    description="Extract design tokens, components, and variant matrices from a Figma file (retry-on-empty + HITL-reviewed).",
+    description="Extract design tokens/components from a Figma file (retry-on-empty), then normalize to DTCG tokens (HITL-reviewed).",
     db=get_postgres_db(),
-    steps=[extract_step],
+    steps=[extract_step, normalize_step],
 )
