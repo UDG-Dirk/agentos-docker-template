@@ -26,11 +26,11 @@ import os
 from pathlib import Path
 
 from agno.agent import Agent
-from agno.models.openai import OpenAIChat
 from agno.tools.mcp import MCPTools
 from mcp import StdioServerParameters
 
 from agents.figma_extractor.models import FigmaExtractionResult
+from app.settings import default_chat_model
 from db import get_postgres_db
 
 AGENT_DIR = Path(__file__).resolve().parent
@@ -134,7 +134,7 @@ figma_mcp_tools = MCPTools(server_params=_mcp_server_params(), timeout_seconds=1
 figma_extractor_agent = Agent(
     id="figma-extractor",
     name="Figma Extractor",
-    model=OpenAIChat(id="gpt-5.4"),  # OpenAIChat, NOT OpenAIResponses — see module docstring
+    model=default_chat_model(),  # OpenAIChat (not OpenAIResponses) via app.settings — see module docstring
     db=get_postgres_db(),
     tools=[figma_mcp_tools],
     output_schema=FigmaExtractionResult,
