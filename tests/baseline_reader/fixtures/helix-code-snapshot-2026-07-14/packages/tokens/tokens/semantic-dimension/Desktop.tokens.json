@@ -1,0 +1,28 @@
+{
+  "dimension": {
+    "spacing": {
+      "components": {
+        "md": {
+          "$type": "number",
+          "$value": 24
+        }
+      }
+    },
+    "layout": {
+      "margin": {
+        "$type": "number",
+        "$value": 48
+      }
+    }
+  },
+  "font": {
+    "family": {
+      "body-2": {
+        "strong": {
+          "$type": "string",
+          "$value": "DM Sans"
+        }
+      }
+    }
+  }
+}

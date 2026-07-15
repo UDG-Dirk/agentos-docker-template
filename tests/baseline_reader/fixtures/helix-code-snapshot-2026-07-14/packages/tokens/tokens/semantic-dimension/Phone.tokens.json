@@ -1,0 +1,18 @@
+{
+  "dimension": {
+    "spacing": {
+      "components": {
+        "md": {
+          "$type": "number",
+          "$value": 20
+        }
+      }
+    },
+    "layout": {
+      "margin": {
+        "$type": "number",
+        "$value": 16
+      }
+    }
+  }
+}

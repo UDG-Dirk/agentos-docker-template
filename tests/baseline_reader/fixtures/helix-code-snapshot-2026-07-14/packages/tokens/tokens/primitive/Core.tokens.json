@@ -1,0 +1,21 @@
+{
+  "size": {
+    "8": {
+      "$type": "number",
+      "$value": 8,
+      "$extensions": {
+        "com.figma.variableId": "VariableID:1:1"
+      }
+    },
+    "16": {
+      "$type": "number",
+      "$value": 16
+    }
+  },
+  "stroke-weight": {
+    "md": {
+      "$type": "number",
+      "$value": 2
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "1.0.0",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "packages/elements/src/atoms/Button/Button.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "hx-button",
+          "name": "HxButton",
+          "attributes": [
+            {
+              "name": "variant"
+            },
+            {
+              "name": "size"
+            },
+            {
+              "name": "disabled"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "variant"
+            },
+            {
+              "kind": "field",
+              "name": "disabled"
+            },
+            {
+              "kind": "field",
+              "name": "styles",
+              "static": true
+            }
+          ],
+          "slots": [
+            {
+              "name": ""
+            }
+          ],
+          "events": [
+            {
+              "name": "click"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "packages/elements/src/atoms/Heading/Heading.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "hx-heading",
+          "name": "HxHeading",
+          "attributes": [
+            {
+              "name": "size"
+            },
+            {
+              "name": "strong"
+            }
+          ],
+          "members": [],
+          "slots": [
+            {
+              "name": ""
+            }
+          ],
+          "events": []
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "packages/elements/src/molecules/InputGroup/InputGroup.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "hx-input-group",
+          "name": "HxInputGroup",
+          "attributes": [
+            {
+              "name": "label"
+            }
+          ],
+          "members": [],
+          "slots": [],
+          "events": []
+        }
+      ]
+    }
+  ]
+}

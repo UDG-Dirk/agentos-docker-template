@@ -1,0 +1,7 @@
+{
+  "name": "@helix/storybook",
+  "devDependencies": {
+    "@storybook/web-components-vite": "^8.0.0",
+    "storybook": "^8.0.0"
+  }
+}

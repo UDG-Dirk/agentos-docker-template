@@ -1,0 +1,16 @@
+{
+  "color": {
+    "brand": {
+      "purple": {
+        "$type": "color",
+        "$value": "#8A38F5"
+      }
+    },
+    "error": {
+      "bg": {
+        "$type": "color",
+        "$value": "#FFE0E0"
+      }
+    }
+  }
+}
