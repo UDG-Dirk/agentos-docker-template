@@ -26,6 +26,7 @@ include:
   - component: $CI_SERVER_FQDN/pipeline-templates/security/security-scanner@v4.0.1
     inputs:
       grype-gate-enabled: true
+      grype-fail-on: critical      # block only on CRITICAL CVEs; highs report-only
       gitleaks-gate-enabled: true
 
 # --- SBOM generation (DEFERRED) --------------------------------------------

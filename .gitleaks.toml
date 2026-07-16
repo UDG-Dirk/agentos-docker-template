@@ -1,0 +1,34 @@
+# Gitleaks configuration for poc-agno-docker.
+#
+# Keeps ALL default gitleaks rules (useDefault = true) and narrowly allowlists
+# known FALSE POSITIVES of the broad `generic-api-key` rule: Figma FILE KEYS
+# (public identifiers that appear in figma.com URLs — NOT credentials), dummy
+# PATs, and the design-context / extractor run-log DEV ARTIFACTS that carry them.
+#
+# Allowlisted scopes:
+#   * spikes/            — throwaway experiment code + Figma design-context dumps;
+#                          only dummy/placeholder creds and public file keys live here.
+#   * agents/figma_extractor/runs/ — captured extractor run logs (file keys, node
+#                          IDs, token counts — no credentials).
+#   * the public Figma file key referenced across the extractor code/tests.
+# Real secrets anywhere else in the repo (app code, config, and .env if it is ever
+# accidentally staged) are STILL detected — nothing outside these dev paths is muted.
+#
+# Reviewed: 2026-07-16  ·  Re-review by: 2027-01-16  ·  Owner: Dirk Böhmerle
+# Verified false-positive during the security-pipeline setup: `generic-api-key`
+# matched Figma file keys like 8qPSyetzviLR6eF6bkpL44.
+
+title = "poc-agno-docker"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Figma dev artifacts (spikes/ scratch + extractor run logs) and the public Figma file key — verified false positives, not credentials."
+paths = [
+  '''^spikes/''',
+  '''^agents/figma_extractor/runs/''',
+]
+regexes = [
+  '''8qPSyetzviLR6eF6bkpL44''',
+]
