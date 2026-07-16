@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Security pipeline — UDG Security Scanner (GitLab CI/CD Component).
+#
+# Integrated per pipeline-templates/security/docs/integrate-security-scanner.prompt.md.
+# Component version is PINNED to the exact tag @v4.0.1 (current latest, verified via
+# ls-remote 2026-07-16) — the prompt-doc's bare-major "@4" does NOT resolve on this
+# GitLab and fails with "Component content not found" (0-job red pipeline). Bump the
+# tag deliberately when the template releases a new version.
+#
+# Scanners: Grype (CVE), Checkov (IaC/misconfig), Gitleaks (secrets),
+# OSV (deps), Socket (supply-chain).
+# Gate policy: BLOCK the pipeline on CVE (Grype) and secret (Gitleaks) findings;
+# Checkov / OSV / Socket run report-only. Adjust via the *-gate-enabled inputs.
+#
+# Prerequisites (outside this file):
+#   * GitLab 16.0+ (CI/CD Components support).
+#   * This project must be granted access to pipeline-templates/security
+#     (grant by Marcello Pabst) — the include will not resolve, and the pipeline
+#     will fail with "Component content not found", until that access exists.
+# ---------------------------------------------------------------------------
+
+stages:
+  - security_scanning
+
+include:
+  - component: $CI_SERVER_FQDN/pipeline-templates/security/security-scanner@v4.0.1
+    inputs:
+      grype-gate-enabled: true
+      gitleaks-gate-enabled: true
+
+# --- SBOM generation (DEFERRED) --------------------------------------------
+# Syft SBOM + upload to Dependency-Track. Left OUT for now because it requires
+# CI/CD variables DTRACK_API_URL + DTRACK_API_KEY (BOM_UPLOAD permission), which
+# are NOT currently present at project or group scope. The sbom-generation job
+# POSTs unconditionally and has NO allow_failure, so without those vars it
+# hard-fails (exit 1) and reds the pipeline on every push.
+#
+# To re-enable once the DTRACK vars are provisioned (project Settings -> CI/CD ->
+# Variables, or inherited from group/instance):
+#   1) add   - sbom_generation   to the stages: list above
+#   2) append this item to the include: block above:
+#        - component: $CI_SERVER_FQDN/pipeline-templates/security/sbom-generation@v4.0.1
+# ---------------------------------------------------------------------------
