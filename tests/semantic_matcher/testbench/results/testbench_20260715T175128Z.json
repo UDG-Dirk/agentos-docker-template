@@ -1,0 +1,4358 @@
+{
+  "report": {
+    "generated_at": "2026-07-15T17:51:28Z",
+    "llm_path": "mock",
+    "thresholds": {},
+    "overall": {
+      "total": 160,
+      "deterministic_accept_rate": 0.025,
+      "false_accept_rate_on_deterministic": 0.0,
+      "correct_mapping_rate": 0.7063,
+      "unmapped_precision": 1.0,
+      "unmapped_recall": 0.9667,
+      "llm_invocation_rate": 0.85,
+      "llm_correctness_on_escalated": 0.6544
+    },
+    "per_class": {
+      "composite": {
+        "total": 20,
+        "deterministic_accept_rate": 0.0,
+        "false_accept_rate_on_deterministic": null,
+        "correct_mapping_rate": 1.0,
+        "unmapped_precision": 1.0,
+        "unmapped_recall": 1.0,
+        "llm_invocation_rate": 0.0,
+        "llm_correctness_on_escalated": null
+      },
+      "cross_category": {
+        "total": 10,
+        "deterministic_accept_rate": 0.0,
+        "false_accept_rate_on_deterministic": null,
+        "correct_mapping_rate": 0.9,
+        "unmapped_precision": 1.0,
+        "unmapped_recall": 0.9,
+        "llm_invocation_rate": 1.0,
+        "llm_correctness_on_escalated": 0.9
+      },
+      "name_collision": {
+        "total": 40,
+        "deterministic_accept_rate": 0.0,
+        "false_accept_rate_on_deterministic": null,
+        "correct_mapping_rate": 0.45,
+        "unmapped_precision": null,
+        "unmapped_recall": null,
+        "llm_invocation_rate": 1.0,
+        "llm_correctness_on_escalated": 0.45
+      },
+      "name_only": {
+        "total": 30,
+        "deterministic_accept_rate": 0.0,
+        "false_accept_rate_on_deterministic": null,
+        "correct_mapping_rate": 0.6667,
+        "unmapped_precision": null,
+        "unmapped_recall": null,
+        "llm_invocation_rate": 1.0,
+        "llm_correctness_on_escalated": 0.6667
+      },
+      "provenance_stripped": {
+        "total": 30,
+        "deterministic_accept_rate": 0.1,
+        "false_accept_rate_on_deterministic": 0.0,
+        "correct_mapping_rate": 1.0,
+        "unmapped_precision": null,
+        "unmapped_recall": null,
+        "llm_invocation_rate": 0.9,
+        "llm_correctness_on_escalated": 1.0
+      },
+      "value_drift": {
+        "total": 30,
+        "deterministic_accept_rate": 0.0333,
+        "false_accept_rate_on_deterministic": 0.0,
+        "correct_mapping_rate": 0.5333,
+        "unmapped_precision": null,
+        "unmapped_recall": null,
+        "llm_invocation_rate": 0.9667,
+        "llm_correctness_on_escalated": 0.5172
+      }
+    },
+    "confidence_buckets": {
+      "authoritative": {
+        "n": 2,
+        "correctness": 1.0
+      },
+      "high": {
+        "n": 96,
+        "correctness": 0.7396
+      },
+      "medium": {
+        "n": 33,
+        "correctness": 0.3333
+      },
+      "unresolved": {
+        "n": 29,
+        "correctness": 1.0
+      }
+    },
+    "signal_correlation_matrix": {
+      "name_similarity": {
+        "name_similarity": 1.0,
+        "path_overlap": -0.1163,
+        "value_distance": 0.292,
+        "layer_alignment": 0.2775
+      },
+      "path_overlap": {
+        "name_similarity": -0.1163,
+        "path_overlap": 1.0,
+        "value_distance": 0.1479,
+        "layer_alignment": 0.4706
+      },
+      "value_distance": {
+        "name_similarity": 0.292,
+        "path_overlap": 0.1479,
+        "value_distance": 1.0,
+        "layer_alignment": null
+      },
+      "layer_alignment": {
+        "name_similarity": 0.2775,
+        "path_overlap": 0.4706,
+        "value_distance": null,
+        "layer_alignment": 1.0
+      }
+    },
+    "margin_histogram": {
+      "0.00-0.05": 39,
+      "0.05-0.10": 36,
+      "0.10-0.15": 44,
+      "0.15-0.20": 29,
+      "0.20-0.25": 4,
+      "0.25-0.30": 3,
+      "0.40-0.45": 2,
+      "0.50-0.55": 2,
+      "0.55-0.60": 1
+    },
+    "n_records": 160,
+    "input_source": "mutations"
+  },
+  "records": [
+    {
+      "mutation_class": "name_only",
+      "client_name": "color-red-800",
+      "expected_baseline_var": "--helix-color-red-800",
+      "raw_actual": "--helix-color-red-800",
+      "actual_baseline_var": "--helix-color-red-800",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.135602,
+      "signals": {
+        "name_similarity": 0.6190476190476191,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "stripped --helix- prefix"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "colors-icon-muted",
+      "expected_baseline_var": "--helix-colors-icon-muted",
+      "raw_actual": "--helix-colors-icon-muted",
+      "actual_baseline_var": "--helix-colors-icon-muted",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.164,
+      "signals": {
+        "name_similarity": 0.6799999999999999,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "stripped --helix- prefix"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "color-neutral-1000",
+      "expected_baseline_var": "--helix-color-neutral-1000",
+      "raw_actual": "--helix-color-neutral-1000",
+      "actual_baseline_var": "--helix-color-neutral-1000",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.116561,
+      "signals": {
+        "name_similarity": 0.6923076923076923,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "stripped --helix- prefix"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "radius-none",
+      "expected_baseline_var": "--helix-radius-none",
+      "raw_actual": "--helix-radius-none",
+      "actual_baseline_var": "--helix-radius-none",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.517544,
+      "signals": {
+        "name_similarity": 0.5789473684210527,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "stripped --helix- prefix"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "dimension-radius-round",
+      "expected_baseline_var": "--helix-dimension-radius-round",
+      "raw_actual": "--helix-dimension-radius-round",
+      "actual_baseline_var": "--helix-dimension-radius-round",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.417143,
+      "signals": {
+        "name_similarity": 0.7333333333333334,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "stripped --helix- prefix"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "colors-feedback-success-border",
+      "expected_baseline_var": "--helix-colors-feedback-success-border",
+      "raw_actual": "--helix-colors-feedback-success-border",
+      "actual_baseline_var": "--helix-colors-feedback-success-border",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.139379,
+      "signals": {
+        "name_similarity": 0.7894736842105263,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "stripped --helix- prefix"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "colors-brand-secondary-subtle",
+      "expected_baseline_var": "--helix-colors-brand-secondary-subtle",
+      "raw_actual": "--helix-colors-brand-secondary-subtle",
+      "actual_baseline_var": "--helix-colors-brand-secondary-subtle",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.154054,
+      "signals": {
+        "name_similarity": 0.7837837837837838,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "stripped --helix- prefix"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "colors-feedback-warning-icon",
+      "expected_baseline_var": "--helix-colors-feedback-warning-icon",
+      "raw_actual": "--helix-colors-feedback-warning-icon",
+      "actual_baseline_var": "--helix-colors-feedback-warning-icon",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.146302,
+      "signals": {
+        "name_similarity": 0.7777777777777778,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "stripped --helix- prefix"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-font-9xl-size",
+      "expected_baseline_var": "--helix-font-size-9xl",
+      "raw_actual": "--helix-font-size-8xl",
+      "actual_baseline_var": "--helix-font-size-8xl",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.1,
+      "signals": {
+        "name_similarity": 0.6190476190476191,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "permuted segments"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-font-9xl-lineheight",
+      "expected_baseline_var": "--helix-font-lineheight-9xl",
+      "raw_actual": "--helix-font-lineheight-9xl",
+      "actual_baseline_var": "--helix-font-lineheight-9xl",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.142857,
+      "signals": {
+        "name_similarity": 0.7037037037037037,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "permuted segments"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-light-stroke",
+      "expected_baseline_var": "--helix-colors-stroke-light",
+      "raw_actual": "--helix-colors-stroke-light",
+      "actual_baseline_var": "--helix-colors-stroke-light",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.088609,
+      "signals": {
+        "name_similarity": 0.5555555555555556,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "permuted segments"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-interactive-default-background",
+      "expected_baseline_var": "--helix-colors-interactive-background-default",
+      "raw_actual": "--helix-colors-interactive-default",
+      "actual_baseline_var": "--helix-colors-interactive-default",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.007937,
+      "signals": {
+        "name_similarity": 0.6444444444444444,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "permuted segments"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-component-colors-button-solid-default-icon",
+      "expected_baseline_var": "--helix-component-colors-button-solid-icon-default",
+      "raw_actual": "--helix-component-colors-button-solid-bg-default",
+      "actual_baseline_var": "--helix-component-colors-button-solid-bg-default",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.072381,
+      "signals": {
+        "name_similarity": 0.8,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "permuted segments"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-color-600-brand2",
+      "expected_baseline_var": "--helix-color-brand2-600",
+      "raw_actual": "--helix-color-brand2-600",
+      "actual_baseline_var": "--helix-color-brand2-600",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.110516,
+      "signals": {
+        "name_similarity": 0.6666666666666667,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "permuted segments"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-dimension-spacing-md-row",
+      "expected_baseline_var": "--helix-dimension-spacing-row-md",
+      "raw_actual": "--helix-dimension-spacing-row-none",
+      "actual_baseline_var": "--helix-dimension-spacing-row-none",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.107983,
+      "signals": {
+        "name_similarity": 0.8125,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "permuted segments"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-color-50-yellow",
+      "expected_baseline_var": "--helix-color-yellow-50",
+      "raw_actual": "--helix-color-yellow-50",
+      "actual_baseline_var": "--helix-color-yellow-50",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.131769,
+      "signals": {
+        "name_similarity": 0.7391304347826086,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "permuted segments"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-stroke-base",
+      "expected_baseline_var": "--helix-colors-stroke-default",
+      "raw_actual": "--helix-colors-stroke-default",
+      "actual_baseline_var": "--helix-colors-stroke-default",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.173208,
+      "signals": {
+        "name_similarity": 0.7931034482758621,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "synonym substitution"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-component-colors-control-border-base",
+      "expected_baseline_var": "--helix-component-colors-control-border-default",
+      "raw_actual": "--helix-component-colors-control-border-default",
+      "actual_baseline_var": "--helix-component-colors-control-border-default",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.113131,
+      "signals": {
+        "name_similarity": 0.8723404255319149,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "synonym substitution"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-feedback-danger-text",
+      "expected_baseline_var": "--helix-colors-feedback-error-text",
+      "raw_actual": "--helix-colors-feedback-error-text",
+      "actual_baseline_var": "--helix-colors-feedback-error-text",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.14116,
+      "signals": {
+        "name_similarity": 0.8571428571428572,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "synonym substitution"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-interactive-bg-hover",
+      "expected_baseline_var": "--helix-colors-interactive-background-hover",
+      "raw_actual": "--helix-colors-interactive-hover",
+      "actual_baseline_var": "--helix-colors-interactive-hover",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.014096,
+      "signals": {
+        "name_similarity": 0.813953488372093,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "synonym substitution"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-feedback-danger-background",
+      "expected_baseline_var": "--helix-colors-feedback-error-background",
+      "raw_actual": "--helix-colors-feedback-error-background",
+      "actual_baseline_var": "--helix-colors-feedback-error-background",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.141586,
+      "signals": {
+        "name_similarity": 0.8780487804878049,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "synonym substitution"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-interactive-bg-transparent",
+      "expected_baseline_var": "--helix-colors-interactive-background-transparent",
+      "raw_actual": "--helix-colors-interactive-transparent",
+      "actual_baseline_var": "--helix-colors-interactive-transparent",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.019946,
+      "signals": {
+        "name_similarity": 0.8367346938775511,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "synonym substitution"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-interactive-text-base",
+      "expected_baseline_var": "--helix-colors-interactive-text-default",
+      "raw_actual": "--helix-colors-interactive-text-hover",
+      "actual_baseline_var": "--helix-colors-interactive-text-hover",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.08815,
+      "signals": {
+        "name_similarity": 0.8461538461538461,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "synonym substitution"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-component-colors-button-outline-icon",
+      "expected_baseline_var": "--helix-component-colors-button-outline-icon-hover",
+      "raw_actual": "--helix-component-colors-button-outline-icon-hover",
+      "actual_baseline_var": "--helix-component-colors-button-outline-icon-hover",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.105098,
+      "signals": {
+        "name_similarity": 0.88,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "truncated last segment"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-dimension-typography-link-lg",
+      "expected_baseline_var": "--helix-dimension-typography-link-lg-lineheight",
+      "raw_actual": "--helix-dimension-typography-link-lg-lineheight",
+      "actual_baseline_var": "--helix-dimension-typography-link-lg-lineheight",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.092199,
+      "signals": {
+        "name_similarity": 0.7659574468085106,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "truncated last segment"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-surface",
+      "expected_baseline_var": "--helix-colors-surface-active",
+      "raw_actual": "--helix-colors-info-surface",
+      "actual_baseline_var": "--helix-colors-info-surface",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.077522,
+      "signals": {
+        "name_similarity": 0.7586206896551724,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "truncated last segment"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-component-colors-button-outline-stroke",
+      "expected_baseline_var": "--helix-component-colors-button-outline-stroke-default",
+      "raw_actual": "--helix-component-colors-button-outline-stroke-hover",
+      "actual_baseline_var": "--helix-component-colors-button-outline-stroke-hover",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.076516,
+      "signals": {
+        "name_similarity": 0.8518518518518519,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "truncated last segment"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-colors-interactive-surface",
+      "expected_baseline_var": "--helix-colors-interactive-surface-inactive",
+      "raw_actual": "--helix-colors-interactive-surface-inactive",
+      "actual_baseline_var": "--helix-colors-interactive-surface-inactive",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.148443,
+      "signals": {
+        "name_similarity": 0.7906976744186046,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "truncated last segment"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-dimension-typography-heading-xl",
+      "expected_baseline_var": "--helix-dimension-typography-heading-xl-strong",
+      "raw_actual": "--helix-dimension-typography-heading-xl-strong",
+      "actual_baseline_var": "--helix-dimension-typography-heading-xl-strong",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.075362,
+      "signals": {
+        "name_similarity": 0.8478260869565217,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "truncated last segment"
+    },
+    {
+      "mutation_class": "name_only",
+      "client_name": "--helix-dimension-typography-heading-xs",
+      "expected_baseline_var": "--helix-dimension-typography-heading-xs-strong",
+      "raw_actual": "--helix-dimension-typography-heading-xl-strong",
+      "actual_baseline_var": "--helix-dimension-typography-heading-xl-strong",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.066667,
+      "signals": {
+        "name_similarity": 0.8478260869565217,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "truncated last segment"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-green-600",
+      "expected_baseline_var": "--helix-color-green-600",
+      "raw_actual": "--helix-color-green-600",
+      "actual_baseline_var": "--helix-color-green-600",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.128805,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.011764705882352941,
+        "layer_alignment": true
+      },
+      "note": "color +3 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-red-600",
+      "expected_baseline_var": "--helix-color-red-600",
+      "raw_actual": "--helix-color-red-600",
+      "actual_baseline_var": "--helix-color-red-600",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.132526,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.011764705882352941,
+        "layer_alignment": true
+      },
+      "note": "color -3 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-brand2-700",
+      "expected_baseline_var": "--helix-color-brand2-700",
+      "raw_actual": "--helix-color-brand2-700",
+      "actual_baseline_var": "--helix-color-brand2-700",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.131688,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.011764705882352941,
+        "layer_alignment": true
+      },
+      "note": "color +3 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-colors-stroke-default",
+      "expected_baseline_var": "--helix-colors-stroke-default",
+      "raw_actual": "--helix-colors-stroke-default",
+      "actual_baseline_var": "--helix-colors-stroke-default",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.235147,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.011764705882352941,
+        "layer_alignment": true
+      },
+      "note": "color -3 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-red-100",
+      "expected_baseline_var": "--helix-color-red-100",
+      "raw_actual": "--helix-color-red-100",
+      "actual_baseline_var": "--helix-color-red-100",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.144023,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.00960584212856148,
+        "layer_alignment": true
+      },
+      "note": "color +3 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-neutral-600",
+      "expected_baseline_var": "--helix-color-neutral-600",
+      "raw_actual": "--helix-color-neutral-600",
+      "actual_baseline_var": "--helix-color-neutral-600",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.121882,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.03137254901960784,
+        "layer_alignment": true
+      },
+      "note": "color +8 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-red-300",
+      "expected_baseline_var": "--helix-color-red-300",
+      "raw_actual": "--helix-color-red-300",
+      "actual_baseline_var": "--helix-color-red-300",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.134258,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.03137254901960784,
+        "layer_alignment": true
+      },
+      "note": "color -8 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-colors-brand-primary-active",
+      "expected_baseline_var": "--helix-colors-brand-primary-active",
+      "raw_actual": "--helix-colors-brand-primary-active",
+      "actual_baseline_var": "--helix-colors-brand-primary-active",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.157143,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "color +8 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-red-800",
+      "expected_baseline_var": "--helix-color-red-800",
+      "raw_actual": "--helix-color-red-800",
+      "actual_baseline_var": "--helix-color-red-800",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.11987,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.03137254901960784,
+        "layer_alignment": true
+      },
+      "note": "color -8 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-colors-icon-inverse",
+      "expected_baseline_var": "--helix-colors-icon-inverse",
+      "raw_actual": "--helix-colors-icon-inverse",
+      "actual_baseline_var": "--helix-colors-icon-inverse",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.159259,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "color +8 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-brand1-700",
+      "expected_baseline_var": "--helix-color-brand1-700",
+      "raw_actual": "--helix-color-brand1-500",
+      "actual_baseline_var": "--helix-color-brand1-500",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.101288,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.07843137254901954,
+        "layer_alignment": true
+      },
+      "note": "color +20 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-colors-surface-hover",
+      "expected_baseline_var": "--helix-colors-surface-hover",
+      "raw_actual": "--helix-colors-stroke-disabled",
+      "actual_baseline_var": "--helix-colors-stroke-disabled",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.153333,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0784313725490195,
+        "layer_alignment": true
+      },
+      "note": "color -20 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-color-green-900",
+      "expected_baseline_var": "--helix-color-green-900",
+      "raw_actual": "--helix-color-green-500",
+      "actual_baseline_var": "--helix-color-green-500",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.105398,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.07843137254901957,
+        "layer_alignment": true
+      },
+      "note": "color +20 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-colors-bg-subtle",
+      "expected_baseline_var": "--helix-colors-bg-subtle",
+      "raw_actual": "--helix-colors-stroke-disabled",
+      "actual_baseline_var": "--helix-colors-stroke-disabled",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.175656,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0784313725490195,
+        "layer_alignment": true
+      },
+      "note": "color -20 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-colors-surface-disabled",
+      "expected_baseline_var": "--helix-colors-surface-disabled",
+      "raw_actual": "--helix-colors-surface-disabled",
+      "actual_baseline_var": "--helix-colors-surface-disabled",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.164516,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "color +20 hex"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-font-paragraph-6xl",
+      "expected_baseline_var": "--helix-font-paragraph-6xl",
+      "raw_actual": "--helix-font-paragraph-7xl",
+      "actual_baseline_var": "--helix-font-paragraph-7xl",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.112349,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.04761904761904768,
+        "layer_alignment": true
+      },
+      "note": "number +5%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-dimension-spacing-components-2xs",
+      "expected_baseline_var": "--helix-dimension-spacing-components-2xs",
+      "raw_actual": "--helix-dimension-spacing-components-2xs",
+      "actual_baseline_var": "--helix-dimension-spacing-components-2xs",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.16125,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.04999999999999997,
+        "layer_alignment": true
+      },
+      "note": "number -5%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-dimension-stroke-weight-lg",
+      "expected_baseline_var": "--helix-dimension-stroke-weight-lg",
+      "raw_actual": "--helix-dimension-stroke-weight-lg",
+      "actual_baseline_var": "--helix-dimension-stroke-weight-lg",
+      "matched_via": "deterministic",
+      "confidence": "high",
+      "deterministic_accepted": true,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.266387,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.04761904761904766,
+        "layer_alignment": true
+      },
+      "note": "number +5%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-font-size-sm",
+      "expected_baseline_var": "--helix-font-size-sm",
+      "raw_actual": "--helix-font-size-sm",
+      "actual_baseline_var": "--helix-font-size-sm",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.154323,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.04999999999999995,
+        "layer_alignment": true
+      },
+      "note": "number -5%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-radius-lg",
+      "expected_baseline_var": "--helix-radius-lg",
+      "raw_actual": "--helix-radius-lg",
+      "actual_baseline_var": "--helix-radius-lg",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.229856,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.047619047619047596,
+        "layer_alignment": true
+      },
+      "note": "number +5%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-font-size-xl",
+      "expected_baseline_var": "--helix-font-size-xl",
+      "raw_actual": "--helix-font-size-2xl",
+      "actual_baseline_var": "--helix-font-size-2xl",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.092417,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.13043478260869565,
+        "layer_alignment": true
+      },
+      "note": "number +15%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-spacing-10",
+      "expected_baseline_var": "--helix-spacing-10",
+      "raw_actual": "--helix-spacing-8",
+      "actual_baseline_var": "--helix-spacing-8",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.150425,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.15,
+        "layer_alignment": true
+      },
+      "note": "number -15%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-size-3",
+      "expected_baseline_var": "--helix-size-3",
+      "raw_actual": "--helix-size-3",
+      "actual_baseline_var": "--helix-size-3",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.164024,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.1304347826086957,
+        "layer_alignment": true
+      },
+      "note": "number +15%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-dimension-radius-xl",
+      "expected_baseline_var": "--helix-dimension-radius-xl",
+      "raw_actual": "--helix-dimension-size-icon-md",
+      "actual_baseline_var": "--helix-dimension-size-icon-md",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.149336,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.15000000000000005,
+        "layer_alignment": true
+      },
+      "note": "number -15%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-dimension-typography-body-md-lineheight-paragraph",
+      "expected_baseline_var": "--helix-dimension-typography-body-md-lineheight-paragraph",
+      "raw_actual": "--helix-dimension-typography-heading-md-lineheight-paragraph",
+      "actual_baseline_var": "--helix-dimension-typography-heading-md-lineheight-paragraph",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.0694,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.13043478260869573,
+        "layer_alignment": true
+      },
+      "note": "number +15%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-dimension-typography-body-sm-strong",
+      "expected_baseline_var": "--helix-dimension-typography-body-sm-strong",
+      "raw_actual": "--helix-dimension-layout-breakpoint",
+      "actual_baseline_var": "--helix-dimension-layout-breakpoint",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.085271,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.3333333333333333,
+        "layer_alignment": true
+      },
+      "note": "number +50%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-dimension-typography-link-sm-size",
+      "expected_baseline_var": "--helix-dimension-typography-link-sm-size",
+      "raw_actual": "--helix-dimension-radius-md",
+      "actual_baseline_var": "--helix-dimension-radius-md",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.036147,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.5,
+        "layer_alignment": true
+      },
+      "note": "number -50%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-size-64",
+      "expected_baseline_var": "--helix-size-64",
+      "raw_actual": "--helix-size-96",
+      "actual_baseline_var": "--helix-size-96",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.086667,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.3333333333333333,
+        "layer_alignment": true
+      },
+      "note": "number +50%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-dimension-typography-heading-sm-regular",
+      "expected_baseline_var": "--helix-dimension-typography-heading-sm-regular",
+      "raw_actual": "--helix-dimension-spacing-module-lg",
+      "actual_baseline_var": "--helix-dimension-spacing-module-lg",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.006028,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.5,
+        "layer_alignment": true
+      },
+      "note": "number -50%"
+    },
+    {
+      "mutation_class": "value_drift",
+      "client_name": "--helix-dimension-typography-link-weight",
+      "expected_baseline_var": "--helix-dimension-typography-link-weight",
+      "raw_actual": "--helix-dimension-typography-body-lg-strong",
+      "actual_baseline_var": "--helix-dimension-typography-body-lg-strong",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.125455,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.3333333333333333,
+        "layer_alignment": true
+      },
+      "note": "number +50%"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-color-red-800",
+      "expected_baseline_var": "--helix-color-red-800",
+      "raw_actual": "--helix-color-red-800",
+      "actual_baseline_var": "--helix-color-red-800",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.150669,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-icon-muted",
+      "expected_baseline_var": "--helix-colors-icon-muted",
+      "raw_actual": "--helix-colors-icon-muted",
+      "actual_baseline_var": "--helix-colors-icon-muted",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.182222,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-color-neutral-1000",
+      "expected_baseline_var": "--helix-color-neutral-1000",
+      "raw_actual": "--helix-color-neutral-1000",
+      "actual_baseline_var": "--helix-color-neutral-1000",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.129512,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-radius-none",
+      "expected_baseline_var": "--helix-radius-none",
+      "raw_actual": "--helix-radius-none",
+      "actual_baseline_var": "--helix-radius-none",
+      "matched_via": "deterministic",
+      "confidence": "authoritative",
+      "deterministic_accepted": true,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.575049,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-dimension-radius-round",
+      "expected_baseline_var": "--helix-dimension-radius-round",
+      "raw_actual": "--helix-dimension-radius-round",
+      "actual_baseline_var": "--helix-dimension-radius-round",
+      "matched_via": "deterministic",
+      "confidence": "high",
+      "deterministic_accepted": true,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.444444,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-feedback-success-border",
+      "expected_baseline_var": "--helix-colors-feedback-success-border",
+      "raw_actual": "--helix-colors-feedback-success-border",
+      "actual_baseline_var": "--helix-colors-feedback-success-border",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.157265,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-brand-secondary-subtle",
+      "expected_baseline_var": "--helix-colors-brand-secondary-subtle",
+      "raw_actual": "--helix-colors-brand-secondary-subtle",
+      "actual_baseline_var": "--helix-colors-brand-secondary-subtle",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.171171,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-feedback-warning-icon",
+      "expected_baseline_var": "--helix-colors-feedback-warning-icon",
+      "raw_actual": "--helix-colors-feedback-warning-icon",
+      "actual_baseline_var": "--helix-colors-feedback-warning-icon",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.162558,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-font-size-11xl",
+      "expected_baseline_var": "--helix-font-size-11xl",
+      "raw_actual": "--helix-font-size-11xl",
+      "actual_baseline_var": "--helix-font-size-11xl",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.17298,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-font-lineheight-10xl",
+      "expected_baseline_var": "--helix-font-lineheight-10xl",
+      "raw_actual": "--helix-font-lineheight-10xl",
+      "actual_baseline_var": "--helix-font-lineheight-10xl",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.184524,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-stroke-brand-primary",
+      "expected_baseline_var": "--helix-colors-stroke-brand-primary",
+      "raw_actual": "--helix-colors-stroke-brand-primary",
+      "actual_baseline_var": "--helix-colors-stroke-brand-primary",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.15686,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-info-background",
+      "expected_baseline_var": "--helix-colors-info-background",
+      "raw_actual": "--helix-colors-info-background",
+      "actual_baseline_var": "--helix-colors-info-background",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.114286,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-component-colors-button-outline-text-disabled",
+      "expected_baseline_var": "--helix-component-colors-button-outline-text-disabled",
+      "raw_actual": "--helix-component-colors-button-outline-text-disabled",
+      "actual_baseline_var": "--helix-component-colors-button-outline-text-disabled",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.060377,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-color-brand2-600",
+      "expected_baseline_var": "--helix-color-brand2-600",
+      "raw_actual": "--helix-color-brand2-600",
+      "actual_baseline_var": "--helix-color-brand2-600",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.033978,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-dimension-spacing-components-sm",
+      "expected_baseline_var": "--helix-dimension-spacing-components-sm",
+      "raw_actual": "--helix-dimension-spacing-components-sm",
+      "actual_baseline_var": "--helix-dimension-spacing-components-sm",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.088141,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-color-yellow-300",
+      "expected_baseline_var": "--helix-color-yellow-300",
+      "raw_actual": "--helix-color-yellow-300",
+      "actual_baseline_var": "--helix-color-yellow-300",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.058737,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-interactive-text-default",
+      "expected_baseline_var": "--helix-colors-interactive-text-default",
+      "raw_actual": "--helix-colors-interactive-text-default",
+      "actual_baseline_var": "--helix-colors-interactive-text-default",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.082051,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-dimension-spacing-components-5xs",
+      "expected_baseline_var": "--helix-dimension-spacing-components-5xs",
+      "raw_actual": "--helix-dimension-spacing-components-5xs",
+      "actual_baseline_var": "--helix-dimension-spacing-components-5xs",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.2,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-component-colors-control-text-icon-bold",
+      "expected_baseline_var": "--helix-component-colors-control-text-icon-bold",
+      "raw_actual": "--helix-component-colors-control-text-icon-bold",
+      "actual_baseline_var": "--helix-component-colors-control-text-icon-bold",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.066667,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-font-paragraph-sm",
+      "expected_baseline_var": "--helix-font-paragraph-sm",
+      "raw_actual": "--helix-font-paragraph-sm",
+      "actual_baseline_var": "--helix-font-paragraph-sm",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.093571,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-spacing-7",
+      "expected_baseline_var": "--helix-spacing-7",
+      "raw_actual": "--helix-spacing-7",
+      "actual_baseline_var": "--helix-spacing-7",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.087185,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-bg-brand",
+      "expected_baseline_var": "--helix-colors-bg-brand",
+      "raw_actual": "--helix-colors-bg-brand",
+      "actual_baseline_var": "--helix-colors-bg-brand",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.099379,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-radius-full",
+      "expected_baseline_var": "--helix-radius-full",
+      "raw_actual": "--helix-radius-full",
+      "actual_baseline_var": "--helix-radius-full",
+      "matched_via": "deterministic",
+      "confidence": "authoritative",
+      "deterministic_accepted": true,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.517768,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-font-size-10xl",
+      "expected_baseline_var": "--helix-font-size-10xl",
+      "raw_actual": "--helix-font-size-10xl",
+      "actual_baseline_var": "--helix-font-size-10xl",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.079545,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-colors-feedback-success-surface-hover",
+      "expected_baseline_var": "--helix-colors-feedback-success-surface-hover",
+      "raw_actual": "--helix-colors-feedback-success-surface-hover",
+      "actual_baseline_var": "--helix-colors-feedback-success-surface-hover",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.118539,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-dimension-size-elevation-md",
+      "expected_baseline_var": "--helix-dimension-size-elevation-md",
+      "raw_actual": "--helix-dimension-size-elevation-md",
+      "actual_baseline_var": "--helix-dimension-size-elevation-md",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.032653,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-dimension-size-icon-2xs",
+      "expected_baseline_var": "--helix-dimension-size-icon-2xs",
+      "raw_actual": "--helix-dimension-size-icon-2xs",
+      "actual_baseline_var": "--helix-dimension-size-icon-2xs",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.16129,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-dimension-typography-heading-xs-lineheight",
+      "expected_baseline_var": "--helix-dimension-typography-heading-xs-lineheight",
+      "raw_actual": "--helix-dimension-typography-heading-xs-lineheight",
+      "actual_baseline_var": "--helix-dimension-typography-heading-xs-lineheight",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.076429,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-dimension-typography-body-md-size",
+      "expected_baseline_var": "--helix-dimension-typography-body-md-size",
+      "raw_actual": "--helix-dimension-typography-body-md-size",
+      "actual_baseline_var": "--helix-dimension-typography-body-md-size",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.055749,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "provenance_stripped",
+      "client_name": "--helix-color-neutral-800",
+      "expected_baseline_var": "--helix-color-neutral-800",
+      "raw_actual": "--helix-color-neutral-800",
+      "actual_baseline_var": "--helix-color-neutral-800",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.056471,
+      "signals": {
+        "name_similarity": 1.0,
+        "path_overlap": 0.0,
+        "value_distance": 0.0,
+        "layer_alignment": null
+      },
+      "note": "layer+path stripped"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-1",
+      "expected_baseline_var": "--helix-color-red-800",
+      "raw_actual": "--helix-color-red-800",
+      "actual_baseline_var": "--helix-color-red-800",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.116554,
+      "signals": {
+        "name_similarity": 0.6666666666666667,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 1 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-1",
+      "expected_baseline_var": "--helix-colors-icon-muted",
+      "raw_actual": "--helix-colors-icon-muted",
+      "actual_baseline_var": "--helix-colors-icon-muted",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.1,
+      "signals": {
+        "name_similarity": 0.6,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 1 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-2",
+      "expected_baseline_var": "--helix-color-neutral-1000",
+      "raw_actual": "--helix-color-neutral-1000",
+      "actual_baseline_var": "--helix-color-neutral-1000",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.085792,
+      "signals": {
+        "name_similarity": 0.5769230769230769,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 2 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-2",
+      "expected_baseline_var": "--helix-colors-feedback-success-border",
+      "raw_actual": "--helix-colors-feedback-success-icon",
+      "actual_baseline_var": "--helix-colors-feedback-success-icon",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.070058,
+      "signals": {
+        "name_similarity": 0.4473684210526315,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 2 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-3",
+      "expected_baseline_var": "--helix-colors-brand-secondary-subtle",
+      "raw_actual": "--helix-colors-color",
+      "actual_baseline_var": "--helix-colors-color",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.040306,
+      "signals": {
+        "name_similarity": 0.45945945945945943,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 3 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-3",
+      "expected_baseline_var": "--helix-colors-feedback-warning-icon",
+      "raw_actual": "--helix-colors-feedback-warning-icon",
+      "actual_baseline_var": "--helix-colors-feedback-warning-icon",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.101858,
+      "signals": {
+        "name_similarity": 0.4722222222222222,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 3 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-4",
+      "expected_baseline_var": "--helix-colors-stroke-brand-primary",
+      "raw_actual": "--helix-colors-stroke-brand-primary",
+      "actual_baseline_var": "--helix-colors-stroke-brand-primary",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.179326,
+      "signals": {
+        "name_similarity": 0.5714285714285714,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 4 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-4",
+      "expected_baseline_var": "--helix-colors-info-background",
+      "raw_actual": "--helix-colors-color",
+      "actual_baseline_var": "--helix-colors-color",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.063333,
+      "signals": {
+        "name_similarity": 0.5333333333333333,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 4 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-5",
+      "expected_baseline_var": "--helix-component-colors-button-outline-text-disabled",
+      "raw_actual": "--helix-component-colors-link-icon-hover",
+      "actual_baseline_var": "--helix-component-colors-link-icon-hover",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.072165,
+      "signals": {
+        "name_similarity": 0.339622641509434,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "collision pair 5 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-5",
+      "expected_baseline_var": "--helix-color-brand2-600",
+      "raw_actual": "--helix-color-brand2-600",
+      "actual_baseline_var": "--helix-color-brand2-600",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.093849,
+      "signals": {
+        "name_similarity": 0.625,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 5 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-6",
+      "expected_baseline_var": "--helix-color-yellow-300",
+      "raw_actual": "--helix-color-yellow-300",
+      "actual_baseline_var": "--helix-color-yellow-300",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.130323,
+      "signals": {
+        "name_similarity": 0.625,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 6 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-6",
+      "expected_baseline_var": "--helix-colors-interactive-text-default",
+      "raw_actual": "--helix-colors-color",
+      "actual_baseline_var": "--helix-colors-color",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.051605,
+      "signals": {
+        "name_similarity": 0.4358974358974359,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "collision pair 6 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-7",
+      "expected_baseline_var": "--helix-component-colors-control-text-icon-bold",
+      "raw_actual": "--helix-component-colors-control-text-icon-bold",
+      "actual_baseline_var": "--helix-component-colors-control-text-icon-bold",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.157937,
+      "signals": {
+        "name_similarity": 0.4042553191489362,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 7 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-7",
+      "expected_baseline_var": "--helix-colors-bg-brand",
+      "raw_actual": "--helix-colors-color",
+      "actual_baseline_var": "--helix-colors-color",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.1,
+      "signals": {
+        "name_similarity": 0.6086956521739131,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 7 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-8",
+      "expected_baseline_var": "--helix-colors-feedback-success-surface-hover",
+      "raw_actual": "--helix-colors-feedback-success-surface-hover",
+      "actual_baseline_var": "--helix-colors-feedback-success-surface-hover",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.071866,
+      "signals": {
+        "name_similarity": 0.37777777777777777,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 8 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-8",
+      "expected_baseline_var": "--helix-color-neutral-800",
+      "raw_actual": "--helix-color-neutral-800",
+      "actual_baseline_var": "--helix-color-neutral-800",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.099647,
+      "signals": {
+        "name_similarity": 0.64,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 8 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-9",
+      "expected_baseline_var": "--helix-colors-info-icon",
+      "raw_actual": "--helix-colors-color",
+      "actual_baseline_var": "--helix-colors-color",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.1,
+      "signals": {
+        "name_similarity": 0.625,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 9 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-9",
+      "expected_baseline_var": "--helix-colors-interactive-focus-outer",
+      "raw_actual": "--helix-colors-stroke-brand-secondary",
+      "actual_baseline_var": "--helix-colors-stroke-brand-secondary",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.129398,
+      "signals": {
+        "name_similarity": 0.4473684210526315,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 9 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-10",
+      "expected_baseline_var": "--helix-component-colors-button-link-icon-active",
+      "raw_actual": "--helix-component-colors-link-icon-hover",
+      "actual_baseline_var": "--helix-component-colors-link-icon-hover",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.0464,
+      "signals": {
+        "name_similarity": 0.39583333333333337,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "collision pair 10 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-10",
+      "expected_baseline_var": "--helix-colors-interactive-transparent",
+      "raw_actual": "--helix-colors-stroke-inverse",
+      "actual_baseline_var": "--helix-colors-stroke-inverse",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.072051,
+      "signals": {
+        "name_similarity": 0.4473684210526315,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 10 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-11",
+      "expected_baseline_var": "--helix-dimension-typography-link-md-lineheight-paragraph",
+      "raw_actual": "--helix-dimension-typography-body-sm-size",
+      "actual_baseline_var": "--helix-dimension-typography-body-sm-size",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.066667,
+      "signals": {
+        "name_similarity": 0.26315789473684215,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 11 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-11",
+      "expected_baseline_var": "--helix-dimension-typography-body-sm-strong",
+      "raw_actual": "--helix-dimension-typography-heading-lg-strong",
+      "actual_baseline_var": "--helix-dimension-typography-heading-lg-strong",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.066464,
+      "signals": {
+        "name_similarity": 0.32558139534883723,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 11 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-12",
+      "expected_baseline_var": "--helix-shadow-2",
+      "raw_actual": "--helix-shadow-1",
+      "actual_baseline_var": "--helix-shadow-1",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.190476,
+      "signals": {
+        "name_similarity": 0.5,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "collision pair 12 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-12",
+      "expected_baseline_var": "--helix-shadow-4",
+      "raw_actual": "--helix-shadow-1",
+      "actual_baseline_var": "--helix-shadow-1",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.164502,
+      "signals": {
+        "name_similarity": 0.4545454545454546,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "collision pair 12 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-13",
+      "expected_baseline_var": "--helix-shadow-1",
+      "raw_actual": "--helix-shadow-1",
+      "actual_baseline_var": "--helix-shadow-1",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.190476,
+      "signals": {
+        "name_similarity": 0.5,
+        "path_overlap": 1.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "collision pair 13 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-13",
+      "expected_baseline_var": "--helix-font-weight-regular",
+      "raw_actual": "--helix-font-weight-regular",
+      "actual_baseline_var": "--helix-font-weight-regular",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.153732,
+      "signals": {
+        "name_similarity": 0.40740740740740744,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 13 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-14",
+      "expected_baseline_var": "--helix-dimension-spacing-row-none",
+      "raw_actual": "--helix-dimension-stroke-weight-0",
+      "actual_baseline_var": "--helix-dimension-stroke-weight-0",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.109452,
+      "signals": {
+        "name_similarity": 0.3529411764705882,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 14 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-14",
+      "expected_baseline_var": "--helix-spacing-2",
+      "raw_actual": "--helix-spacing-2",
+      "actual_baseline_var": "--helix-spacing-2",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.233333,
+      "signals": {
+        "name_similarity": 0.40909090909090906,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 14 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-15",
+      "expected_baseline_var": "--helix-font-paragraph-10xl",
+      "raw_actual": "--helix-font-size-11xl",
+      "actual_baseline_var": "--helix-font-size-11xl",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.106349,
+      "signals": {
+        "name_similarity": 0.4444444444444444,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 15 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-15",
+      "expected_baseline_var": "--helix-component-dimensions-radius-sm",
+      "raw_actual": "--helix-component-dimensions-radius-sm",
+      "actual_baseline_var": "--helix-component-dimensions-radius-sm",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.3,
+      "signals": {
+        "name_similarity": 0.39473684210526316,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 15 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-16",
+      "expected_baseline_var": "--helix-spacing-7",
+      "raw_actual": "--helix-spacing-7",
+      "actual_baseline_var": "--helix-spacing-7",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.158009,
+      "signals": {
+        "name_similarity": 0.40909090909090906,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 16 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-16",
+      "expected_baseline_var": "--helix-dimension-spacing-components-4xl",
+      "raw_actual": "--helix-dimension-spacing-components-4xl",
+      "actual_baseline_var": "--helix-dimension-spacing-components-4xl",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.1175,
+      "signals": {
+        "name_similarity": 0.35,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 16 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-17",
+      "expected_baseline_var": "--helix-dimension-size-icon-3xs",
+      "raw_actual": "--helix-dimension-stroke-weight-lg",
+      "actual_baseline_var": "--helix-dimension-stroke-weight-lg",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.157938,
+      "signals": {
+        "name_similarity": 0.4193548387096774,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 17 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-17",
+      "expected_baseline_var": "--helix-component-dimensions-button-height-xl",
+      "raw_actual": "--helix-component-dimensions-accordion-lg",
+      "actual_baseline_var": "--helix-component-dimensions-accordion-lg",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.122857,
+      "signals": {
+        "name_similarity": 0.3555555555555555,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 17 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-18",
+      "expected_baseline_var": "--helix-font-size-11xl",
+      "raw_actual": "--helix-font-size-11xl",
+      "actual_baseline_var": "--helix-font-size-11xl",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.1375,
+      "signals": {
+        "name_similarity": 0.5,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 18 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-18",
+      "expected_baseline_var": "--helix-dimension-spacing-components-3xs",
+      "raw_actual": "--helix-dimension-size-icon-2xs",
+      "actual_baseline_var": "--helix-dimension-size-icon-2xs",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.143687,
+      "signals": {
+        "name_similarity": 0.35,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 18 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-19",
+      "expected_baseline_var": "--helix-dimension-typography-link-sm-lineheight",
+      "raw_actual": "--helix-dimension-size-icon-md",
+      "actual_baseline_var": "--helix-dimension-size-icon-md",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.116667,
+      "signals": {
+        "name_similarity": 0.2978723404255319,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 19 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-19",
+      "expected_baseline_var": "--helix-dimension-spacing-components-4xs",
+      "raw_actual": "--helix-dimension-stroke-weight-lg",
+      "actual_baseline_var": "--helix-dimension-stroke-weight-lg",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.130196,
+      "signals": {
+        "name_similarity": 0.35,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 19 side B"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-20",
+      "expected_baseline_var": "--helix-dimension-typography-body-sm-regular",
+      "raw_actual": "--helix-dimension-typography-heading-lg-regular",
+      "actual_baseline_var": "--helix-dimension-typography-heading-lg-regular",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.06628,
+      "signals": {
+        "name_similarity": 0.31818181818181823,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 20 side A"
+    },
+    {
+      "mutation_class": "name_collision",
+      "client_name": "--helix-color-token-20",
+      "expected_baseline_var": "--helix-stroke-weight-lg",
+      "raw_actual": "--helix-stroke-weight-lg",
+      "actual_baseline_var": "--helix-stroke-weight-lg",
+      "matched_via": "llm_required",
+      "confidence": "high",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.283333,
+      "signals": {
+        "name_similarity": 0.45833333333333337,
+        "path_overlap": 1.0,
+        "value_distance": 0.0,
+        "layer_alignment": true
+      },
+      "note": "collision pair 20 side B"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-color-red-800",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-dimension-radius-none",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.002189,
+      "signals": {
+        "name_similarity": 0.4482758620689655,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": false
+      },
+      "note": "declared color as number"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-colors-icon-muted",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-dimension-size-icon-md",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.02765,
+      "signals": {
+        "name_similarity": 0.5,
+        "path_overlap": 0.16666666666666666,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "declared color as number"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-color-neutral-1000",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-dimension-layout-breakpoint",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.003463,
+      "signals": {
+        "name_similarity": 0.4,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": false
+      },
+      "note": "declared color as number"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-colors-feedback-success-border",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-dimension-radius-none",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.015038,
+      "signals": {
+        "name_similarity": 0.39473684210526316,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "declared color as number"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-colors-brand-secondary-subtle",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-dimension-layout-gutter",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": {
+        "name_similarity": 0.4054054054054054,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "declared color as number"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-dimension-spacing-row-sm",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-color-brand1-50",
+      "actual_baseline_var": "--helix-color-brand1-50",
+      "matched_via": "llm_required",
+      "confidence": "medium",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": false,
+      "margin": 0.0,
+      "signals": {
+        "name_similarity": 0.40625,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": false
+      },
+      "note": "declared number as color"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-stroke-weight-lg",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-color-red-50",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": {
+        "name_similarity": 0.5,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "declared number as color"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-spacing-10",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-color-red-100",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.001183,
+      "signals": {
+        "name_similarity": 0.5238095238095238,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": true
+      },
+      "note": "declared number as color"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-dimension-typography-heading-sm-lineheight-paragraph",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-color-neutral-transparent",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.009524,
+      "signals": {
+        "name_similarity": 0.31666666666666665,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": false
+      },
+      "note": "declared number as color"
+    },
+    {
+      "mutation_class": "cross_category",
+      "client_name": "--helix-dimension-typography-body-lg-lineheight-paragraph",
+      "expected_baseline_var": null,
+      "raw_actual": "--helix-color-description-description-color",
+      "actual_baseline_var": null,
+      "matched_via": "llm_required",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": true,
+      "post_validator_passed": false,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": false,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": {
+        "name_similarity": 0.29824561403508776,
+        "path_overlap": 0.0,
+        "value_distance": null,
+        "layer_alignment": false
+      },
+      "note": "declared number as color"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-00",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='dm sans' (matches baseline) weight=100 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-01",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='roboto' (matches baseline) weight=200 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-02",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='ibm plex mono' (matches baseline) weight=300 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-03",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='dm sans' (matches baseline) weight=800 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-04",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='roboto' (matches baseline) weight=900 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-05",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='ibm plex mono' (matches baseline) weight=100 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-06",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='dm sans' (matches baseline) weight=200 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-07",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='roboto' (matches baseline) weight=300 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-08",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='ibm plex mono' (matches baseline) weight=800 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-09",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='dm sans' (matches baseline) weight=900 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-10",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='roboto' (matches baseline) weight=100 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-11",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='ibm plex mono' (matches baseline) weight=200 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-12",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='dm sans' (matches baseline) weight=300 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-13",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='roboto' (matches baseline) weight=800 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-14",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='ibm plex mono' (matches baseline) weight=900 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-15",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='dm sans' (matches baseline) weight=100 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-16",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='roboto' (matches baseline) weight=200 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-17",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='ibm plex mono' (matches baseline) weight=300 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-18",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='dm sans' (matches baseline) weight=800 (mismatch)"
+    },
+    {
+      "mutation_class": "composite",
+      "client_name": "--client-typography-19",
+      "expected_baseline_var": null,
+      "raw_actual": null,
+      "actual_baseline_var": null,
+      "matched_via": "no_candidates",
+      "confidence": "unresolved",
+      "deterministic_accepted": false,
+      "llm_invoked": false,
+      "post_validator_passed": true,
+      "post_validator_checks": {
+        "vocabulary": true,
+        "category_alignment": true,
+        "value_type_consistent": true,
+        "rationale_nonempty": true
+      },
+      "correct": true,
+      "margin": 0.0,
+      "signals": null,
+      "note": "typography partial agree: family='roboto' (matches baseline) weight=900 (mismatch)"
+    }
+  ]
+}
