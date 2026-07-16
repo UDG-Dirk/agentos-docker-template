@@ -25,9 +25,13 @@ useDefault = true
 
 [allowlist]
 description = "Figma dev artifacts (spikes/ scratch + extractor run logs) and the public Figma file key — verified false positives, not credentials."
+# NOTE: unanchored (no leading ^) on purpose — the CI component runs gitleaks with
+# an ABSOLUTE --source ($CI_PROJECT_DIR), so reported paths are absolute
+# (/builds/.../poc-agno-docker/spikes/...). An anchored ^spikes/ matches a local
+# relative scan but NOT the CI absolute path. Substring match works for both.
 paths = [
-  '''^spikes/''',
-  '''^agents/figma_extractor/runs/''',
+  '''spikes/''',
+  '''agents/figma_extractor/runs/''',
 ]
 regexes = [
   '''8qPSyetzviLR6eF6bkpL44''',
