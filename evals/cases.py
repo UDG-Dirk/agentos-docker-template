@@ -10,7 +10,13 @@ Each case sends one input to one agent and (optionally) checks two things:
   `expected_tool_calls`.
 
 Both check primitives are built-ins from Agno.
-Results are stored in Postgres via `eval_db` (visible at os.agno.com).
+Results are stored in Postgres via `eval_db` (view in the local UI at
+http://localhost:3000, or query Postgres directly).
+
+The suite runs in-process: it imports the agents and calls `agent.arun()`
+directly — no AgentOS server and no auth required. Models still route through
+the LiteLLM proxy (`OPENAI_BASE_URL` / `OPENAI_API_KEY` from `.env`), so a broad
+failure across many cases usually means the proxy/key is wrong, not the agents.
 
 Add a case below, then run `python -m evals`.
 """
@@ -21,6 +27,8 @@ from os import getenv
 from agno.agent import Agent
 
 from agents.code_search import code_search
+from agents.knowledge_agent import knowledge_agent
+from agents.reasoning_agent import reasoning_agent
 from agents.web_search import web_search
 from db import get_postgres_db
 
@@ -80,6 +88,31 @@ CASES: tuple[Case, ...] = (
         input="Where is the function `fizz_buzz_xyz` defined in this project?",
         criteria=(
             "Honestly says the function `fizz_buzz_xyz` is not defined in this project. Does not fabricate a file path."
+        ),
+    ),
+    # Reasoning — STACK CRITERION: tool-call parity through LiteLLM.
+    # reasoning-agent runs on OpenAIChat (NOT OpenAIResponses) precisely so its
+    # ReasoningTools round-trip cleanly through the proxy. This case fails loudly
+    # if anyone reverts the model class (the tool round-trip breaks under LiteLLM).
+    Case(
+        name="reasoning_agent_tool_parity",
+        agent=reasoning_agent,
+        input="We must choose between two designs under time pressure. Reason through how to decide and give a recommendation.",
+        criteria=(
+            "Works through the trade-offs explicitly and ends with a clear, justified recommendation."
+        ),
+        expected_tool_calls=("think",),
+    ),
+    # Knowledge — STACK CRITERION: tool-free RAG grounded in the Dark Factory KB.
+    # knowledge-agent injects KB docs into context (add_knowledge_to_context=True,
+    # search_knowledge=False), so there is no tool to assert — judge grounding only.
+    Case(
+        name="knowledge_agent_grounded_in_kb",
+        agent=knowledge_agent,
+        input="What is the Viable System Model in the Dark Factory context?",
+        criteria=(
+            "Explains the Viable System Model grounded in the Dark Factory knowledge base. "
+            "Does not claim ignorance or fabricate unrelated content."
         ),
     ),
 )

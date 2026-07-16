@@ -10,7 +10,9 @@ Each case runs the agent once, then optionally checks the response with
 `AgentAsJudgeEval` (when `criteria` is set) and `ReliabilityEval` (when
 `expected_tool_calls` is set).
 
-Both log to Postgres through `eval_db`. Connect your AgentOS at os.agno.com to see history.
+Both log to Postgres through `eval_db`. View history in the local UI
+(http://localhost:3000) or query Postgres directly. Runs in-process (imports the
+agents; no AgentOS server, no auth). Models route through the LiteLLM proxy.
 
 Exit 0 on all-pass, non-zero on any failure or error.
 """
@@ -27,6 +29,7 @@ from uuid import uuid4  # noqa: E402
 
 import typer  # noqa: E402
 from agno.eval import AgentAsJudgeEval, ReliabilityEval  # noqa: E402
+from agno.models.openai import OpenAIChat  # noqa: E402
 from agno.run.agent import RunOutput  # noqa: E402
 from rich.console import Console  # noqa: E402
 from rich.live import Live  # noqa: E402
@@ -34,6 +37,12 @@ from rich.status import Status  # noqa: E402
 from rich.table import Table  # noqa: E402
 
 from evals.cases import CASES, Case, eval_db  # noqa: E402
+
+# Judge model — pinned to a model the LiteLLM proxy allows. Agno's default judge
+# model (gpt-5-mini) is NOT on our virtual-key allow-list, so the judge 401s
+# without this. OpenAIChat (not OpenAIResponses) keeps the judge's structured
+# round-trips clean through LiteLLM. See the agno-dev skill GOTCHAS.
+_JUDGE_MODEL = OpenAIChat(id="gpt-5.4")
 
 app = typer.Typer(add_completion=False, no_args_is_help=False, pretty_exceptions_show_locals=False)
 console = Console()
@@ -93,6 +102,7 @@ async def _run_case_async(case: Case, *, verbose: bool) -> CaseOutcome:
         try:
             judge = await AgentAsJudgeEval(
                 name=case.name,
+                model=_JUDGE_MODEL,
                 criteria=case.criteria,
                 scoring_strategy="binary",
                 db=eval_db,
