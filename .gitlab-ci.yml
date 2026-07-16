@@ -26,8 +26,17 @@ include:
   - component: $CI_SERVER_FQDN/pipeline-templates/security/security-scanner@v4.0.1
     inputs:
       grype-gate-enabled: true
-      grype-fail-on: critical      # block only on CRITICAL CVEs; highs report-only
+      grype-fail-on: critical      # NOTE: dead in v4.0.1 (component bug — see override below)
       gitleaks-gate-enabled: true
+
+# Workaround for a v4.0.1 component bug: the component's .grypeFs job hardcodes a
+# JOB-LEVEL variable `GRYPE_FAIL_ON: "high"`, which shadows the `grype-fail-on`
+# input (job-level vars beat the include's global var). Re-set it at the job level
+# here — a main-file job definition merges over the included one — so the gate
+# blocks only on CRITICAL, not high. Remove once the component honors the input.
+grype-fs-scan:
+  variables:
+    GRYPE_FAIL_ON: "critical"
 
 # --- SBOM generation (DEFERRED) --------------------------------------------
 # Syft SBOM + upload to Dependency-Track. Left OUT for now because it requires
