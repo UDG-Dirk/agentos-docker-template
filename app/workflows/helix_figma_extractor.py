@@ -17,7 +17,8 @@ Two branches run in PARALLEL and converge into a downstream smoke-test step
 
   baseline branch (Agent 3a — "baseline-read"):
     Pull-on-invocation read of the helix-code baseline at a configurable
-    ``baseline_ref`` (default "main"), persisted to a Coolify volume. Output is
+    ``baseline_ref`` (default "master" — helix-code's default branch), persisted
+    to a Coolify volume. Output is
     CLIENT-INVARIANT and consumed by 3b/3c/3d from Workflow state — see
     agents/baseline_reader/step.py.
 
@@ -27,7 +28,7 @@ Two branches run in PARALLEL and converge into a downstream smoke-test step
     3b will use — asserts shape, and passes normalized tokens through.
 
 Run-time parameter: pass ``additional_data={"baseline_ref": "<branch|tag|sha>"}``
-to ``workflow.arun(...)`` to override the baseline ref (default "main").
+to ``workflow.arun(...)`` to override the baseline ref (default "master").
 
 Rollback: replace ``steps=[Parallel(...), smoke_test_step]`` with
 ``steps=[extract_step, normalize_step]`` to return to the sequential two-step

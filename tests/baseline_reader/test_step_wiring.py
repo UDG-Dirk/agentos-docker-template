@@ -48,9 +48,10 @@ class _FakeStepOutput:
 
 
 # --- ref resolution ---------------------------------------------------------
-def test_resolve_ref_defaults_to_main():
-    assert _resolve_ref(_FakeStepInput()) == "main"
-    assert _resolve_ref(_FakeStepInput(additional_data={"baseline_ref": "  "})) == "main"
+def test_resolve_ref_defaults_to_master():
+    # helix-code's default branch is master; main does not exist on the remote.
+    assert _resolve_ref(_FakeStepInput()) == "master"
+    assert _resolve_ref(_FakeStepInput(additional_data={"baseline_ref": "  "})) == "master"
 
 
 def test_resolve_ref_honours_override():

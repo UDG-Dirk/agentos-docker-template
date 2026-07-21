@@ -9,7 +9,7 @@ checkout. Pull-on-invocation (decision:cycle-2-wiring-2026-07-21) therefore live
 here, in the Step wrapper, NOT in reader.py (which stays authoritative/unmodified).
 
 Flow per invocation:
-  1. Resolve ``baseline_ref`` from the Workflow run's ``additional_data`` (default "main").
+  1. Resolve ``baseline_ref`` from the Workflow run's ``additional_data`` (default "master").
   2. Ensure the baseline is checked out at that ref inside a Coolify PERSISTENT
      VOLUME (``BASELINE_REPO_PATH``, default ``/var/lib/helix/baseline``):
        - empty volume -> shallow clone; else -> ``fetch --depth 1`` + checkout.
@@ -45,8 +45,12 @@ from agents.baseline_reader.reader import BaselineReaderError, read_baseline
 STEP_NAME_BASELINE = "baseline-read"
 STEP_NAME_SMOKE = "baseline-access-smoke-test"
 
-# --- configuration (env-driven; defaults match the task spec) ----------------
-DEFAULT_BASELINE_REF = "main"
+# --- configuration (env-driven) ----------------------------------------------
+# helix-code's default branch is `master` (verified: remote HEAD -> refs/heads/
+# master; `main` does not exist). The Cycle 2 decision said "main" but that was a
+# wrong assumption about the baseline's mainline — corrected here to match reality.
+# Override per-invocation via additional_data={"baseline_ref": "..."}.
+DEFAULT_BASELINE_REF = "master"
 DEFAULT_BASELINE_REPO_PATH = "/var/lib/helix/baseline"
 DEFAULT_BASELINE_OUTPUT_DIR = "/var/lib/helix/inventory"
 DEFAULT_BASELINE_CLEAN_URL = "https://rmvc01.rm.udg.de/msq-turbo/helix-code.git"
@@ -64,7 +68,7 @@ _GIT_TIMEOUT_SECONDS = 180
 # Pure helpers (unit-tested)
 # ---------------------------------------------------------------------------
 def _resolve_ref(step_input: StepInput) -> str:
-    """baseline_ref from the run's additional_data, defaulting to 'main'."""
+    """baseline_ref from the run's additional_data, defaulting to 'master'."""
     data = getattr(step_input, "additional_data", None) or {}
     ref = data.get("baseline_ref") if isinstance(data, dict) else None
     return ref.strip() if isinstance(ref, str) and ref.strip() else DEFAULT_BASELINE_REF
