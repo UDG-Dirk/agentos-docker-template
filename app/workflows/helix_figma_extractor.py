@@ -1,20 +1,37 @@
 """
-HELIX Figma Extractor Workflow (two-step)
-=========================================
+HELIX Figma Extractor Workflow (parallel: client-branch + baseline-branch)
+==========================================================================
 
-Step 1 — extract  : Figma Extractor agent, wrapped in a retry-on-empty guard
-                    (extract_with_retry). Non-deterministic model sometimes
-                    finalizes after discovery with an empty result; the guard
-                    re-invokes until tokens/components are non-empty. No HITL
-                    gate here so the pipeline flows straight into Step 2.
-Step 2 — normalize: Token Normalizer (pure Python, zero LLM / zero MCP). Reads
-                    Step 1's FigmaExtractionResult via previous_step_content,
-                    converts to DTCG NormalizedTokens. HITL output-review gate
-                    lives here — the reviewer sees the normalization_report
-                    (confidence distribution, unresolved tokens, composites).
+Two branches run in PARALLEL and converge into a downstream smoke-test step
+(decision:cycle-2-wiring-2026-07-21):
 
-Rollback: remove normalize_step from steps=[...] (and optionally restore the
-extract HITL) to return to the single-step workflow — one revert.
+  client branch (Steps "figma-extract-normalize"):
+    Step 1 — extract  : Figma Extractor agent, wrapped in a retry-on-empty guard
+                        (extract_with_retry). Non-deterministic model sometimes
+                        finalizes after discovery with an empty result; the guard
+                        re-invokes until tokens/components are non-empty.
+    Step 2 — normalize: Token Normalizer (pure Python, zero LLM / zero MCP). Reads
+                        Step 1's FigmaExtractionResult via previous_step_content,
+                        converts to DTCG NormalizedTokens. HITL output-review gate
+                        lives here — the reviewer sees the normalization_report.
+
+  baseline branch (Agent 3a — "baseline-read"):
+    Pull-on-invocation read of the helix-code baseline at a configurable
+    ``baseline_ref`` (default "main"), persisted to a Coolify volume. Output is
+    CLIENT-INVARIANT and consumed by 3b/3c/3d from Workflow state — see
+    agents/baseline_reader/step.py.
+
+  converge (Step "baseline-access-smoke-test"):
+    Reads 3a's output BY NAME across the Parallel boundary
+    (``get_step_output("baseline-read")``) — the non-adjacent access pattern
+    3b will use — asserts shape, and passes normalized tokens through.
+
+Run-time parameter: pass ``additional_data={"baseline_ref": "<branch|tag|sha>"}``
+to ``workflow.arun(...)`` to override the baseline ref (default "main").
+
+Rollback: replace ``steps=[Parallel(...), smoke_test_step]`` with
+``steps=[extract_step, normalize_step]`` to return to the sequential two-step
+workflow — one revert. id unchanged.
 
 Registered in ``app/main.py`` via ``AgentOS(workflows=[...])`` — id unchanged.
 """
@@ -23,9 +40,15 @@ from __future__ import annotations
 
 import json
 
-from agno.workflow import Step, Workflow
+from agno.workflow import Parallel, Step, Steps, Workflow
 from agno.workflow.types import StepInput, StepOutput
 
+from agents.baseline_reader.step import (
+    STEP_NAME_BASELINE,
+    STEP_NAME_SMOKE,
+    baseline_access_smoke_test_executor,
+    baseline_read_executor,
+)
 from agents.figma_extractor.agent import figma_extractor_agent
 from agents.figma_extractor.models import FigmaExtractionResult
 from agents.token_normalizer.normalizer import FigmaExtractionResult as _NormalizerFER
@@ -158,10 +181,36 @@ normalize_step = Step(
     output_review_message=_REVIEW_MESSAGE,
 )
 
+# Agent 3a — Baseline Reader (pull-on-invocation; see agents/baseline_reader/step.py).
+baseline_step = Step(
+    name=STEP_NAME_BASELINE,
+    executor=baseline_read_executor,
+)
+
+# Client branch: extract -> normalize, grouped so it runs as one parallel branch.
+client_branch = Steps(
+    name="figma-extract-normalize",
+    steps=[extract_step, normalize_step],
+)
+
+# Converge: verify non-adjacent access to 3a's output (the pattern 3b will use).
+smoke_test_step = Step(
+    name=STEP_NAME_SMOKE,
+    executor=baseline_access_smoke_test_executor,
+)
+
 helix_figma_extractor_workflow = Workflow(
     id="helix-figma-extractor",
     name="HELIX Figma Extractor",
-    description="Extract design tokens/components from a Figma file (retry-on-empty), then normalize to DTCG tokens (HITL-reviewed).",
+    description=(
+        "Parallel: (client) extract design tokens/components from Figma "
+        "(retry-on-empty) then normalize to DTCG tokens (HITL-reviewed); "
+        "(baseline) read the helix-code baseline at baseline_ref. Both branches "
+        "converge into a non-adjacent-access smoke test."
+    ),
     db=get_postgres_db(),
-    steps=[extract_step, normalize_step],
+    steps=[
+        Parallel(client_branch, baseline_step, name="client-and-baseline"),
+        smoke_test_step,
+    ],
 )

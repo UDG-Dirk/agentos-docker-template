@@ -19,7 +19,7 @@ RUN groupadd -g 61000 app \
 # `npx figma-developer-mcp --stdio` resolves offline (no runtime npm pull).
 # Placed early so this layer stays cached across app-code changes.
 # ---------------------------------------------------------------------------
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg git \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && npm install -g figma-developer-mcp@0.13.2 \
