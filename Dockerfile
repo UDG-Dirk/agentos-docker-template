@@ -36,6 +36,15 @@ RUN uv pip sync requirements.txt --system
 COPY --chown=app:app . .
 
 # ---------------------------------------------------------------------------
+# Persistent baseline volume (Coolify mounts a named volume at /var/lib/helix).
+# Create the tree owned by the non-root app user BEFORE `USER app`: an empty
+# named volume inherits the image mount-point's ownership on first mount, so
+# Agent 3a can clone/fetch the helix-code baseline as uid 61000.
+# ---------------------------------------------------------------------------
+RUN mkdir -p /var/lib/helix/baseline /var/lib/helix/inventory \
+    && chown -R app:app /var/lib/helix
+
+# ---------------------------------------------------------------------------
 # Entrypoint
 # ---------------------------------------------------------------------------
 RUN chmod +x /app/scripts/entrypoint.sh
