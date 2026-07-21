@@ -80,5 +80,9 @@ agents/token_normalizer/runs/*
 spikes/**/__pycache__/
 spikes/**/*.log
 
+# scratchpad/ local scratch — ignore working artifacts, keep the tracked capture script
+scratchpad/*
+!scratchpad/capture_baseline.py
+
 # Optional: local PyPI creds (uncomment if you ever create it)
 # .pypirc
