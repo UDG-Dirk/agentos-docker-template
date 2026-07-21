@@ -1,8 +1,11 @@
 """Contract + behavioural tests for LLM abstention (spec v3.1).
 
 Covers: LLMMatchResult schema, MockLLM oracle abstention + env override, harness
-routing to unmapped 'llm_abstained', abstention metrics, and scenario 10
-(recall-gap reproduction with abstention on vs off).
+routing to unmapped 'llm_abstained', abstention metrics, and scenario 10.
+
+Updated for spec v3.2 (defense-layers-2-3): Layer 2 (name/type coherence) now
+precedes Layer 1, so scenario 10 routes to 'name_type_incoherent'; the Layer 1
+abstention mechanism + routing remain covered here for COHERENT unmappable tokens.
 """
 from __future__ import annotations
 
@@ -88,40 +91,78 @@ def test_mockllm_no_candidates_is_unmappable():
 
 
 # --------------------------------------------------------------------------- harness routing
-def test_harness_routes_abstention_to_unmapped(monkeypatch):
-    monkeypatch.setenv("MOCKLLM_ABSTENTION_RATE_OVERRIDE", "1.0")
-    recs = run_records(input_source="regression")
-    abst = [r for r in recs if r["llm_abstained"]]
-    assert abst, "expected at least one abstention in scenario 10"
-    for r in abst:
-        assert r["actual_baseline_var"] is None
-        assert r["unmapped_reason"] == "llm_abstained"
-        assert r["post_validator_checks"]["vocabulary"] == "skipped"
-        assert r["post_validator_checks"]["category_alignment"] == "skipped"
-        assert r["post_validator_passed"] is True  # rationale present
-    m = compute_metrics(recs)
-    assert m["llm_abstention_count"] == len(abst)
-    assert m["llm_abstention_rate"] is not None
+# NOTE (spec v3.2, defense-layers-2-3): Layer 2 (name/type coherence) now fires
+# BEFORE the LLM, so the scenario-10 cases — whose NAME contradicts their declared
+# TYPE — route to 'name_type_incoherent' (Layer 2) with PRECEDENCE over
+# 'llm_abstained' (Layer 1). The scenario-10 tests below assert that new layered
+# reality (they previously asserted llm_abstained / recall-gap reproduction, which
+# Layer 2 intentionally supersedes — the predecessor flagged exactly this in its
+# follow-ups). Layer 1's abstention MECHANISM stays covered by the MockLLM unit
+# tests above; its harness ROUTING stays covered by the coherent-token test below
+# (a token Layer 2 does NOT pre-empt still routes via Layer 1 when the LLM abstains).
+
+
+class _AlwaysAbstainLLM:
+    name = "stub-abstain"
+
+    def match(self, client_token, candidates, *, expected_baseline_var=None, scoring_result=None):
+        return LLMMatchResult(outcome="unmappable", baseline_var=None,
+                              confidence="unresolved", rationale="stub abstention")
+
+
+def test_layer1_abstention_routing_survives_for_coherent_tokens():
+    """A COHERENT but unmappable token (name/path/type agree) is NOT pre-empted by
+    Layer 2; when the LLM abstains it still routes to 'llm_abstained' (Layer 1)."""
+    from tests.semantic_matcher.testbench.input_sources._common import load_baseline
+    from tests.semantic_matcher.testbench.run_testbench import (
+        build_baseline_enrichment, run_case)
+
+    base = load_baseline()
+    bbn = {r["name"]: r for r in base}
+    enr = build_baseline_enrichment(base)
+    client = _tok("--helix-color-zzz-nonexistent", "color/zzz/nonexistent", "color",
+                  "primitive", "color", _color("#1F74C9"))
+    case = {"mutation_class": "probe", "client_token": client,
+            "expected_baseline_var": None, "note": ""}
+    rec = run_case(case, base, bbn, set(bbn), _AlwaysAbstainLLM(), None, enr)
+    assert rec["llm_invoked"] is True            # Layer 2 did NOT pre-empt (coherent token)
+    assert rec["name_type_incoherent"] is False
+    assert rec["llm_abstained"] is True
+    assert rec["unmapped_reason"] == "llm_abstained"
+    assert rec["post_validator_checks"]["vocabulary"] == "skipped"
 
 
 # --------------------------------------------------------------------------- scenario 10
-def test_scenario10_default_abstention(monkeypatch):
+def test_scenario10_caught_by_layer2_abstention_on(monkeypatch):
+    """With abstention ON, scenario 10 is caught STRUCTURALLY by Layer 2 (name/type
+    incoherence), taking precedence over Layer 1 — nothing reaches abstention."""
     monkeypatch.setenv("MOCKLLM_ABSTENTION_RATE_OVERRIDE", "1.0")
     recs = run_records(input_source="regression")
     assert len(recs) == 10
-    abstentions = sum(1 for r in recs if r["llm_abstained"])
-    assert abstentions >= 8, f"expected >=8/10 abstentions, got {abstentions}"
+    incoherent = [r for r in recs if r["unmapped_reason"] == "name_type_incoherent"]
+    assert len(incoherent) >= 9, f"expected >=9/10 caught by Layer 2, got {len(incoherent)}"
+    for r in incoherent:
+        assert r["actual_baseline_var"] is None
+        assert r["llm_invoked"] is False          # never reached the LLM
+        assert r["coherence_check"]["verdict"] == "incoherent"
+    m = compute_metrics(recs)
+    assert m["name_type_incoherent_count"] == len(incoherent)
+    assert m["unmapped_by_reason"].get("name_type_incoherent") == len(incoherent)
 
 
-def test_scenario10_abstention_disabled_reproduces_gap(monkeypatch):
+def test_scenario10_layer2_catches_without_abstention(monkeypatch):
+    """ACID TEST (spec success criterion 4): with abstention DISABLED, Layer 2 alone
+    must catch the recall-gap cases — zero wrong mappings, none rely on Layer 1."""
     monkeypatch.setenv("MOCKLLM_ABSTENTION_RATE_OVERRIDE", "0.0")
     recs = run_records(input_source="regression")
     assert len(recs) == 10
+    incoherent = sum(1 for r in recs if r["unmapped_reason"] == "name_type_incoherent")
     abstentions = sum(1 for r in recs if r["llm_abstained"])
     wrong = sum(1 for r in recs if r["actual_baseline_var"] is not None
                 and r["expected_baseline_var"] is None)
-    assert abstentions == 0
-    assert wrong >= 1, "abstention disabled must reproduce the recall-gap (wrong mappings)"
+    assert abstentions == 0                        # Layer 1 is off
+    assert incoherent >= 9, f"Layer 2 must catch >=9/10 without Layer 1, got {incoherent}"
+    assert wrong == 0, "Layer 2 must eliminate the recall-gap wrong mappings"
 
 
 # --------------------------------------------------------------------------- regression
