@@ -40,6 +40,7 @@ Registered in ``app/main.py`` via ``AgentOS(workflows=[...])`` — id unchanged.
 from __future__ import annotations
 
 import json
+import os
 
 from agno.workflow import Parallel, Step, Steps, Workflow
 from agno.workflow.types import StepInput, StepOutput
@@ -61,6 +62,15 @@ from db import get_postgres_db
 # ---------------------------------------------------------------------------
 MAX_EXTRACTION_ATTEMPTS = 3
 
+# Option D — drill guard. A "node-level drill call" is a get_figma_data call that
+# carries a concrete nodeId (i.e. NOT the file-root discovery call 0:0 / 0:1 / no
+# nodeId). If the agent discovered pages but drilled fewer than this many times, it
+# almost certainly finalized empty per RULE 1 — reject and re-nudge; hard-abort with
+# a diagnostic after the final attempt rather than silently returning an empty result.
+DRILL_THRESHOLD_N = 3
+_ROOT_NODE_IDS = {"", "0:0", "0:1"}
+_NODE_ID_KEYS = ("nodeId", "node_id", "node-id")
+
 _CONTINUE_NUDGE = (
     "\n\nCRITICAL — a previous attempt returned an EMPTY extraction (no tokens, no "
     "components) after essentially only the discovery call. That is a FAILURE. Do NOT "
@@ -70,6 +80,62 @@ _CONTINUE_NUDGE = (
     "Keep calling tools until BOTH tokens AND components are populated, then assemble the "
     "FigmaExtractionResult."
 )
+
+# Escalation added on the FINAL attempt when prior attempts stayed shallow (drilled
+# fewer than DRILL_THRESHOLD_N times). Names the failure explicitly.
+_DRILL_NUDGE = (
+    "\n\nHARD REQUIREMENT — prior attempts discovered pages but did NOT drill into them "
+    "(too few get_figma_data calls with a concrete nodeId). You MUST call get_figma_data "
+    "AGAIN for each foundation and component page using the node ids from your discovery "
+    "response — the file-root (0:0) call alone is not extraction. This is your final attempt."
+)
+
+
+class DrillGuardAbort(Exception):
+    """Raised when the extractor discovers pages but never drills into them across all
+    attempts (RULE 1 premature-finalize). Carries a secret-free diagnostic so the failure
+    surfaces with context instead of a silent empty result."""
+
+    def __init__(self, diagnostic: dict):
+        self.diagnostic = diagnostic
+        super().__init__(diagnostic.get("suggestion", "drill guard hard-abort"))
+
+
+def _scrub_secrets(text: str) -> str:
+    """Never let a PAT leak into a diagnostic. Redact the live FIGMA_PAT value if present."""
+    if not text:
+        return text
+    for var in ("FIGMA_PAT", "FIGMA_API_KEY"):
+        val = os.environ.get(var)
+        if val:
+            text = text.replace(val, "<redacted>")
+    return text
+
+
+def _count_node_drill_calls(response) -> int:
+    """Count get_figma_data calls that carry a concrete (non-root) nodeId.
+
+    Single agent (not a Team), so ``response.tools`` reflects THIS agent's own calls —
+    the leader-only caveat (lesson figma-extractor-implementation RULE 2) does not apply.
+    """
+    tools = getattr(response, "tools", None) or []
+    count = 0
+    for t in tools:
+        name = getattr(t, "tool_name", None) or (t.get("tool_name") if isinstance(t, dict) else None)
+        if not name or "get_figma_data" not in name:
+            continue
+        args = getattr(t, "tool_args", None)
+        if args is None and isinstance(t, dict):
+            args = t.get("tool_args")
+        args = args or {}
+        node_id = next((str(args[k]) for k in _NODE_ID_KEYS if k in args and args[k] is not None), "")
+        if node_id.strip() not in _ROOT_NODE_IDS:
+            count += 1
+    return count
+
+
+def _pages_discovered(result: FigmaExtractionResult | None) -> int:
+    return len(result.pages_discovered) if result is not None else 0
 
 
 def _coerce_figma(content) -> FigmaExtractionResult | None:
@@ -92,30 +158,54 @@ def _is_empty(result: FigmaExtractionResult | None) -> bool:
 
 
 async def extract_with_retry(step_input: StepInput, **kwargs) -> StepOutput:
-    """Run the extractor, retrying while the result is empty (premature finalize)."""
+    """Run the extractor, retrying while the result is empty (premature finalize).
+
+    Option D drill guard: track how many node-level get_figma_data calls each attempt
+    makes; escalate the nudge on the final attempt if the agent has stayed shallow; and
+    if every attempt finalizes empty, HARD-ABORT with a secret-free diagnostic
+    (``DrillGuardAbort``) instead of silently returning an empty result — so the failure
+    surfaces with context rather than sliding through to a quiet, reviewless normalize.
+    """
     base_input = step_input.input or step_input.previous_step_content or ""
     session_id = getattr(getattr(step_input, "workflow_session", None), "session_id", None)
 
     last_result: FigmaExtractionResult | None = None
+    best_drill_calls = 0
+    best_pages = 0
+    last_response_excerpt = ""
     for attempt in range(1, MAX_EXTRACTION_ATTEMPTS + 1):
         message = base_input if attempt == 1 else f"{base_input}{_CONTINUE_NUDGE}"
+        # Final attempt + only-ever-shallow drilling → escalate with the explicit drill nudge.
+        if attempt == MAX_EXTRACTION_ATTEMPTS and best_drill_calls < DRILL_THRESHOLD_N:
+            message = f"{message}{_DRILL_NUDGE}"
         run_kwargs = {"input": message}
         if session_id:
             run_kwargs["session_id"] = session_id
         response = await figma_extractor_agent.arun(**run_kwargs)
         last_result = _coerce_figma(getattr(response, "content", response))
+        best_drill_calls = max(best_drill_calls, _count_node_drill_calls(response))
+        best_pages = max(best_pages, _pages_discovered(last_result))
+        last_response_excerpt = _scrub_secrets(str(getattr(response, "content", "") or ""))[:2000]
         if not _is_empty(last_result):
             return StepOutput(content=last_result)
 
-    if last_result is not None:
-        note = (
-            f"extraction returned empty (no tokens/components) after "
-            f"{MAX_EXTRACTION_ATTEMPTS} attempts — premature finalize not recovered"
-        )
-        if note not in last_result.gaps_detected:
-            last_result.gaps_detected.append(note)
-        return StepOutput(content=last_result, success=False)
-    return StepOutput(content=None, success=False, error="extraction produced no parseable result")
+    # Every attempt finalized empty → hard-abort with diagnostics (Option D HITL surface).
+    diagnostic = {
+        "error": "drill_guard_hard_abort",
+        "pages_discovered": best_pages,
+        "node_level_drill_calls": best_drill_calls,
+        "drill_threshold_N": DRILL_THRESHOLD_N,
+        "attempts": MAX_EXTRACTION_ATTEMPTS,
+        "last_extractor_response_excerpt": last_response_excerpt,
+        "suggestion": (
+            f"drill guard rejected — the extractor discovered {best_pages} page(s) but made "
+            f"only {best_drill_calls} node-level get_figma_data call(s) across "
+            f"{MAX_EXTRACTION_ATTEMPTS} attempts (< threshold {DRILL_THRESHOLD_N}); this is the "
+            "documented RULE 1 premature-finalize. Consider adjusting the prompt, the "
+            "parser_model choice, or the drill threshold."
+        ),
+    }
+    raise DrillGuardAbort(diagnostic)
 
 
 # ---------------------------------------------------------------------------

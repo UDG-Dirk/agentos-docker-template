@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 
 from agno.agent import Agent
+from agno.models.openai import OpenAIChat
 from agno.tools.mcp import MCPTools
 from mcp import StdioServerParameters
 
@@ -38,6 +39,15 @@ AGENT_DIR = Path(__file__).resolve().parent
 # Coolify-injected. Empty at build time — the MCP child only needs it at connect
 # time (AgentOS lifespan), by which point the Coolify env var is present.
 FIGMA_PAT = os.environ.get("FIGMA_PAT") or os.environ.get("FIGMA_API_KEY", "")
+
+# Parser model for structured-output assembly (Option B — fixes RULE 1 premature
+# finalize). With ``parser_model`` set, the tool-calling base model runs FREE-FORM
+# (its tools are not marked strict — see agno parse_tools) and this separate,
+# tool-less model converts the base model's final text into ``FigmaExtractionResult``.
+# ``output_schema`` stays set: it is the PARSE TARGET, not base-model pressure.
+# Separate instance from the base model — never reuse (avoids tool-loop cross-talk).
+# Env-overridable so an A/B against gpt-5.4 is a one-env change, no code edit.
+FIGMA_PARSER_MODEL_ID = os.environ.get("FIGMA_PARSER_MODEL_ID", "anthropic/claude-sonnet-4-6")
 
 
 # === SYSTEM PROMPT (verbatim from agents:figma-extractor:step2-instructions,
@@ -137,7 +147,13 @@ figma_extractor_agent = Agent(
     model=default_chat_model(),  # OpenAIChat (not OpenAIResponses) via app.settings — see module docstring
     db=get_postgres_db(),
     tools=[figma_mcp_tools],
+    # Option B: keep output_schema as the parse TARGET, but hand structured-output
+    # assembly to a separate tool-less parser_model. This removes the documented
+    # RULE 1 anti-pattern (output_schema pressure making the tool-calling model
+    # finalize an empty object after ~one call). parser_model MUST be a distinct
+    # OpenAIChat instance (RULE 7: not OpenAIResponses) — never the base model.
     output_schema=FigmaExtractionResult,
+    parser_model=OpenAIChat(id=FIGMA_PARSER_MODEL_ID),
     instructions=INSTRUCTIONS,
     markdown=False,
 )
