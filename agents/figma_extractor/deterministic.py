@@ -171,6 +171,38 @@ def _variants_for_set(gfd_yaml: str, set_node_id: str) -> tuple[list[ComponentVa
     return variants, style_ids
 
 
+# --------------------------------------------------------------------------- fail-loud thin-detection
+def _classify_gfd_response(gfd_yaml: str) -> tuple[str | None, int | None, str]:
+    """Classify a get_figma_data payload for fail-loud thin-detection (spec §3 'fail loud, not silent').
+
+    Returns (error_class, http_status, detail). error_class is None when the response carries real
+    enrichment substance. A component_set is FAILED only when Framelink returned NO usable structure:
+      - rate_limit_exhausted : 429 marker survived _default_get_figma_data's backoff
+      - malformed            : YAML could not be parsed
+      - empty_response       : non-dict payload, OR an envelope whose metadata.components AND
+                               globalVars.styles are BOTH empty (the 'Framelink walked nothing' signature)
+    A set with EITHER components OR styles is treated as valid — this deliberately avoids false-failing a
+    genuinely sparse set (e.g. one component, no local styles), per the spec's thin-but-valid caveat.
+    error_class names refine Lane 2/3/5's generic `empty`/`malformed` for diagnostic precision."""
+    if _is_rate_limited(gfd_yaml):
+        return "rate_limit_exhausted", 429, "429 persisted after get_figma_data backoff"
+    try:
+        data = yaml.safe_load(gfd_yaml)
+    except Exception as e:  # noqa: BLE001 — any parse failure is a failed set
+        return "malformed", None, f"yaml parse failed: {e!r}"[:200]
+    if not isinstance(data, dict):
+        return "empty_response", None, f"non-dict payload ({type(data).__name__})"
+    meta = data.get("metadata")
+    gv = data.get("globalVars")
+    meta_components = meta.get("components") if isinstance(meta, dict) else None
+    gv_styles = gv.get("styles") if isinstance(gv, dict) else None
+    has_components = isinstance(meta_components, dict) and len(meta_components) > 0
+    has_styles = isinstance(gv_styles, dict) and len(gv_styles) > 0
+    if not has_components and not has_styles:
+        return "empty_response", None, "metadata.components and globalVars.styles both empty"
+    return None, None, ""
+
+
 # --------------------------------------------------------------------------- default real callables
 _RATE_LIMIT_MARKERS = ("Too Many Requests", "status 429")
 _GFD_BACKOFF = (1.0, 3.0, 8.0)  # spec §10.3 — backoff on 429
@@ -251,19 +283,30 @@ async def run_deterministic_extraction(
     sets_failed: list[str] = []
     sem_sid = asyncio.Semaphore(_NODE_CONCURRENCY)
 
+    def _fail_set(name, nid, error_class, http_status, message, retry_count=0) -> None:
+        failure_reports.append({"endpoint": "get_figma_data", "http_status": http_status,
+                                "error_class": error_class, "message": message[:400],
+                                "attempted_at": _now_iso(), "retry_count": retry_count,
+                                "node_id": nid, "component_set": name})
+        sets_failed.append(name)
+
     async def _process_set(cs: dict) -> None:
         nid = cs.get("node_id")
+        name = cs.get("name") or nid or "?"
         if not nid:
-            sets_failed.append(cs.get("name", "?"))
+            _fail_set(cs.get("name", "?"), None, "client_error", None, "component_set missing node_id")
             return
         try:
             async with sem_sid:
                 yaml_text = await gfd(file_key, nid)
         except Exception as e:
-            failure_reports.append({"endpoint": "get_figma_data", "http_status": None,
-                                    "error_class": "server_error", "message": f"{nid}: {e!r}"[:400],
-                                    "attempted_at": _now_iso(), "retry_count": 0})
-            sets_failed.append(cs.get("name", nid))
+            _fail_set(name, nid, "server_error", None, f"{nid}: {e!r}")
+            return
+        # fail loud (spec §3): thin / empty / rate-limited responses become failed sets, never silent
+        # success. Anti-fabrication: a failed set emits NOTHING (no empty shell backfilled downstream).
+        err_class, http_status, detail = _classify_gfd_response(yaml_text)
+        if err_class is not None:
+            _fail_set(name, nid, err_class, http_status, f"{name} ({nid}): {detail}")
             return
         set_tokens, _ = _distill_tokens_from_globalvars(yaml_text)
         variants, style_ids = _variants_for_set(yaml_text, nid)
@@ -333,9 +376,11 @@ async def run_deterministic_extraction(
     typos_rich = _detect_typos(named)
     typos_flat = [f"{t['original']} -> {t['suggestion']} (node {t['node_id']})" for t in typos_rich]
 
-    # status
+    # status (spec §3 fail-loud): ALL per-set enrichment failed → failure; ANY failed → partial
     if not roster_ok:
         status = "failure"
+    elif component_sets_raw and len(sets_failed) >= len(component_sets_raw):
+        status = "failure"  # every component_set's get_figma_data enrichment failed (Lane-2 skeleton only)
     elif failure_reports or sets_failed:
         status = "partial"
     else:
@@ -355,7 +400,12 @@ async def run_deterministic_extraction(
         assets=assets,
         extraction_runs=1,
         consensus_confidence=1.0,
-        gaps_detected=[f"lane failure: {fr.get('endpoint')} {fr.get('error_class')}" for fr in failure_reports],
+        gaps_detected=[
+            f"{fr.get('endpoint')} {fr.get('error_class')}"
+            + (f" [{fr.get('component_set')}/{fr.get('node_id')}]" if fr.get("node_id") else "")
+            + (f": {fr.get('message')}" if fr.get("message") else "")
+            for fr in failure_reports
+        ],
         typos_detected=typos_flat,
         enrichment_coverage=0.0,
     )

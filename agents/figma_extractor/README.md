@@ -11,6 +11,29 @@
 > The old LLM agent (`agent.py` + the drill-guard in the workflow) is retained as dead code / git
 > history per spec §9 (replace-in-place); removable in a cleanup follow-up.
 
+### Fail-loud per-set enrichment (spec §3 — "fail loud, not silent")
+
+Per component_set, `get_figma_data` enrichment is classified before any data is emitted
+(`_classify_gfd_response`). A set is marked **failed** — added to `coverage_report.component_sets_failed`
++ a structured `failure_report` + a `gaps_detected` entry — and emits **nothing** (anti-fabrication: no
+empty shell is backfilled) when Framelink returned no usable structure:
+
+| `error_class` | Trigger | http_status |
+|---|---|---|
+| `rate_limit_exhausted` | 429 marker survived `_default_get_figma_data`'s backoff | 429 |
+| `malformed` | YAML could not be parsed | — |
+| `empty_response` | non-dict payload, **or** `metadata.components` **and** `globalVars.styles` both empty | — |
+| `server_error` | `get_figma_data` raised | — |
+| `client_error` | component_set had no `node_id` | — |
+
+**Thin-but-valid is NOT a failure:** a set with **either** components **or** styles present is treated as
+valid (e.g. a single-component set with no local styles), so genuinely sparse sets are never false-failed.
+The `error_class` names refine Lanes 2/3/5's generic `empty`/`malformed` for diagnostic precision.
+
+**Status aggregation:** any failed set → `partial`; **all** sets failed → `failure` (only the Lane-2
+skeleton survived); roster failed → `failure`. This is what made the prod-vs-local thinness
+(35 vs 733 tokens) surface as `partial`/`failure` + gaps instead of a silent `success`.
+
 Pulls design tokens, foundation styles, and component variant matrices from a client's Figma file
 and emits a typed `FigmaExtractionResult` for the next pipeline step (Token Normalizer).
 
