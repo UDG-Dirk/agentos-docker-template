@@ -30,6 +30,7 @@ from agno.models.openai import OpenAIChat
 from agno.tools.mcp import MCPTools
 from mcp import StdioServerParameters
 
+from agents.figma_extractor.binding_topology import get_figma_binding_topology
 from agents.figma_extractor.cache_versioning import get_figma_file_meta, get_figma_file_versions
 from agents.figma_extractor.models import FigmaExtractionResult
 from agents.figma_extractor.semantic_layer import get_figma_semantic_layer
@@ -149,10 +150,17 @@ figma_extractor_agent = Agent(
     model=default_chat_model(),  # OpenAIChat (not OpenAIResponses) via app.settings — see module docstring
     db=get_postgres_db(),
     # Lane 1 (Framelink MCP: get_figma_data + download_figma_images) + Lane 2
-    # (get_figma_semantic_layer: REST component_sets/components/styles) + Lane 5
-    # (get_figma_file_meta / get_figma_file_versions: REST change-detection + version
+    # (get_figma_semantic_layer: REST component_sets/components/styles) + Lane 3
+    # (get_figma_binding_topology: REST node property → VariableID map) + Lane 5
+    # (get_figma_file_meta / get_figma_file_versions: change-detection + version
     # history). All additive — each lane supplies data Framelink cannot see.
-    tools=[figma_mcp_tools, get_figma_semantic_layer, get_figma_file_meta, get_figma_file_versions],
+    tools=[
+        figma_mcp_tools,
+        get_figma_semantic_layer,
+        get_figma_binding_topology,
+        get_figma_file_meta,
+        get_figma_file_versions,
+    ],
     # Option B: keep output_schema as the parse TARGET, but hand structured-output
     # assembly to a separate tool-less parser_model. This removes the documented
     # RULE 1 anti-pattern (output_schema pressure making the tool-calling model
