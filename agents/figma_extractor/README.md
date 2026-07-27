@@ -66,6 +66,14 @@ without parsing debug logs.
   provenance pattern as Lane 2 v0.2 (error_class incl. `not_found`/`client_error`); single
   `failure_report` object (not array). Primitives only — change-detection *logic* lives in
   the workflow layer. Spec: `helix-poc-agno:spec:lane-5-cache-versioning-v0-1-draft`.
+- **REST binding topology** (Lane 3 — `agents/figma_extractor/binding_topology.py`).
+  Tool: `get_figma_binding_topology(file_key, node_ids, depth?, geometry?)` — node-scoped
+  `getFileNodes` call parsing `boundVariables` at node level (fills/strokes/effects/layout/
+  spacing) AND componentProperty level, returning a `{node_id → property → VariableID}` map
+  + `binding_summary`. Variable IDs surfaced OPAQUE (`VariableID:X:Y`) — resolution is
+  downstream. Missing requested ids = success with coverage gap (not failure). 30s timeout;
+  same v0.2 error_class/retry/provenance pattern; single `failure_report` object. Spec:
+  `helix-poc-agno:spec:lane-3-binding-topology-v0-1-draft`.
 - **PAT** injected ONLY at the MCP layer (`StdioServerParameters(env={"FIGMA_API_KEY": ...})`),
   never in `session_state`/logs/output (RULE 6).
 - **Model**: `OpenAIChat` via LiteLLM (NOT `OpenAIResponses` — breaks tool round-trips, RULE 7).
