@@ -115,6 +115,25 @@ _COLOR_PREFIXES = ("fill_", "stroke_")
 _STYLE_TYPE_CATEGORY = {"TEXT": "typography", "EFFECT": "effect", "GRID": "other", "FILL": "color"}
 
 
+def _infer_style_category(val) -> str | None:
+    """Infer a token category from a globalVars style VALUE shape, for styleIds whose name carries
+    no known prefix (e.g. Framelink 0.13.x named styles like 'link/md/regular', 'FocusRing').
+    Value-shape driven so it is robust to naming/version changes. Returns None if not distillable.
+    Anti-fabrication: the caller emits the OPAQUE styleId as name + the resolved value — never invents."""
+    if isinstance(val, list):
+        if any(isinstance(v, str) and ("#" in v or v.startswith("rgb")) for v in val):
+            return "color"
+        return None
+    if isinstance(val, dict):
+        if "fontFamily" in val or "fontSize" in val:
+            return "typography"
+        if "boxShadow" in val or "effects" in val or ("color" in val and ("radius" in val or "offset" in val)):
+            return "effect"
+        if any(k in val for k in ("gap", "padding", "mode", "sizing", "dimensions")):
+            return "spacing"
+    return None
+
+
 def _distill_tokens_from_globalvars(gfd_yaml: str) -> tuple[list[TokenEntry], list[str]]:
     """Deterministically distil TokenEntry list from a get_figma_data YAML payload.
     Colors from fill_/stroke_ styleIds (resolved values), effects from effect_, typography from
@@ -145,6 +164,13 @@ def _distill_tokens_from_globalvars(gfd_yaml: str) -> tuple[list[TokenEntry], li
                 if dim_key in val and val[dim_key] not in (None, "", {}):
                     tokens.append(TokenEntry(name=f"{sid}/{dim_key}", value=str(val[dim_key]),
                                              style_id=sid, category="spacing"))
+        else:
+            # broaden (Framelink 0.13.x): named styles carry no known prefix (link/*, FocusRing, …).
+            # Infer category from the value shape so typography/effect/color tokens are not silently
+            # dropped. OPAQUE styleId name + resolved value — no fabrication.
+            cat = _infer_style_category(val)
+            if cat:
+                tokens.append(TokenEntry(name=sid, value=str(val)[:200], style_id=sid, category=cat))
     return tokens, seen_ids
 
 

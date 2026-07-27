@@ -271,6 +271,47 @@ def test_default_gfd_gives_up_after_max_retries(monkeypatch):
     assert d._is_rate_limited(out)  # exhausted; returns last (still-429) text, does not hang/raise
 
 
+# ---- Framelink 0.13.2 schema-guard + token recovery (task framelink-0-13-json-fix) ---------
+import json  # noqa: E402
+import pathlib  # noqa: E402
+
+_FIX_0_13_2 = pathlib.Path(__file__).parent / "fixtures" / "framelink_0_13_2_node_57_766.json"
+
+
+def test_framelink_0_13_2_schema_guard():
+    """SAFETY NET: assert the 0.13.2 --format json output carries the schema the parser needs.
+    Fails LOUD if a future Framelink bump silently changes the top-level shape (the exact class of
+    breakage that caused the prod thinness: v0.13.0 flipped the default format to unparseable `tree`)."""
+    data = json.loads(_FIX_0_13_2.read_text())
+    for key in ("metadata", "nodes", "globalVars"):
+        assert key in data, f"0.13.2 schema missing required top-level key {key!r}"
+    assert "elements" in data  # additive since PR #197
+    assert isinstance((data["globalVars"] or {}).get("styles"), dict)
+    assert isinstance((data["metadata"] or {}).get("components"), dict)
+
+
+def test_0_13_2_json_token_recovery_incl_named_styles():
+    """0.13.2 json distils colors + spacing AND the named typography/effect styles that the old
+    prefix-only rule silently skipped (link/*, FocusRing)."""
+    txt = _FIX_0_13_2.read_text()
+    toks, _ = d._distill_tokens_from_globalvars(txt)
+    cats = {t.category for t in toks}
+    assert {"color", "typography", "effect"} <= cats, f"missing categories, got {cats}"
+    names = {t.name for t in toks}
+    assert "FocusRing" in names and any(n.startswith("link/") for n in names)
+    variants, _ = d._variants_for_set(txt, "57:766")
+    assert len(variants) >= 60, f"expected rich variants from 0.13.2 metadata.components, got {len(variants)}"
+
+
+def test_infer_style_category_value_shapes():
+    assert d._infer_style_category(["#1971C2"]) == "color"
+    assert d._infer_style_category(["rgba(0,0,0,0.1)"]) == "color"
+    assert d._infer_style_category({"fontFamily": "roboto", "fontSize": 16}) == "typography"
+    assert d._infer_style_category({"boxShadow": "0px 0px 0px 4px ..."}) == "effect"
+    assert d._infer_style_category({"mode": "row", "gap": "8px"}) == "spacing"
+    assert d._infer_style_category({"unknown": "thing"}) is None  # not distillable → not fabricated
+
+
 # ---- Normalizer contract preservation (runtime coercion) -------------------
 def test_normalizer_coerces_deterministic_output():
     r = _run()

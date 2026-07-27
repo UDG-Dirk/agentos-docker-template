@@ -133,7 +133,11 @@ def _mcp_server_params() -> StdioServerParameters:
     """
     return StdioServerParameters(
         command="npx",
-        args=["-y", "figma-developer-mcp", "--stdio"],
+        # Version PINNED to match the Dockerfile global install (was unpinned -> npx resolved a
+        # stale 0.9.0 locally vs 0.13.2 in prod: the root cause of the prod thinness). `--format json`
+        # neutralises the v0.13.0 default-format flip (YAML -> `tree`, PR #394): `tree` is unparseable
+        # by the deterministic distiller; json returns the [metadata, nodes, globalVars, elements] schema.
+        args=["-y", "figma-developer-mcp@0.13.2", "--stdio", "--format", "json"],
         env={**os.environ, "FIGMA_API_KEY": FIGMA_PAT},
         cwd=str(AGENT_DIR),
     )
