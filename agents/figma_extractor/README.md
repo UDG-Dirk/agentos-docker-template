@@ -50,7 +50,15 @@ without parsing debug logs.
 ## Tools / stack
 
 - **Framelink MCP** (`figma-developer-mcp`) over stdio via `MCPTools` + `StdioServerParameters`.
-  Tools: `get_figma_data`, `download_figma_images`.
+  Tools (Lane 1 — values + assets): `get_figma_data`, `download_figma_images`.
+- **REST semantic layer** (Lane 2 — `agents/figma_extractor/semantic_layer.py`).
+  Tool: `get_figma_semantic_layer(file_key)` — one composite tool that pulls three
+  non-Enterprise PAT REST endpoints in parallel (`/component_sets`, `/components`,
+  `/styles`) for the authored taxonomy, variant census, and Text/Effect/Grid styles
+  that Framelink cannot see. Descriptions captured verbatim (naive, no parsing).
+  Never raises — returns `{status, coverage_report, provenance, failure_reports, ...}`.
+  Spec: `helix-poc-agno:spec:lane-2-semantic-layer-v0-1-draft`. Reconciliation:
+  REST canonical for structural names, Framelink for resolved values.
 - **PAT** injected ONLY at the MCP layer (`StdioServerParameters(env={"FIGMA_API_KEY": ...})`),
   never in `session_state`/logs/output (RULE 6).
 - **Model**: `OpenAIChat` via LiteLLM (NOT `OpenAIResponses` — breaks tool round-trips, RULE 7).
