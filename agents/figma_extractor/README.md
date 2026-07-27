@@ -59,6 +59,13 @@ without parsing debug logs.
   Never raises — returns `{status, coverage_report, provenance, failure_reports, ...}`.
   Spec: `helix-poc-agno:spec:lane-2-semantic-layer-v0-1-draft`. Reconciliation:
   REST canonical for structural names, Framelink for resolved values.
+- **REST cache/versioning** (Lane 5 — `agents/figma_extractor/cache_versioning.py`).
+  Two atomic tools: `get_figma_file_meta(file_key)` — cheap (~965 B) change-detection
+  probe (`version` + `last_touched_at`, no full tree); `get_figma_file_versions(file_key,
+  page_size=30)` — historical version list (reproducibility/audit). Same PAT/retry/
+  provenance pattern as Lane 2 v0.2 (error_class incl. `not_found`/`client_error`); single
+  `failure_report` object (not array). Primitives only — change-detection *logic* lives in
+  the workflow layer. Spec: `helix-poc-agno:spec:lane-5-cache-versioning-v0-1-draft`.
 - **PAT** injected ONLY at the MCP layer (`StdioServerParameters(env={"FIGMA_API_KEY": ...})`),
   never in `session_state`/logs/output (RULE 6).
 - **Model**: `OpenAIChat` via LiteLLM (NOT `OpenAIResponses` — breaks tool round-trips, RULE 7).
