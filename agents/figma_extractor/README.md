@@ -11,6 +11,35 @@
 > The old LLM agent (`agent.py` + the drill-guard in the workflow) is retained as dead code / git
 > history per spec §9 (replace-in-place); removable in a cleanup follow-up.
 
+### Framelink pinned to 0.13.2 + `--format json` (required)
+
+The Framelink server is spawned as `npx -y figma-developer-mcp@0.13.2 --stdio --format json`
+(`agent.py:_mcp_server_params`). Both the **pin** and the **format flag** are load-bearing:
+
+- **Version pin** — the arg was previously unpinned (`figma-developer-mcp`), so `npx` resolved a
+  stale **0.9.0** locally while the Dockerfile installs **0.13.2** globally in prod. That drift was
+  the root cause of the prod "thinness" (local rich, prod empty). The pin here MUST match the
+  Dockerfile's `npm install -g figma-developer-mcp@0.13.2`.
+- **`--format json`** — Framelink **v0.13.0 flipped the default output format from YAML to `tree`**
+  (PR #394). `tree` is a compact non-YAML format the distiller cannot parse (it surfaced as a YAML
+  `ScannerError` → every set failed). `--format json` returns the parseable
+  `[metadata, nodes, globalVars, elements]` schema. JSON (not `yaml`) is used deliberately — it
+  avoids the YAML edge-case surface that the `tree` default exposed.
+
+0.13.0 also **deduplicates** styles (a file's `globalVars.styles` shrinks vs 0.9.0's per-node
+duplicates) and adds an additive `elements` key whose `layout` fields are *references* into
+`globalVars.styles`. `_distill_tokens_from_globalvars` reads `globalVars.styles` and, via
+`_infer_style_category`, also distils **named** styles that carry no known prefix (e.g.
+`link/md/regular` → typography, `FocusRing` → effect) by inspecting the value shape — so token
+coverage is by-value, robust to naming/version changes, and never fabricated (opaque styleId name +
+resolved value). Note: a lower raw token count under 0.13.x is expected — it reflects dedup, not loss
+(0.9.0's ~733 raw tokens were ~67 distinct).
+
+**Schema-guard test** (`tests/test_deterministic_extractor.py::test_framelink_0_13_2_schema_guard`,
+backed by `tests/fixtures/framelink_0_13_2_node_57_766.json`) asserts the top-level shape stays
+`[metadata, nodes, globalVars]` (+`elements`) — it fails loud if a future Framelink bump silently
+changes the schema, closing the process gap that let the default-format flip reach prod.
+
 ### Fail-loud per-set enrichment (spec §3 — "fail loud, not silent")
 
 Per component_set, `get_figma_data` enrichment is classified before any data is emitted
