@@ -2,18 +2,26 @@
 HELIX Figma Extractor Workflow (parallel: client-branch + baseline-branch)
 ==========================================================================
 
-Two branches run in PARALLEL and converge into a downstream smoke-test step
-(decision:cycle-2-wiring-2026-07-21):
+Shape (decision:cycle-2-wiring-2026-07-21 + HITL Finding-51 fix 2026-07-27):
 
-  client branch (Steps "figma-extract-normalize"):
-    Step 1 — extract  : Figma Extractor agent, wrapped in a retry-on-empty guard
-                        (extract_with_retry). Non-deterministic model sometimes
-                        finalizes after discovery with an empty result; the guard
-                        re-invokes until tokens/components are non-empty.
-    Step 2 — normalize: Token Normalizer (pure Python, zero LLM / zero MCP). Reads
-                        Step 1's FigmaExtractionResult via previous_step_content,
-                        converts to DTCG NormalizedTokens. HITL output-review gate
-                        lives here — the reviewer sees the normalization_report.
+    steps = [ Parallel(extract, baseline-read),  →  normalize  →  smoke-test ]
+
+  extract and baseline-read run in PARALLEL; normalize and smoke-test are TOP-LEVEL
+  steps after the Parallel converges.
+
+  extract (top-level Parallel member "extract"):
+    Figma Extractor agent, wrapped in a retry-on-empty guard (extract_with_retry).
+    Non-deterministic model sometimes finalizes after discovery with an empty result;
+    the guard re-invokes until tokens/components are non-empty (+ drill guard).
+
+  normalize (TOP-LEVEL step "normalize", post-Parallel):
+    Token Normalizer (pure Python, zero LLM / zero MCP). Reads extract's
+    FigmaExtractionResult BY NAME across the Parallel boundary via
+    get_step_output('extract') — the proven cycle-2 non-adjacent access pattern —
+    converts to DTCG NormalizedTokens. The HITL output-review gate lives here; it is
+    reachable ONLY because normalize is top-level (Agno evaluates requires_output_review
+    for top-level Step/Router only — nesting it inside Steps/Parallel made it a no-op,
+    Finding 51 / shared-results:hitl-pause-behavior-verification-result-2026-07-27).
 
   baseline branch (Agent 3a — "baseline-read"):
     Pull-on-invocation read of the helix-code baseline at a configurable
@@ -30,9 +38,8 @@ Two branches run in PARALLEL and converge into a downstream smoke-test step
 Run-time parameter: pass ``additional_data={"baseline_ref": "<branch|tag|sha>"}``
 to ``workflow.arun(...)`` to override the baseline ref (default "master").
 
-Rollback: replace ``steps=[Parallel(...), smoke_test_step]`` with
-``steps=[extract_step, normalize_step]`` to return to the sequential two-step
-workflow — one revert. id unchanged.
+Rollback: this MR (normalize moved top-level) is a single-commit revert; ``id`` unchanged.
+Reverting restores the prior shape (normalize nested in the Parallel — HITL gate a no-op).
 
 Registered in ``app/main.py`` via ``AgentOS(workflows=[...])`` — id unchanged.
 """
@@ -42,7 +49,7 @@ from __future__ import annotations
 import json
 import os
 
-from agno.workflow import Parallel, Step, Steps, Workflow
+from agno.workflow import Parallel, Step, Workflow
 from agno.workflow.types import StepInput, StepOutput
 
 from agents.baseline_reader.step import (
@@ -242,11 +249,20 @@ def _coerce_extraction_for_normalizer(raw):
 
 
 def normalize_step_executor(step_input: StepInput, **kwargs) -> StepOutput:
-    """Step 2 — normalize the FigmaExtractionResult produced by Step 1."""
-    extraction = _coerce_extraction_for_normalizer(getattr(step_input, "previous_step_content", None))
+    """Normalize the FigmaExtractionResult from the extract step.
+
+    Runs TOP-LEVEL, after the Parallel(extract, baseline) converges (so its HITL
+    output-review gate is reachable — Agno only evaluates requires_output_review on
+    top-level Step/Router). Reads extract's output BY NAME across the Parallel boundary
+    via ``get_step_output('extract')`` — the proven cycle-2 non-adjacent access pattern
+    (see baseline_access_smoke_test_executor / shared-results:3a-cycle-2-wiring-result).
+    NOT ``previous_step_content`` — that would now be the Parallel's aggregate output."""
+    extract_out = step_input.get_step_output("extract")
+    raw = getattr(extract_out, "content", None) if extract_out is not None else None
+    extraction = _coerce_extraction_for_normalizer(raw)
     if extraction is None:
         return StepOutput(
-            content="normalization failed: no usable FigmaExtractionResult from Step 1",
+            content="normalization failed: no usable FigmaExtractionResult from the extract step",
             success=False,
             stop=True,
         )
@@ -278,30 +294,29 @@ baseline_step = Step(
     executor=baseline_read_executor,
 )
 
-# Client branch: extract -> normalize, grouped so it runs as one parallel branch.
-client_branch = Steps(
-    name="figma-extract-normalize",
-    steps=[extract_step, normalize_step],
-)
-
 # Converge: verify non-adjacent access to 3a's output (the pattern 3b will use).
 smoke_test_step = Step(
     name=STEP_NAME_SMOKE,
     executor=baseline_access_smoke_test_executor,
 )
 
+# HITL FIX (Finding 51): normalize_step is TOP-LEVEL, after the Parallel converges — Agno
+# only evaluates requires_output_review on top-level Step/Router, so nesting normalize inside
+# Steps(...) inside Parallel(...) made the review gate structurally unreachable. Extract runs
+# as a direct Parallel member; normalize reads it via get_step_output('extract'). Parallelism
+# (cycle-2) preserved: extract || baseline still run concurrently.
 helix_figma_extractor_workflow = Workflow(
     id="helix-figma-extractor",
     name="HELIX Figma Extractor",
     description=(
-        "Parallel: (client) extract design tokens/components from Figma "
-        "(retry-on-empty) then normalize to DTCG tokens (HITL-reviewed); "
-        "(baseline) read the helix-code baseline at baseline_ref. Both branches "
-        "converge into a non-adjacent-access smoke test."
+        "Parallel(extract, baseline) → normalize (DTCG, HITL-reviewed, top-level) → "
+        "non-adjacent-access smoke test. Extract retries-on-empty; normalize reads extract "
+        "across the Parallel boundary; baseline reads helix-code at baseline_ref."
     ),
     db=get_postgres_db(),
     steps=[
-        Parallel(client_branch, baseline_step, name="client-and-baseline"),
+        Parallel(extract_step, baseline_step, name="client-and-baseline"),
+        normalize_step,   # top-level → HITL output-review gate is now reachable (Finding 51 fix)
         smoke_test_step,
     ],
 )
