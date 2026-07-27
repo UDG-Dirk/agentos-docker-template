@@ -1,8 +1,18 @@
 # Figma Extractor — HELIX UC2 Pipeline Step 1
 
-First production HELIX agent. Pulls design tokens, foundation styles, and component
-variant matrices from a client's Figma file and emits a typed `FigmaExtractionResult`
-for the next pipeline step (Token Normalizer).
+> **Step 1 is now DETERMINISTIC (no LLM)** — spec `helix-poc-agno:spec:figma-extractor-deterministic-v0-1-draft` (RATIFIED).
+> `deterministic.py` (`run_deterministic_extraction`) replaced the LLM-orchestrated agent: reading
+> structured data from a structured API is not the LLM's job (the LLM invented component names not in
+> the authored roster — the fabrication surface). Fixed orchestration: Lane 5 meta → Lane 2 semantic
+> roster → per-component_set Framelink `get_figma_data` via `ClientSession.call_tool` (NO LLM) → Lane 3
+> bindings → asset download → Levenshtein+dictionary typo detection → compose. Same-input→same-output
+> (bulletproof). Emits a `FigmaExtractionResult`-shaped dict (Token Normalizer contract preserved) with
+> the §5 rich envelope nested under `deterministic_extraction`. `provenance.llm_involvement = "none"`.
+> The old LLM agent (`agent.py` + the drill-guard in the workflow) is retained as dead code / git
+> history per spec §9 (replace-in-place); removable in a cleanup follow-up.
+
+Pulls design tokens, foundation styles, and component variant matrices from a client's Figma file
+and emits a typed `FigmaExtractionResult` for the next pipeline step (Token Normalizer).
 
 Built from: `agents:figma-extractor:step1-spec` / `step2-instructions` / `step2-test-criteria`.
 Feasibility proven by spikes S1 (extraction quality + headless Agno), S2 (Workflow spine), S3 (GitLab push).

@@ -10,9 +10,13 @@ Shape (decision:cycle-2-wiring-2026-07-21 + HITL Finding-51 fix 2026-07-27):
   steps after the Parallel converges.
 
   extract (top-level Parallel member "extract"):
-    Figma Extractor agent, wrapped in a retry-on-empty guard (extract_with_retry).
-    Non-deterministic model sometimes finalizes after discovery with an empty result;
-    the guard re-invokes until tokens/components are non-empty (+ drill guard).
+    DETERMINISTIC extractor (spec figma-extractor-deterministic-v0-1, RATIFIED) —
+    deterministic_extract_executor: NO LLM, NO agent. Orchestrates Lane 5 (meta) → Lane 2
+    (semantic roster) → per-set Framelink get_figma_data via ClientSession.call_tool →
+    Lane 3 (bindings) → asset download → Levenshtein typo detection. Emits a
+    FigmaExtractionResult-shaped dict (Normalizer contract) with the §5 rich envelope nested
+    under 'deterministic_extraction'. (The old LLM agent path — extract_with_retry + drill
+    guard — is retained above as dead code per spec §9 replace-in-place; git preserves history.)
 
   normalize (TOP-LEVEL step "normalize", post-Parallel):
     Token Normalizer (pure Python, zero LLM / zero MCP). Reads extract's
@@ -48,6 +52,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 
 from agno.workflow import Parallel, Step, Workflow
 from agno.workflow.types import StepInput, StepOutput
@@ -58,7 +63,8 @@ from agents.baseline_reader.step import (
     baseline_access_smoke_test_executor,
     baseline_read_executor,
 )
-from agents.figma_extractor.agent import figma_extractor_agent
+from agents.figma_extractor.agent import figma_extractor_agent, figma_mcp_tools
+from agents.figma_extractor.deterministic import run_deterministic_extraction
 from agents.figma_extractor.models import FigmaExtractionResult
 from agents.token_normalizer.normalizer import FigmaExtractionResult as _NormalizerFER
 from agents.token_normalizer.normalizer import normalize_tokens
@@ -274,11 +280,48 @@ def normalize_step_executor(step_input: StepInput, **kwargs) -> StepOutput:
 
 
 # ---------------------------------------------------------------------------
-# Workflow
+# Step 1 — DETERMINISTIC extractor (spec figma-extractor-deterministic-v0-1, RATIFIED)
+# Replaces the LLM-orchestrated extract_with_retry (kept above as dead code / git history
+# per spec §9 replace-in-place; removable in a cleanup follow-up). Zero LLM inference.
 # ---------------------------------------------------------------------------
+_FILE_KEY_RE = re.compile(r"(?:/(?:file|design)/)([A-Za-z0-9]{20,40})|([A-Za-z0-9]{20,40})")
+
+
+def _parse_file_key(message: str) -> str | None:
+    """Deterministically extract the Figma file key from the run message (full URL or bare key)."""
+    if not message:
+        return None
+    m = re.search(r"/(?:file|design)/([A-Za-z0-9]{20,40})", message)
+    if m:
+        return m.group(1)
+    # bare-key fallback: the first 20-40 char alphanumeric run
+    m = re.search(r"\b([A-Za-z0-9]{20,40})\b", message)
+    return m.group(1) if m else None
+
+
+async def deterministic_extract_executor(step_input: StepInput, **kwargs) -> StepOutput:
+    """Function-backed extract step (no agent, no LLM). Parses the file key from the run message,
+    connects the Framelink MCP session, and runs the deterministic orchestration. Emits a
+    FigmaExtractionResult-shaped dict (contract for normalize) with the §5 envelope nested under
+    'deterministic_extraction'. Never raises past the step boundary."""
+    message = step_input.input or step_input.previous_step_content or ""
+    file_key = _parse_file_key(str(message))
+    if not file_key:
+        return StepOutput(
+            content=FigmaExtractionResult(
+                file_key="", gaps_detected=["no Figma file key found in run message"]
+            ).model_dump(),
+            success=False,
+        )
+    async with figma_mcp_tools:  # connect Framelink stdio MCP for the extraction (deterministic call_tool)
+        content = await run_deterministic_extraction(file_key, session=figma_mcp_tools.session)
+    status = (content.get("deterministic_extraction") or {}).get("status")
+    return StepOutput(content=content, success=(status != "failure"))
+
+
 extract_step = Step(
     name="extract",
-    executor=extract_with_retry,
+    executor=deterministic_extract_executor,
 )
 
 normalize_step = Step(

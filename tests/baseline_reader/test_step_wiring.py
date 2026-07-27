@@ -159,8 +159,10 @@ def test_workflow_has_parallel_then_smoke_topology():
 
     assert wf.id == "helix-figma-extractor"
     steps = wf.steps
-    assert len(steps) == 2, "expected [Parallel(...), smoke_test]"
-    parallel, smoke = steps[0], steps[1]
-    # Parallel branch contains the baseline step and the client Steps group
+    # Shape post-HITL-fix (MR !11): Parallel(extract, baseline) -> normalize (top-level,
+    # HITL gate) -> smoke. normalize must be top-level for requires_output_review to fire.
+    assert len(steps) == 3, "expected [Parallel(...), normalize, smoke_test]"
+    parallel, smoke = steps[0], steps[-1]
+    # Parallel branch contains the extract step and the baseline step
     assert type(parallel).__name__ == "Parallel"
     assert getattr(smoke, "name", None) == STEP_NAME_SMOKE
