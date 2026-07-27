@@ -145,12 +145,85 @@ def test_lane2_failure_is_status_failure():
 
 def test_get_figma_data_error_is_partial_not_raise():
     async def gfd_boom(fk, nid):
-        raise RuntimeError("boom")
+        if nid == "9:9":  # only the Drodown set errors → mixed outcome
+            raise RuntimeError("boom")
+        return _GFD_YAML
     r = _run(get_figma_data=gfd_boom)
     de = r["deterministic_extraction"]
-    assert de["status"] == "partial"  # roster ok, node query failed
+    assert de["status"] == "partial"  # roster ok, one node query failed
     assert any(f["endpoint"] == "get_figma_data" for f in de["failure_reports"])
-    assert de["coverage_report"]["component_sets_failed"]
+    assert de["coverage_report"]["component_sets_failed"] == ["Drodown"]
+
+
+# ---- fail-loud thin-detection (hardening task figma-extractor-process-set-hardening) --------
+_THIN = "metadata:\n  name: X\n  components: {}\nglobalVars:\n  styles: {}\n"  # envelope, no substance
+
+
+def _gfd_map(overrides=None, default=_GFD_YAML):
+    async def g(fk, nid):
+        return (overrides or {}).get(nid, default)
+    return g
+
+
+def test_all_sets_thin_is_failure_not_silent_success():
+    r = _run(get_figma_data=_gfd_map(default=_THIN))
+    de = r["deterministic_extraction"]
+    assert de["status"] == "failure"  # every set's enrichment returned nothing
+    cov = de["coverage_report"]
+    assert set(cov["component_sets_failed"]) == {"Button", "Drodown"}
+    assert cov["component_sets_extracted"] == 0
+    assert r["components"] == []
+    assert all(fr["error_class"] == "empty_response" for fr in de["failure_reports"]
+               if fr["endpoint"] == "get_figma_data")
+    assert de["component_sets"] == []  # anti-fabrication: no empty shells backfilled
+    assert r["gaps_detected"], "gaps must be populated, not silent"
+
+
+def test_one_set_thin_is_partial_with_gap():
+    r = _run(get_figma_data=_gfd_map({"9:9": _THIN}))  # Button rich, Drodown thin
+    de = r["deterministic_extraction"]
+    assert de["status"] == "partial"
+    assert de["coverage_report"]["component_sets_failed"] == ["Drodown"]
+    assert [c["name"] for c in r["components"]] == ["Button"]
+    fr = next(f for f in de["failure_reports"] if f.get("node_id") == "9:9")
+    assert fr["error_class"] == "empty_response" and fr["component_set"] == "Drodown"
+    assert any("Drodown" in g and "9:9" in g for g in r["gaps_detected"])
+
+
+def test_rate_limit_post_backoff_is_failed_set():
+    r = _run(get_figma_data=_gfd_map(default="Fetch failed with status 429: Too Many Requests"))
+    de = r["deterministic_extraction"]
+    assert de["status"] == "failure"
+    gfd_frs = [f for f in de["failure_reports"] if f["endpoint"] == "get_figma_data"]
+    assert gfd_frs and all(f["error_class"] == "rate_limit_exhausted" and f["http_status"] == 429
+                           for f in gfd_frs)
+
+
+def test_malformed_response_is_failed_set():
+    r = _run(get_figma_data=_gfd_map(default="a: b: c"))  # yaml scanner error
+    de = r["deterministic_extraction"]
+    assert de["status"] == "failure"
+    assert any(f["error_class"] == "malformed" for f in de["failure_reports"])
+
+
+def test_genuine_thin_but_valid_not_failed():
+    """A set with metadata.components present (≥1 variant) but empty globalVars.styles is VALID —
+    must NOT be false-failed (spec thin-but-valid caveat)."""
+    y = ("metadata:\n  name: X\n  components:\n"
+         "    {cid}: {{id: {cid}, name: 'Variant=Solo', componentSetId: {sid}}}\n"
+         "globalVars:\n  styles: {{}}\n")
+    r = _run(get_figma_data=_gfd_map({"57:766": y.format(cid="57:760", sid="57:766"),
+                                      "9:9": y.format(cid="9:10", sid="9:9")}))
+    de = r["deterministic_extraction"]
+    assert de["status"] == "success"  # has_components → valid despite empty styles
+    assert de["coverage_report"]["component_sets_failed"] == []
+
+
+def test_failed_set_emits_no_fabricated_data():
+    r = _run(get_figma_data=_gfd_map({"9:9": _THIN}))
+    de = r["deterministic_extraction"]
+    assert all(c["name"] != "Drodown" for c in r["components"])       # not in components
+    assert all(s["name"] != "Drodown" for s in de["component_sets"])  # not in §5 sets
 
 
 # ---- 429 backoff on the real get_figma_data wrapper (spec §10.3) -----------
