@@ -35,6 +35,14 @@ coverage is by-value, robust to naming/version changes, and never fabricated (op
 resolved value). Note: a lower raw token count under 0.13.x is expected — it reflects dedup, not loss
 (0.9.0's ~733 raw tokens were ~67 distinct).
 
+**Rate-limit handling under load (0.13.x):** Framelink surfaces a Figma **429** two different ways —
+0.9.x as error *text* (`Too Many Requests`), **0.13.x as an *empty envelope*** (`metadata.components`
+and `globalVars.styles` both empty). `_default_get_figma_data` retries with backoff `(1,3,8)s` on
+**both** signals (`_is_rate_limited` OR `_is_empty_envelope`) — safe because a *component_set* is never
+legitimately empty. `_NODE_CONCURRENCY` is **2** (lowered from 3) to reduce throttle pressure on heavy
+subtrees (Input ≈ 233 KB, Button ≈ 141 KB). If a set is still empty after retries it is surfaced loud
+(`empty_response`), never silently dropped — the P1a fail-loud guard stays intact.
+
 **Schema-guard test** (`tests/test_deterministic_extractor.py::test_framelink_0_13_2_schema_guard`,
 backed by `tests/fixtures/framelink_0_13_2_node_57_766.json`) asserts the top-level shape stays
 `[metadata, nodes, globalVars]` (+`elements`) — it fails loud if a future Framelink bump silently
