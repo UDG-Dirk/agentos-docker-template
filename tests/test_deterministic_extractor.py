@@ -271,6 +271,64 @@ def test_default_gfd_gives_up_after_max_retries(monkeypatch):
     assert d._is_rate_limited(out)  # exhausted; returns last (still-429) text, does not hang/raise
 
 
+# ---- 0.13.2 429-as-empty-envelope retry (task concurrency-rate-limit-hardening) ------------
+_EMPTY_ENVELOPE = "metadata:\n  name: X\n  components: {}\nglobalVars:\n  styles: {}\n"
+
+
+def test_is_empty_envelope_detects_0_13_2_429_shape():
+    assert d._is_empty_envelope(_EMPTY_ENVELOPE) is True          # 0.13.2 throttle signature
+    assert d._is_empty_envelope(_GFD_YAML) is False               # rich data → not empty
+    assert d._is_empty_envelope("just a string") is False         # non-dict → not "empty envelope"
+    # 0.9.x text-429 parses to a keyed dict with no metadata/globalVars → also caught as retryable
+    assert d._is_empty_envelope("Fetch failed with status 429: Too Many Requests") is True
+
+
+def test_default_gfd_retries_on_empty_envelope_then_succeeds(monkeypatch):
+    monkeypatch.setattr(d, "_GFD_BACKOFF", (0.0, 0.0, 0.0))
+    calls = {"n": 0}
+
+    class _Block:
+        type = "text"
+
+        def __init__(self, t):
+            self.text = t
+
+    class _Res:
+        def __init__(self, t):
+            self.content = [_Block(t)]
+
+    class _Sess:
+        async def call_tool(self, name, args):
+            calls["n"] += 1
+            # 0.13.2 returns empty envelopes (throttle) twice, then real data on retry
+            return _Res(_EMPTY_ENVELOPE if calls["n"] < 3 else _GFD_YAML)
+
+    out = asyncio.run(d._default_get_figma_data(_Sess(), FILE_KEY, "57:766"))
+    assert calls["n"] == 3 and "globalVars" in out and "fill_" in out  # retried past empties to rich data
+
+
+def test_default_gfd_gives_up_on_persistent_empty_envelope(monkeypatch):
+    """Fail-loud preserved: a set that stays empty after retries is still surfaced (classify → failed)."""
+    monkeypatch.setattr(d, "_GFD_BACKOFF", (0.0, 0.0))
+
+    class _Block:
+        type = "text"
+
+        def __init__(self, t):
+            self.text = t
+
+    class _Res:
+        def __init__(self, t):
+            self.content = [_Block(t)]
+
+    class _Sess:
+        async def call_tool(self, name, args):
+            return _Res(_EMPTY_ENVELOPE)
+
+    out = asyncio.run(d._default_get_figma_data(_Sess(), FILE_KEY, "57:766"))
+    assert d._classify_gfd_response(out)[0] == "empty_response"  # exhausted → still loud, not silent
+
+
 # ---- Framelink 0.13.2 schema-guard + token recovery (task framelink-0-13-json-fix) ---------
 import json  # noqa: E402
 import pathlib  # noqa: E402

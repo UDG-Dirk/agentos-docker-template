@@ -45,7 +45,8 @@ from agents.figma_extractor.models import (
 
 PIPELINE = "figma-extractor-deterministic-v0-1"
 _LANE_VERSIONS = {"lane_2": "v0.2", "lane_3": "v0.1", "lane_5": "v0.1"}
-_NODE_CONCURRENCY = 3  # spec §10.3
+_NODE_CONCURRENCY = 2  # spec §10.3 (lowered 3→2: empirical rate-limit relief for heavy subtrees;
+#                        §10.3 permits adjustment on empirical need — see rate-limit-hardening task)
 
 
 def _now_iso() -> str:
@@ -218,13 +219,7 @@ def _classify_gfd_response(gfd_yaml: str) -> tuple[str | None, int | None, str]:
         return "malformed", None, f"yaml parse failed: {e!r}"[:200]
     if not isinstance(data, dict):
         return "empty_response", None, f"non-dict payload ({type(data).__name__})"
-    meta = data.get("metadata")
-    gv = data.get("globalVars")
-    meta_components = meta.get("components") if isinstance(meta, dict) else None
-    gv_styles = gv.get("styles") if isinstance(gv, dict) else None
-    has_components = isinstance(meta_components, dict) and len(meta_components) > 0
-    has_styles = isinstance(gv_styles, dict) and len(gv_styles) > 0
-    if not has_components and not has_styles:
+    if _is_empty_envelope(gfd_yaml):
         return "empty_response", None, "metadata.components and globalVars.styles both empty"
     return None, None, ""
 
@@ -235,17 +230,41 @@ _GFD_BACKOFF = (1.0, 3.0, 8.0)  # spec §10.3 — backoff on 429
 
 
 def _is_rate_limited(text: str) -> bool:
+    """Text-marker rate-limit signal (Framelink 0.9.x surfaces a Figma 429 as error text)."""
     return bool(text) and any(m in text for m in _RATE_LIMIT_MARKERS)
 
 
+def _is_empty_envelope(text: str) -> bool:
+    """A payload that parsed to a dict but carries NO substance — metadata.components AND
+    globalVars.styles both empty. Framelink 0.13.x returns exactly this shape on a Figma 429 (the
+    rate limit is NOT surfaced as error text), so it must be treated as retryable. For a component_set
+    — which by definition holds ≥1 variant — an empty envelope is never legitimate, so retrying is safe."""
+    try:
+        data = yaml.safe_load(text)
+    except Exception:  # noqa: BLE001 — unparseable is handled elsewhere, not "empty"
+        return False
+    if not isinstance(data, dict):
+        return False
+    meta = data.get("metadata")
+    gv = data.get("globalVars")
+    mc = meta.get("components") if isinstance(meta, dict) else None
+    gs = gv.get("styles") if isinstance(gv, dict) else None
+    has_components = isinstance(mc, dict) and len(mc) > 0
+    has_styles = isinstance(gs, dict) and len(gs) > 0
+    return not has_components and not has_styles
+
+
 async def _default_get_figma_data(session, file_key: str, node_id: str, depth: int = 4) -> str:
-    """Framelink get_figma_data via ClientSession (no LLM), with 429 backoff (spec §10.3).
-    Framelink surfaces a Figma 429 as error text in the tool result; retry until data or give up."""
+    """Framelink get_figma_data via ClientSession (no LLM), with backoff-retry on rate limits.
+    A Figma 429 is surfaced as error TEXT by Framelink 0.9.x and as an EMPTY ENVELOPE by 0.13.x —
+    retry on BOTH signals until real data or the backoff is exhausted (then return the last payload,
+    which _classify_gfd_response records loudly as rate_limit_exhausted / empty_response)."""
     for attempt in range(len(_GFD_BACKOFF) + 1):
         res = await session.call_tool("get_figma_data", {"fileKey": file_key, "nodeId": node_id, "depth": depth})
         blocks = getattr(res, "content", None) or []
         text = "".join(getattr(b, "text", "") for b in blocks if getattr(b, "type", None) == "text")
-        if not _is_rate_limited(text) or attempt == len(_GFD_BACKOFF):
+        retryable = _is_rate_limited(text) or _is_empty_envelope(text)
+        if not retryable or attempt == len(_GFD_BACKOFF):
             return text
         await asyncio.sleep(_GFD_BACKOFF[attempt])
     return text
