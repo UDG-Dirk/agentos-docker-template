@@ -31,6 +31,7 @@ from agno.tools.mcp import MCPTools
 from mcp import StdioServerParameters
 
 from agents.figma_extractor.models import FigmaExtractionResult
+from agents.figma_extractor.semantic_layer import get_figma_semantic_layer
 from app.settings import default_chat_model
 from db import get_postgres_db
 
@@ -146,7 +147,10 @@ figma_extractor_agent = Agent(
     name="Figma Extractor",
     model=default_chat_model(),  # OpenAIChat (not OpenAIResponses) via app.settings — see module docstring
     db=get_postgres_db(),
-    tools=[figma_mcp_tools],
+    # Lane 1 (Framelink MCP: get_figma_data + download_figma_images) + Lane 2
+    # (get_figma_semantic_layer: REST component_sets/components/styles). Additive —
+    # Lane 2 supplies the authored taxonomy Framelink cannot see (spec lane-2-v0.1).
+    tools=[figma_mcp_tools, get_figma_semantic_layer],
     # Option B: keep output_schema as the parse TARGET, but hand structured-output
     # assembly to a separate tool-less parser_model. This removes the documented
     # RULE 1 anti-pattern (output_schema pressure making the tool-calling model
