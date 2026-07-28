@@ -56,6 +56,13 @@ curl -sN -H "Authorization: Bearer $AGNO_MCP_TOKEN" \
 Optional `helix-client-extractor` params via message: `additional=<key1,key2>`, `freshness=<days>`.
 Lane 6 streaming events ride in the result's `client_extraction.resolution_events` in deterministic order.
 
+**Missing-parameter prompt:** if the run message lacks the two required keys, the workflow returns a
+structured `needs_parameters` prompt (required/optional params, `message_format`, examples, and any
+keys it *did* detect) instead of a terse error — so MCP/REST callers see exactly what to supply and
+re-invoke. (True interactive elicitation isn't available on the current surface — the agno-prod MCP
+exposes a generic `run_workflow(workflow_id, message)` with no per-workflow typed params or
+`elicitation/create`, and Agno HITL is output-review, not input-collection.)
+
 ## Modules
 
 | Module | Purpose |
