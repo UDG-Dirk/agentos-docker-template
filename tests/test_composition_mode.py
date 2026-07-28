@@ -233,6 +233,38 @@ async def _wrap(v):
     return v
 
 
+# ---- rate-limit hardening for large files (task rate-limit-hardening-large-files) ----------
+def _pages_fetcher(n):
+    async def fp(fk):
+        return [{"id": f"p{i}", "name": f"P{i}"} for i in range(n)]
+    return fp
+
+
+def _empty_node_fetcher():
+    async def fn(fk, nid, depth):
+        return {"document": {"id": nid, "name": nid, "type": "CANVAS", "children": []}, "components": {}}
+    return fn
+
+
+def test_adaptive_pacing_only_on_large_files(monkeypatch):
+    calls = {"n": 0}
+
+    async def counting_sleep(s):
+        calls["n"] += 1
+    monkeypatch.setattr(pb, "_sleep", counting_sleep)
+    # large file (>20 pages) -> paced between fetches (pages-1 sleeps; no 429 so no backoff sleeps)
+    r = asyncio.run(pb.run_pathway_b("F", fetch_pages=_pages_fetcher(21), fetch_node=_empty_node_fetcher()))
+    assert r["page_count"] == 21 and calls["n"] == 20
+    # small file (<=20, e.g. Helix's 17) -> NO pacing (baseline latency preserved)
+    calls["n"] = 0
+    r2 = asyncio.run(pb.run_pathway_b("F", fetch_pages=_pages_fetcher(17), fetch_node=_empty_node_fetcher()))
+    assert r2["page_count"] == 17 and calls["n"] == 0
+
+
+def test_backoff_strengthened_to_four_attempts():
+    assert len(pb._BACKOFF) == 4 and pb._BACKOFF[0] >= 2.0  # (2,5,12,30) — strengthened for large files
+
+
 # ---- Pathway B 429 backoff (task pathway-b-429-backoff-hardening) ----------
 def test_get_with_backoff_retries_429_then_succeeds(monkeypatch):
     monkeypatch.setattr(pb, "_BACKOFF", (0.0, 0.0, 0.0))  # no real sleeping
