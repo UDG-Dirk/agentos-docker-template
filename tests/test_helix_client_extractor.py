@@ -13,7 +13,7 @@ import app.workflows.helix_client_extractor as w
 
 CORE = "8qPSyetzviLR6eF6bkpL44"
 CLIENT = "qMi5B9YeqAf9Ik1yN6erw4"
-LIB3 = "QqBwuvd33y3MT4IXP6uGN"
+MOCK_ADDITIONAL_LIB = "mockadditionallibrarykey01"  # obviously-fake fixture (parsing test only; not a real library)
 
 
 # ---- message parsing -------------------------------------------------------
@@ -25,10 +25,10 @@ def test_parse_positional_two_urls():
 
 
 def test_parse_labelled_with_additional_and_freshness():
-    msg = f"core={CORE} client={CLIENT} additional={LIB3},anotherlibkey1234567 freshness=14"
+    msg = f"core={CORE} client={CLIENT} additional={MOCK_ADDITIONAL_LIB},anotherlibkey1234567 freshness=14"
     r = w._parse_client_request(msg)
     assert r["core_file_key"] == CORE and r["client_file_key"] == CLIENT
-    assert r["additional_library_keys"] == [LIB3, "anotherlibkey1234567"]
+    assert r["additional_library_keys"] == [MOCK_ADDITIONAL_LIB, "anotherlibkey1234567"]
     assert r["freshness_threshold_days"] == 14
 
 
@@ -48,10 +48,10 @@ def test_executor_calls_extraction_with_parsed_params(monkeypatch):
         return {"workflow": "extract_client_design_system", "client_extraction": {"status": "success"}}
 
     monkeypatch.setattr(w, "extract_client_design_system", fake_extract)
-    si = StepInput(input=f"core={CORE} client={CLIENT} additional={LIB3} freshness=9")
+    si = StepInput(input=f"core={CORE} client={CLIENT} additional={MOCK_ADDITIONAL_LIB} freshness=9")
     out = asyncio.run(w.client_extract_executor(si))
     assert out.success is True
-    assert captured == {"core": CORE, "client": CLIENT, "add": [LIB3], "fresh": 9}
+    assert captured == {"core": CORE, "client": CLIENT, "add": [MOCK_ADDITIONAL_LIB], "fresh": 9}
     assert out.content["workflow"] == "extract_client_design_system"
 
 
