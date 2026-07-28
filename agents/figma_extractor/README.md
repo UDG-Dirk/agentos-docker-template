@@ -48,6 +48,31 @@ backed by `tests/fixtures/framelink_0_13_2_node_57_766.json`) asserts the top-le
 `[metadata, nodes, globalVars]` (+`elements`) — it fails loud if a future Framelink bump silently
 changes the schema, closing the process gap that let the default-format flip reach prod.
 
+### Lane 6 — Cross-File Library Resolution (STREAMING) — ADDITIVE, Phase A
+
+`cross_file_resolution.py` (`resolve_stream` / `resolve`) resolves `remote:true` component references
+from a **composition file** (Modules / client files) against **registered foundation libraries**
+(Core + optional additional, UNBOUNDED N) — proving where each organism's Core dependencies live.
+Spec: `spec:lane-6-cross-file-library-resolution-v0-1-draft` v0.1.1 (STREAMING). Zero LLM.
+
+**Streaming** — `resolve_stream(...)` is an async generator yielding SSE-compatible events in
+deterministic order (`page_then_depth_first` traversal × registration-order library priority):
+`resolution_started` → `library_registered`/`library_registration_failed` (per lib) →
+`library_dependency_cycle` (bounded direct+one-hop) → per-reference `resolved_reference` /
+`library_key_collision` / `unresolved_reference` (+ `third_library_suspect` when ≥3 unresolved cluster)
+→ `resolution_complete` (summary + per-library SLI metrics). `resolve(...)` is a batch-bridge that
+collects the stream for non-streaming consumers.
+
+**Mechanism** (proven 7/9 on Modules MediaText → Core): remote instances carry a global component
+`key`; exact-match against a registered library's `/components`(+`/component_sets`) map, **first match
+in registration-order priority** (Core first). Library maps cached per `(lib_key, lastModified)`.
+
+**Scope note:** Lane 6 is the resolution **engine** — it consumes an enumerated reference list. Producing
+that list from a composition file is **Pathway B** (a separate, not-yet-built work stream; the current
+published-library extractor yields nothing on composition files). A minimal `enumerate_remote_references`
+helper is included for the live smoke only — NOT the production traversal. Phase A: emits events, no
+downstream consumer yet, safe single-MR revert.
+
 ### Lane 7 — Token Catalog (Tokens Studio) — ADDITIVE, Phase A
 
 `token_catalog.py` (`run_token_catalog`) extracts the **authoritative** design-token catalog from
