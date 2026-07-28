@@ -139,14 +139,18 @@ def test_composition_mode_orchestrates_pathway_b_and_lane6():
 def test_composition_mode_emit_callback_receives_events_in_order():
     refs = [{"key": "kA", "source_node_id": "1", "source_page_name": "P"}]
     seen = []
-    # use real Lane 6 resolve_stream via emit; inject a resolve? No — emit path only used when resolve is None.
-    # Provide a stub library via injected resolve is not compatible with emit; test emit with real stream:
+
+    async def stub_fetch(lib_key):  # offline library map so the real resolve_stream runs + emits
+        return {"lastModified": "L", "map": {"kA": {"name": "A", "node_id": "1:1", "kind": "component"}},
+                "source": "fresh_fetch"}
+    # a library IS registered -> full composition mode -> real resolve_stream emits through `emit`
     r = asyncio.run(cm.run_composition_extraction(
-        MODULES, registered_libraries=[],
-        pathway_b=_fake_pb_result(refs), emit=seen.append, now=lambda: "T"))
+        MODULES, registered_libraries=[{"file_key": "lib", "role": "core_foundation", "priority_order": 0}],
+        pathway_b=_fake_pb_result(refs), fetch_library_map=stub_fetch, emit=seen.append, now=lambda: "T"))
     types = [e["event_type"] for e in seen]
     assert types[0] == "resolution_started" and types[-1] == "resolution_complete"
     assert r["resolution_events"] == seen  # emitted == collected, same order
+    assert r["extraction_mode"] == "composition"  # library registered -> NOT composition-only
 
 
 # ---- per-client orchestration (mocked core + composition) ------------------
