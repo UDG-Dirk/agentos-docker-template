@@ -48,26 +48,33 @@ async def run_composition_extraction(
     file_key: str, *, registered_libraries: list[dict] | None = None,
     client: httpx.AsyncClient | None = None, file_role: str = "client",
     emit=None, now=_now_iso,
-    pathway_b=None, resolve=None, library_edges: dict | None = None,
+    pathway_b=None, resolve=None, library_edges: dict | None = None, fetch_library_map=None,
 ) -> dict:
     """Composition-mode extraction. Pathway B -> remote refs -> Lane 6 streaming resolution.
     `emit` (optional): called per Lane 6 event for SSE forwarding. Injectables (pathway_b, resolve)
     for tests. Returns a unified composition-mode output. Never raises past the boundary."""
     registered_libraries = registered_libraries or []
+    # Pattern 3 (self-contained/unpublished, e.g. DGX): no external library registered -> COMPOSITION-ONLY.
+    # Skip Lane 6 entirely (nothing to resolve against; avoids self-referential noise + false
+    # third_library_suspect). Pathway B still captures the composition_tree + local components.
+    composition_only = not registered_libraries and resolve is None
     pb_run = pathway_b or (lambda fk: pb.run_pathway_b(fk, client=client))
 
     # Step 1 — Pathway B traversal (composition tree + remote references)
     pb_result = await (pb_run(file_key) if pathway_b is None else pathway_b(file_key))
 
-    # Step 2 — Lane 6 streaming resolution over the remote references
+    # Step 2 — Lane 6 streaming resolution (SKIPPED in composition-only mode)
     remote_refs = pb_result.get("remote_references", [])
     events: list[dict] = []
-    if resolve is not None:
+    if composition_only:
+        pass  # self-contained: no libraries to resolve against
+    elif resolve is not None:
         lane6_out = await resolve(file_key, remote_refs, registered_libraries)
         events = lane6_out.get("events", [])
     else:
         async for ev in lane6.resolve_stream(file_key, remote_refs, registered_libraries,
-                                              client=client, library_edges=library_edges, now=now):
+                                              client=client, library_edges=library_edges,
+                                              fetch_library_map=fetch_library_map, now=now):
             events.append(ev)
             if emit is not None:
                 emit(ev)  # SSE forwarding
@@ -79,8 +86,9 @@ async def run_composition_extraction(
     if complete and complete["resolution_summary"]["references_unresolved"] > 0:
         status = "partial" if status != "failure" else status
 
-    return {
-        "extraction_mode": "composition",
+    mode = "composition-only" if composition_only else "composition"
+    out = {
+        "extraction_mode": mode,
         "file_key": file_key,
         "file_role": file_role,
         "status": status,
@@ -94,10 +102,16 @@ async def run_composition_extraction(
         "resolution_events": events,
         "resolution_summary": (complete or {}).get("resolution_summary") if complete else None,
         "reconciliation_contract": RECONCILIATION_CONTRACT,
-        "provenance": {"extraction_mode": "composition", "traversal": "pathway-b",
-                       "resolution": "lane-6-streaming", "llm_involvement": "none"},
+        "provenance": {"extraction_mode": mode, "traversal": "pathway-b",
+                       "resolution": ("skipped-self-contained" if composition_only else "lane-6-streaming"),
+                       "llm_involvement": "none"},
         "extracted_at": now(),
     }
+    if composition_only:
+        out["lane6_note"] = ("Lane 6 skipped — self-contained/unpublished file, no external library "
+                             "registered. Local components live in composition_tree; any remote refs "
+                             f"({pb_result.get('remote_reference_count', 0)}) are reported but not resolved.")
+    return out
 
 
 # --------------------------------------------------------------------------- per-client orchestration

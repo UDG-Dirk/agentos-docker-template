@@ -36,6 +36,7 @@
 |---|---|---|
 | `helix-figma-extractor` | Library-mode single-file extraction (Core substrate) | `POST /workflows/helix-figma-extractor/runs` |
 | `helix-client-extractor` | Multi-file per-client extraction (Core + client + Lane 6 resolution) | `POST /workflows/helix-client-extractor/runs` |
+| `helix-composition-only-extractor` | **Pattern 3** — self-contained/unpublished file (Pathway B only, Lane 6 skipped; e.g. DGX Brandportal) | `POST /workflows/helix-composition-only-extractor/runs` |
 
 **Direct-REST invocation examples:**
 
