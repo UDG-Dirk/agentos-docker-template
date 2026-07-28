@@ -4,7 +4,8 @@ STREAMING, deterministic, zero-LLM. Resolves `remote:true` component references 
 file (Modules / client files) against registered foundation libraries (Core + optional additional),
 emitting SSE-compatible events as each reference resolves: `resolution_started`, `library_registered`,
 `library_registration_failed`, `resolved_reference`, `library_key_collision`, `unresolved_reference`,
-`third_library_suspect`, `library_dependency_cycle`, `resolution_complete`.
+`internal_link_reference` (v0.1.3 — navigation/hyperlink refs, not components), `third_library_suspect`,
+`library_dependency_cycle`, `resolution_complete`.
 
 Resolution mechanism (empirically proven, `shared-results:helix-modules-figma-exploration-result`):
 a remote instance carries a global component `key`; exact-match that key against a registered library's
@@ -89,14 +90,42 @@ async def enumerate_remote_references(composition_file_key: str, page_node_ids: 
                 continue
             for wrap in (resp.json().get("nodes") or {}).values():
                 page_name = (wrap.get("document") or {}).get("name", pid)
+                # component references (remote:true component-map entries) — variant instances
                 for cid, c in (wrap.get("components") or {}).items():
                     if c.get("remote"):
                         refs.append({"key": c.get("key"), "source_node_id": cid,
-                                     "source_page_name": page_name, "name": c.get("name")})
+                                     "source_page_name": page_name, "name": c.get("name"),
+                                     "ref_type": "component"})
+                # internal-link references (prototype reactions / TEXT hyperlinks) — v0.1.3 classification
+                refs.extend(_walk_internal_links(wrap.get("document") or {}, page_name))
     finally:
         if own:
             await client.aclose()
     return refs
+
+
+def _walk_internal_links(node, page_name: str) -> list[dict]:
+    """Detect GENUINE internal-navigation references: prototype reactions with a destinationId, or TEXT
+    hyperlinks. These carry a navigation intent, NOT a component instance — Lane 6 must NOT try to resolve
+    them as library components (spec v0.1.3). Evidence-based: destinationId / hyperlink fields only."""
+    out: list[dict] = []
+    if not isinstance(node, dict):
+        return out
+    nid = node.get("id")
+    for r in (node.get("reactions") or []):
+        dest = ((r or {}).get("action") or {}).get("destinationId")
+        if dest:
+            out.append({"key": f"link:{nid}->{dest}", "source_node_id": nid, "source_page_name": page_name,
+                        "name": node.get("name"), "ref_type": "internal_link", "link_kind": "reaction",
+                        "destination": dest})
+    hl = node.get("hyperlink") or (node.get("style") or {}).get("hyperlink")
+    if isinstance(hl, dict) and (hl.get("nodeID") or hl.get("url")):
+        out.append({"key": f"link:{nid}:hyperlink", "source_node_id": nid, "source_page_name": page_name,
+                    "name": node.get("name"), "ref_type": "internal_link", "link_kind": "hyperlink",
+                    "destination": hl.get("nodeID") or hl.get("url")})
+    for ch in (node.get("children") or []):
+        out.extend(_walk_internal_links(ch, page_name))
+    return out
 
 
 # --------------------------------------------------------------------------- clustering (§4.5)
@@ -196,13 +225,26 @@ async def resolve_stream(
 
     # Step 6.3 — streaming resolution
     seq = 0
-    resolved = unresolved = collisions = 0
+    resolved = unresolved = collisions = internal_links = 0
     unresolved_refs: list[dict] = []
     reported_clusters: set[str] = set()
     suspects = 0
     for ref in queue:
         seq += 1
         k = ref["key"]
+        # v0.1.3 reference-type classification: internal-navigation refs are NOT components —
+        # do NOT attempt library resolution, and EXCLUDE from third-library clustering (§4.5).
+        if ref.get("ref_type") == "internal_link":
+            internal_links += 1
+            yield {"event_type": "internal_link_reference", "reference_key": k,
+                   "source_composition_file": composition_file_key,
+                   "source_node_id": ref.get("source_node_id"), "source_page_name": ref.get("source_page_name"),
+                   "link_kind": ref.get("link_kind"), "destination": ref.get("destination"),
+                   "classification": "internal_link",
+                   "note": "navigation/hyperlink reference — not a component; resolution skipped, "
+                           "excluded from third-library clustering",
+                   "detected_at": now(), "sequence": seq}
+            continue
         hits = [(lib, m) for lib, m in lib_maps if k in m]
         if hits:
             chosen_lib, chosen_map = hits[0]  # registration order == priority
@@ -249,10 +291,12 @@ async def resolve_stream(
     yield {"event_type": "resolution_complete", "composition_file_key": composition_file_key,
            "resolution_summary": {
                "references_total": total, "references_resolved": resolved,
-               "references_unresolved": unresolved, "third_library_suspects": suspects,
+               "references_unresolved": unresolved, "internal_link_references": internal_links,
+               "third_library_suspects": suspects,
                "library_key_collisions": collisions,
                "library_dependency_cycles": len(_detect_cycles(registered_ok, library_edges)),
-               "resolution_rate_pct": round(resolved / total * 100, 1) if total else 100.0,
+               "resolution_rate_pct": (round(resolved / (resolved + unresolved) * 100, 1)
+                                       if (resolved + unresolved) else 100.0),  # over COMPONENT refs
                "per_library_metrics": {lib["file_key"]: {"references_resolved": per_lib_resolved[lib["file_key"]],
                                                          "resolution_latency_ms_avg": None}
                                        for lib in registered_libraries}},

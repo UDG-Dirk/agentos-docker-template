@@ -186,6 +186,51 @@ def test_dedup_by_key_preserves_first_order():
 
 
 # ---- batch bridge (backward-compat §14) ------------------------------------
+def test_internal_link_reference_classified_not_resolved():
+    refs = [{"key": "link:1->2", "source_node_id": "1", "source_page_name": "Header",
+             "ref_type": "internal_link", "link_kind": "reaction", "destination": "2"},
+            {"key": "kButton", "source_node_id": "3", "source_page_name": "P"}]  # component -> resolves
+    ev = _run(refs, _libs(CORE))
+    il = [e for e in ev if e["event_type"] == "internal_link_reference"]
+    assert len(il) == 1 and il[0]["reference_key"] == "link:1->2" and il[0]["link_kind"] == "reaction"
+    assert not any(e["event_type"] == "unresolved_reference" for e in ev)  # link NOT counted unresolved
+    assert any(e["event_type"] == "resolved_reference" for e in ev)         # kButton resolved
+    s = ev[-1]["resolution_summary"]
+    assert s["internal_link_references"] == 1 and s["references_resolved"] == 1 and s["references_unresolved"] == 0
+    assert s["resolution_rate_pct"] == 100.0  # over component refs only (1/1), link excluded
+
+
+def test_internal_links_excluded_from_third_library_clustering():
+    refs = [{"key": f"link:{i}", "source_node_id": str(i), "source_page_name": "H",
+             "ref_type": "internal_link", "name": "Nav"} for i in range(3)]
+    ev = _run(refs, _libs(CORE))
+    assert not any(e["event_type"] == "third_library_suspect" for e in ev)  # links don't cluster as 3rd-lib
+    assert not any(e["event_type"] == "unresolved_reference" for e in ev)
+    assert ev[-1]["resolution_summary"]["internal_link_references"] == 3
+
+
+def test_walk_internal_links_detects_reaction_and_hyperlink():
+    node = {"id": "n1", "name": "Nav", "reactions": [{"action": {"type": "NODE", "destinationId": "p2:0"}}],
+            "children": [{"id": "t1", "name": "Link", "type": "TEXT",
+                          "style": {"hyperlink": {"nodeID": "p3:0"}}, "children": []}]}
+    links = cfr._walk_internal_links(node, "Header")
+    assert {ln["link_kind"] for ln in links} == {"reaction", "hyperlink"} and len(links) == 2
+    assert all(ln["ref_type"] == "internal_link" for ln in links)
+
+
+def test_component_variant_key_stays_unresolved_not_internal_link():
+    # regression for the lane-6 escalation: the 2 Modules keys are component variants (ref_type=component),
+    # NOT internal links -> must remain unresolved_reference, never reclassified.
+    # NB: placeholder key (not the real 40-char hex — avoids gitleaks generic-secret flag; the test
+    # only asserts a component ref with no Core match stays unresolved, so the value is a label).
+    refs = [{"key": "componentVariantKeyNotInCore", "source_node_id": "x",
+             "source_page_name": "MediaText", "name": "Size=lg, Strong=True, Spacing=False",
+             "ref_type": "component"}]
+    ev = _run(refs, _libs(CORE))
+    assert any(e["event_type"] == "unresolved_reference" for e in ev)
+    assert not any(e["event_type"] == "internal_link_reference" for e in ev)
+
+
 def test_batch_bridge_aggregates_stream():
     refs = [{"key": "kButton", "source_node_id": "1", "source_page_name": "P"}]
     out = asyncio.run(cfr.resolve(COMP, refs, _libs(CORE), now=lambda: "T", fetch_library_map=_fetch()))

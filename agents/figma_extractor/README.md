@@ -125,9 +125,18 @@ deterministic order (`page_then_depth_first` traversal × registration-order lib
 
 - `resolution_started` → `library_registered` / `library_registration_failed` (per lib) →
 - `library_dependency_cycle` (bounded direct + one-hop) →
-- per-reference `resolved_reference` / `library_key_collision` / `unresolved_reference`
-  (+ `third_library_suspect` when ≥3 unresolved cluster) →
+- per-reference `resolved_reference` / `library_key_collision` / `unresolved_reference` /
+  `internal_link_reference` (+ `third_library_suspect` when ≥3 unresolved cluster) →
 - `resolution_complete` (summary + per-library SLI metrics).
+
+**Reference-type classification (v0.1.3):** a `remote:true` ref tagged `ref_type="internal_link"`
+(evidence-based — enumerated from prototype `reactions[].action.destinationId` or TEXT `hyperlink`
+fields, NOT the components map) emits an `internal_link_reference` event, skips library resolution, and
+is **excluded** from third-library clustering. Component-instance refs (variant name + `componentSetId`)
+stay on the resolve path. Note: on the Helix_Modules file, REST enumeration surfaces **zero** internal-link
+refs at depth 4, and the 2 recurring non-Core keys are genuine **component variants**
+(`Size=…`, `componentSetId 72:2195`/`385:11416`) — they remain `unresolved_reference` (a real
+third-library question for Peter/Mel), NOT internal links.
 
 `resolve(...)` is a batch-bridge that collects the stream for non-streaming consumers.
 
