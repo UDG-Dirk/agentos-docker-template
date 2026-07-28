@@ -28,6 +28,8 @@ from datetime import UTC, datetime
 
 import httpx
 
+from agents.figma_extractor.http_errors import classify_http_error
+
 FIGMA_API_BASE = "https://api.figma.com/v1"
 TIMEOUT_S = 30.0  # spec §10.3 — larger than Lane 2/5 (binding-heavy queries return more)
 _RATE_LIMIT_BACKOFF = (0.5, 2.0, 8.0)
@@ -91,7 +93,9 @@ async def _fetch_nodes(client: httpx.AsyncClient, file_key: str, params: dict) -
                 continue
             return None, _failure(429, "rate_limit", resp.text, retries)
         if status in (401, 403):
-            return None, _failure(status, "auth", resp.text, retries)
+            # 403 sub-classification (file_export_disabled / enterprise_scope / forbidden); 401 -> auth.
+            ec = classify_http_error(status, resp.text) if status == 403 else "auth"
+            return None, _failure(status, ec, resp.text, retries)
         if status == 404:
             return None, _failure(404, "not_found", resp.text, retries)
         if 400 <= status < 500:

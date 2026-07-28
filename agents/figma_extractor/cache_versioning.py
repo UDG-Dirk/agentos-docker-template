@@ -23,6 +23,8 @@ from datetime import UTC, datetime
 
 import httpx
 
+from agents.figma_extractor.http_errors import classify_http_error
+
 FIGMA_API_BASE = "https://api.figma.com/v1"
 TIMEOUT_S = 10.0
 _RATE_LIMIT_BACKOFF = (0.5, 2.0, 8.0)
@@ -90,8 +92,11 @@ async def _fetch_one(client: httpx.AsyncClient, operation_id: str, path_seg: str
                 continue
             return None, _failure(operation_id, 429, "rate_limit", resp.text, retries)
 
-        if status in (401, 403):  # auth: no retry
-            return None, _failure(operation_id, status, "auth", resp.text, retries)
+        if status in (401, 403):  # auth / forbidden: no retry
+            # 403 sub-classification: 'File not exportable' content-protection lock, Enterprise scope,
+            # or generic forbidden. 401 stays 'auth'. Other 403s behave exactly as before.
+            ec = classify_http_error(status, resp.text) if status == 403 else "auth"
+            return None, _failure(operation_id, status, ec, resp.text, retries)
 
         if status == 404:  # not_found (v0.2): no retry — bad/deleted file_key
             return None, _failure(operation_id, 404, "not_found", resp.text, retries)
