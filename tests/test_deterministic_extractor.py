@@ -63,7 +63,8 @@ async def _dl(fk, nodes):
 
 def _run(**over):
     kw = dict(lane_meta=_meta, lane_semantic=_sem(), lane_binding=_binding,
-              get_figma_data=_gfd, download_images=_dl, do_assets=False)
+              get_figma_data=_gfd, download_images=_dl, do_assets=False,
+              do_token_catalog=False)  # Lane 7 has its own suite (test_token_catalog.py); keep these net-free
     kw.update(over)
     return asyncio.run(d.run_deterministic_extraction(FILE_KEY, **kw))
 
