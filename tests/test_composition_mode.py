@@ -8,6 +8,7 @@ import asyncio
 import copy
 import os
 
+import httpx
 import pytest
 
 import agents.figma_extractor.composition_mode as cm
@@ -230,6 +231,62 @@ def test_live_smoke_composition_extraction_modules():
 
 async def _wrap(v):
     return v
+
+
+# ---- Pathway B 429 backoff (task pathway-b-429-backoff-hardening) ----------
+def test_get_with_backoff_retries_429_then_succeeds(monkeypatch):
+    monkeypatch.setattr(pb, "_BACKOFF", (0.0, 0.0, 0.0))  # no real sleeping
+    calls = {"n": 0}
+
+    def handler(req):
+        calls["n"] += 1
+        return httpx.Response(429 if calls["n"] < 3 else 200, json={"ok": True})
+
+    async def go():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as c:
+            return await pb._get_with_backoff(c, "https://x/y", {})
+    r = asyncio.run(go())
+    assert calls["n"] == 3 and r.status_code == 200  # retried past two 429s
+
+
+def test_get_with_backoff_exhausts_and_raises(monkeypatch):
+    monkeypatch.setattr(pb, "_BACKOFF", (0.0, 0.0))
+
+    def handler(req):
+        return httpx.Response(429, text="Too Many Requests")
+
+    async def go():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as c:
+            await pb._get_with_backoff(c, "https://x/y", {})
+    with pytest.raises(httpx.HTTPStatusError):
+        asyncio.run(go())  # exhausted -> raises -> caller records malformed_node_data (fail-loud)
+
+
+def test_run_pathway_b_recovers_page_from_429(monkeypatch):
+    monkeypatch.setattr(pb, "_BACKOFF", (0.0, 0.0, 0.0))
+    node_calls = {"n": 0}
+
+    def handler(req):
+        path = req.url.path
+        if path.endswith("/files/F"):  # pages fetch (depth=1)
+            return httpx.Response(200, json={"document": {"id": "d", "name": "doc", "type": "DOCUMENT",
+                                                          "children": [{"id": "p1", "name": "P1"}]}})
+        if path.endswith("/nodes"):
+            node_calls["n"] += 1
+            if node_calls["n"] < 3:  # 429 twice, then 200
+                return httpx.Response(429, text="Too Many Requests")
+            return httpx.Response(200, json={"nodes": {"p1": {"document": {
+                "id": "p1", "name": "P1", "type": "CANVAS",
+                "children": [{"id": "1", "name": "F", "type": "FRAME", "children": []}]}, "components": {}}}})
+        return httpx.Response(404)
+
+    async def go():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as c:
+            return await pb.run_pathway_b("F", client=c)
+    r = asyncio.run(go())
+    assert r["pathway_b_status"] == "success"  # page recovered via backoff, NOT failed
+    assert r["page_count"] == 1 and r["frame_count_total"] == 1
+    assert node_calls["n"] == 3 and not r["failure_reports"]
 
 
 @pytest.mark.skipif(not _HAS_PAT, reason="FIGMA_PAT not in env — live smoke skipped")
