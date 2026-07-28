@@ -17,7 +17,13 @@ from datetime import UTC, datetime
 
 import httpx
 
-_BACKOFF = (1.0, 3.0, 8.0)  # (1,3,8)s — same pattern as Lane 1 _default_get_figma_data (MR !15)
+# (2,5,12,30)s × 4 retries — strengthened from (1,3,8)×3 (MR !22) after DGX (36 pages) 429'd 32/36.
+# Only kicks in on 429/timeout/5xx, so Helix-scale (mostly first-try 200) latency is unchanged.
+_BACKOFF = (2.0, 5.0, 12.0, 30.0)
+# Adaptive inter-page pacing: spread Figma API load on LARGE files only. Files at/under the threshold
+# (Helix_Modules = 17 pages) get NO pacing → baseline latency preserved (<20% constraint).
+_PACING_PAGE_THRESHOLD = 20
+_INTER_PAGE_PACE_S = 0.5
 
 
 async def _sleep(seconds: float) -> None:  # indirection so tests can stub the backoff wait
@@ -117,7 +123,10 @@ async def run_pathway_b(file_key: str, *, client: httpx.AsyncClient | None = Non
             return _result(file_key, "partial", pages_summary, composition_tree, remote_references,
                            failure_reports, gaps)
 
-        for page in pages:  # page order (deterministic)
+        pace = len(pages) > _PACING_PAGE_THRESHOLD  # adaptive: only large files pace between fetches
+        for _i, page in enumerate(pages):  # page order (deterministic)
+            if _i and pace:
+                await _sleep(_INTER_PAGE_PACE_S)  # deterministic spacing; spreads API load, defuses 429s
             pid, pname = page.get("id"), page.get("name")
             try:
                 wrap = await fn(file_key, pid, page_fetch_depth)
