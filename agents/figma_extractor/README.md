@@ -48,6 +48,31 @@ backed by `tests/fixtures/framelink_0_13_2_node_57_766.json`) asserts the top-le
 `[metadata, nodes, globalVars]` (+`elements`) — it fails loud if a future Framelink bump silently
 changes the schema, closing the process gap that let the default-format flip reach prod.
 
+### Two-mode extraction + per-client orchestration (Path C rev.3.1) — ADDITIVE, Phase A
+
+The extractor now has **two modes**:
+- **Library mode** (`deterministic.py`) — published-library files like **Core** (Lanes 1/2/3/5/7).
+- **Composition mode** (`composition_mode.py`) — client / **Modules** files whose organisms live as
+  page frames (0 published entities). Runs **Pathway B** (`pathway_b_traversal.py`) + Lane 5 + **Lane 6**;
+  **skips Lane 2** (0/0/0 on composition files); Lane 7 optional (no token blob → handled gracefully).
+
+**Pathway B** (`pathway_b_traversal.run_pathway_b`) — deterministic page-frame walk (page order, then
+depth-first — matches Lane 6 traversal order), bounded depth (default 20) + per-page frame cap. Emits a
+`composition_tree` + the `remote:true` references Lane 6 consumes. Fail-loud: `file_inaccessible`,
+`empty_composition_file`, `traversal_depth_exceeded`, `malformed_node_data`.
+
+**Per-client entry point** — `composition_mode.extract_client_design_system(core_file_key,
+client_file_key, additional_library_keys=[], freshness_threshold_days=7)`:
+1. Library-mode Core extraction, **cached** per `(core_key, lastModified)` (MLOps/FinOps win),
+2. Composition-mode client extraction (Pathway B → remote refs),
+3. Lane 6 streaming resolution against `[core] + additional_library_keys` (UNBOUNDED N),
+4. Unified output + reconciliation contract. `emit` callback forwards Lane 6 events to SSE. Zero LLM.
+
+Proven end-to-end live (Modules→Core, all 17 pages): 925 frames, 63 remote refs, **23/25 unique
+resolved (92%)**. **Scope note:** the deployed AgentOS *workflow* registration of
+`extract_client_design_system` is the remaining thin wire (the orchestration function + SSE `emit`
+callback are complete and live-proven; registering a second Agno Workflow entry is a follow-up).
+
 ### Lane 6 — Cross-File Library Resolution (STREAMING) — ADDITIVE, Phase A
 
 `cross_file_resolution.py` (`resolve_stream` / `resolve`) resolves `remote:true` component references
