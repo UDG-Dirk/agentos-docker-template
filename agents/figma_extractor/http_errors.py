@@ -352,6 +352,91 @@ def make_scope_classifier(target_key: str, *, reference_key: str | None = None):
     return _classify
 
 
+# ===========================================================================================
+# 403 classification — "File not exportable" content-protection lock (task: file-export-disabled)
+# ===========================================================================================
+# B-S 2026-07-28: a published library can be REST-body-export-LOCKED — /files & /nodes return
+# 403 "File not exportable" while Lane 2 (/components,/component_sets,/styles) stays 200. Distinct
+# from an Enterprise-scope 403 ("Invalid scope") and from an auth-failure 403 (bad PAT). Detected by
+# a STABLE substring on the 403 body; other 403s keep their existing handling untouched.
+_EXPORT_LOCK_MARKER = "not exportable"      # "File not exportable" (case-insensitive substring)
+_ENTERPRISE_SCOPE_MARKER = "invalid scope"  # Enterprise scope gate
+
+
+def classify_forbidden(body_text: str | None) -> str:
+    """Sub-classify a 403 body: 'file_export_disabled' | 'enterprise_scope' | 'forbidden'.
+    Deterministic, case-insensitive substring match on stable Figma markers (zero-LLM)."""
+    t = (body_text or "").lower()
+    if _EXPORT_LOCK_MARKER in t:
+        return "file_export_disabled"
+    if _ENTERPRISE_SCOPE_MARKER in t:
+        return "enterprise_scope"
+    return "forbidden"
+
+
+def classify_http_error(status_code: int, body_text: str | None = "") -> str:
+    """Distinct error_class for an HTTP error status (403 → forbidden sub-categories). Deterministic."""
+    if status_code == 403:
+        return classify_forbidden(body_text)
+    if status_code == 401:
+        return "auth_failure"
+    if status_code == 429:
+        return "rate_limit"
+    if status_code == 404:
+        return "not_found"
+    if 500 <= status_code < 600:
+        return "server_error"
+    return "client_error"
+
+
+def file_export_disabled_report(*, affected_lane: str, figma_message: str = "File not exportable") -> dict:
+    """Structured, actionable guidance for a 'File not exportable' 403. Operators see immediately that
+    it's a client-side file setting (owner must unlock export), NOT a pipeline/auth bug."""
+    return {
+        "error_class": "file_export_disabled",
+        "http_status": 403,
+        "error_message_from_figma": figma_message,
+        "explanation": (
+            "The file has a content-protection setting enabled: REST body/node export is blocked "
+            "while published-library metadata endpoints (Lane 2) remain accessible."
+        ),
+        "action_required": (
+            "File owner must disable content-protection (Figma: file → Share → turn OFF "
+            "'Disable copying/exporting of this file'), or grant export-enabled access."
+        ),
+        "affected_lane": affected_lane,
+        "accessible_lanes": "Lane 2 (published-library metadata) if the file publishes anything",
+        "unblock_channel": "Cross-team ping to the file owner (client-side setting, not a pipeline fix)",
+        "provenance": {"llm_involvement": "none"},
+    }
+
+
+class FileExportDisabledError(Exception):
+    """Raised in place of a bare 403 when the body is the 'File not exportable' content-protection lock,
+    so raise-based lanes (Pathway B, Lane 7) can surface a distinct `file_export_disabled` failure."""
+
+    def __init__(self, figma_message: str = "File not exportable") -> None:
+        super().__init__(f"file_export_disabled: {figma_message}")
+        self.figma_message = figma_message
+
+
+def raise_for_figma_status(resp: httpx.Response) -> None:
+    """Like ``resp.raise_for_status()`` but raises ``FileExportDisabledError`` for the export-lock 403
+    (stable marker) so callers classify it distinctly. All other statuses raise as usual (unchanged)."""
+    if resp.status_code == 403 and _EXPORT_LOCK_MARKER in (resp.text or "").lower():
+        raise FileExportDisabledError(_extract_figma_err(resp.text) or "File not exportable")
+    resp.raise_for_status()
+
+
+def _extract_figma_err(body_text: str | None) -> str | None:
+    """Best-effort pull of Figma's ``err`` message from a JSON error body; None if absent/unparseable."""
+    import json
+    try:
+        v = json.loads(body_text or "")
+    except (ValueError, TypeError):
+        return None
+    return v.get("err") if isinstance(v, dict) and isinstance(v.get("err"), str) else None
+
 # Phase 0 (v3): emit the config warning once at module import — the app imports this at boot via the
 # workflow modules, so an unset reference is loud in Coolify startup logs.
 check_rate_limit_reference_config()

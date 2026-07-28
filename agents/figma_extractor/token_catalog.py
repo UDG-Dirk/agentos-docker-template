@@ -16,6 +16,8 @@ from datetime import UTC, datetime
 
 import httpx
 
+from agents.figma_extractor.http_errors import FileExportDisabledError, raise_for_figma_status
+
 # --------------------------------------------------------------------------- constants
 LANE = "lane-7-token-catalog"
 LANE_VERSION = "lane-7-token-catalog-v0-1-2"
@@ -329,7 +331,7 @@ async def _default_fetch_shared(file_key: str, client: httpx.AsyncClient | None 
     try:
         resp = await client.get(f"{_FIGMA_API_BASE}/files/{file_key}",
                                 params={"depth": 1, "plugin_data": "shared"})
-        resp.raise_for_status()
+        raise_for_figma_status(resp)  # export-lock 403 -> FileExportDisabledError (distinct)
         return resp.json()
     finally:
         if own:
@@ -371,6 +373,10 @@ async def run_token_catalog(file_key: str, *, session=None, client: httpx.AsyncC
         if shared_doc is None:
             fetcher = fetch_shared or _default_fetch_shared
             shared_doc = await fetcher(file_key, client) if fetch_shared is None else await fetcher(file_key)
+    except FileExportDisabledError as e:  # content-protection lock — distinct, actionable
+        failure_reports.append(_fail("file_export_disabled", f"{file_key}: {e.figma_message}"))
+        status = "failure"
+        return cat()
     except Exception as e:  # noqa: BLE001 — fetch failure is a lane failure, surfaced not raised
         failure_reports.append(_fail("shared_fetch_error", f"{file_key}: {e!r}"))
         status = "failure"

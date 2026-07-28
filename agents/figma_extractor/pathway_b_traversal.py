@@ -17,6 +17,8 @@ from datetime import UTC, datetime
 
 import httpx
 
+from agents.figma_extractor.http_errors import FileExportDisabledError, raise_for_figma_status
+
 # (2,5,12,30)s × 4 retries — strengthened from (1,3,8)×3 (MR !22) after DGX (36 pages) 429'd 32/36.
 # Only kicks in on 429/timeout/5xx, so Helix-scale (mostly first-try 200) latency is unchanged.
 _BACKOFF = (2.0, 5.0, 12.0, 30.0)
@@ -45,7 +47,8 @@ async def _get_with_backoff(client: httpx.AsyncClient, url: str, params: dict) -
         if attempt < len(_BACKOFF) and (resp.status_code == 429 or 500 <= resp.status_code < 600):
             await _sleep(_BACKOFF[attempt])
             continue
-        resp.raise_for_status()  # final 429 / other client errors surface -> malformed_node_data
+        # export-lock 403 -> FileExportDisabledError (distinct); other errors surface as before.
+        raise_for_figma_status(resp)  # final 429 / other client errors -> malformed_node_data
         return resp
     raise RuntimeError("unreachable")  # pragma: no cover
 
@@ -114,6 +117,10 @@ async def run_pathway_b(file_key: str, *, client: httpx.AsyncClient | None = Non
     try:
         try:
             pages = await fp(file_key)
+        except FileExportDisabledError as e:  # content-protection lock — distinct, actionable
+            fail("file_export_disabled", f"{file_key}: {e.figma_message}")
+            return _result(file_key, "failure", pages_summary, composition_tree, remote_references,
+                           failure_reports, gaps)
         except Exception as e:  # noqa: BLE001
             fail("file_inaccessible", f"{file_key}: {e!r}")
             return _result(file_key, "failure", pages_summary, composition_tree, remote_references,
@@ -130,6 +137,10 @@ async def run_pathway_b(file_key: str, *, client: httpx.AsyncClient | None = Non
             pid, pname = page.get("id"), page.get("name")
             try:
                 wrap = await fn(file_key, pid, page_fetch_depth)
+            except FileExportDisabledError as e:  # export lock mid-traversal -> fail loud, distinct
+                fail("file_export_disabled", f"page {pname} ({pid}): {e.figma_message}")
+                status = "failure"
+                break
             except Exception as e:  # noqa: BLE001
                 fail("malformed_node_data", f"page {pname} ({pid}): {e!r}")
                 gaps.append(f"page {pname} unreadable")
