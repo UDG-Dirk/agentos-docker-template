@@ -20,6 +20,11 @@ from agno.workflow import Step, Workflow
 from agno.workflow.types import StepInput, StepOutput
 
 from agents.figma_extractor.composition_mode import extract_client_design_system
+from agents.figma_extractor.http_errors import (
+    make_account_probe,
+    make_scope_classifier,
+    with_account_level_retry,
+)
 from db import get_postgres_db
 
 _KEY_RE = re.compile(r"/(?:file|design)/([A-Za-z0-9]{20,40})")
@@ -101,12 +106,22 @@ async def client_extract_executor(step_input: StepInput, **kwargs) -> StepOutput
     if not req:
         return StepOutput(content=_missing_params_prompt(str(message)), success=False)
     events: list = []
-    result = await extract_client_design_system(
-        req["core_file_key"], req["client_file_key"],
-        additional_library_keys=req["additional_library_keys"],
-        freshness_threshold_days=req["freshness_threshold_days"] or 7,
-        emit=events.append,  # Lane 6 events forwarded (also present in client_extraction.resolution_events)
+    # Guarded against account-level 429 (bounded auto-retry + escalation) at the orchestration level;
+    # per-page 429s still handled inside each lane. Probe the client (composition) file key.
+    result = await with_account_level_retry(
+        run_extraction=lambda: extract_client_design_system(
+            req["core_file_key"], req["client_file_key"],
+            additional_library_keys=req["additional_library_keys"],
+            freshness_threshold_days=req["freshness_threshold_days"] or 7,
+            emit=events.append,  # Lane 6 events forwarded (also in client_extraction.resolution_events)
+        ),
+        probe=make_account_probe(req["client_file_key"]),
+        scope_classifier=make_scope_classifier(req["client_file_key"]),
+        target_key=req["client_file_key"],
     )
+    # Account-level escalation short-circuits before extraction -> flat throttled failure (no client_extraction).
+    if result.get("error_class") == "account_level_rate_limit":
+        return StepOutput(content=result, success=False)
     ce = result.get("client_extraction") or {}
     ok = ce.get("status") != "failure" and not ce.get("pathway_b_status") == "failure"
     return StepOutput(content=result, success=ok)

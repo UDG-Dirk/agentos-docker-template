@@ -70,7 +70,12 @@ def test_executor_composition_only(monkeypatch):
     async def fake_run(fk, *, registered_libraries, file_role):
         captured.update(fk=fk, libs=registered_libraries, role=file_role)
         return {"extraction_mode": "composition-only", "status": "success"}
+
+    async def not_throttled():  # isolate the account-429 guard's probe -> offline, no real backoff
+        import agents.figma_extractor.http_errors as he
+        return he.ProbeResult(False)
     monkeypatch.setattr(w, "run_composition_extraction", fake_run)
+    monkeypatch.setattr(w, "make_account_probe", lambda fk: not_throttled)
     out = asyncio.run(w.composition_only_executor(StepInput(input=f"design/{DGX}")))
     assert out.success is True and captured["fk"] == DGX and captured["libs"] == []
     assert captured["role"] == "self_contained"
