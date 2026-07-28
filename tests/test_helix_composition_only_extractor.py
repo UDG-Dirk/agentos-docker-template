@@ -55,6 +55,36 @@ def test_backward_compat_libraries_provided_runs_lane6():
     assert r["extraction_mode"] == "composition"  # NOT composition-only when a library is registered
     assert r["resolution_summary"]["references_resolved"] == 2  # Lane 6 ran
     assert "lane6_note" not in r
+    assert r["warnings"] == []  # normal composition mode -> no FM-2 warning
+
+
+# ---- FM-2 mitigation: composition-only + 0 remote refs -> explicit output warning ----
+def test_composition_only_zero_refs_emits_warning():
+    r = asyncio.run(cm.run_composition_extraction(DGX, registered_libraries=[],
+                                                  pathway_b=_pb_result(remote=0), now=lambda: "T"))
+    assert r["extraction_mode"] == "composition-only" and r["remote_reference_count"] == 0
+    assert len(r["warnings"]) == 1
+    warn = r["warnings"][0]
+    assert warn["event_type"] == "composition_only_mode_no_remote_refs"
+    assert warn["severity"] == "warning"
+    assert warn["extraction_still_succeeded"] is True
+    assert warn["lane6_status"] == "skipped_self_contained"
+    assert isinstance(warn["reference_files_to_check"], list) and warn["reference_files_to_check"]
+    assert r["status"] == "success"  # warning is informational, does NOT change status
+
+
+def test_composition_only_with_refs_no_warning():
+    r = asyncio.run(cm.run_composition_extraction(DGX, registered_libraries=[],
+                                                  pathway_b=_pb_result(remote=3), now=lambda: "T"))
+    assert r["extraction_mode"] == "composition-only" and r["remote_reference_count"] == 3
+    assert r["warnings"] == []  # composition-only WITH remote refs -> no FM-2 warning
+
+
+def test_composition_only_zero_refs_warning_deterministic():
+    def run():
+        return asyncio.run(cm.run_composition_extraction(DGX, registered_libraries=[],
+                                                         pathway_b=_pb_result(remote=0), now=lambda: "T"))
+    assert run()["warnings"] == run()["warnings"]  # byte-identical for identical 0-ref input
 
 
 # ---- workflow: parsing + executor + registration --------------------------

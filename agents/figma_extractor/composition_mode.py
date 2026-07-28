@@ -105,12 +105,35 @@ async def run_composition_extraction(
         "provenance": {"extraction_mode": mode, "traversal": "pathway-b",
                        "resolution": ("skipped-self-contained" if composition_only else "lane-6-streaming"),
                        "llm_involvement": "none"},
+        "warnings": [],
         "extracted_at": now(),
     }
     if composition_only:
         out["lane6_note"] = ("Lane 6 skipped — self-contained/unpublished file, no external library "
                              "registered. Local components live in composition_tree; any remote refs "
                              f"({pb_result.get('remote_reference_count', 0)}) are reported but not resolved.")
+        # FM-2 mitigation: composition-only + 0 remote refs is ambiguous — genuinely self-contained
+        # (Pattern 3) OR a Pattern-2 file whose remote refs failed detection (misdiagnosed). Surface an
+        # explicit, deterministic warning in the OUTPUT (not just logs) so Lane 6 is never silently skipped.
+        if pb_result.get("remote_reference_count", 0) == 0:
+            out["warnings"].append({
+                "event_type": "composition_only_mode_no_remote_refs",
+                "severity": "warning",
+                "explanation": ("Composition-only mode extracted this file with 0 remote references "
+                                "detected. Two possibilities: (a) file is genuinely self-contained "
+                                "(Pattern 3) - no action needed; (b) file has remote references that "
+                                "failed detection (Pattern 2 misdiagnosed) - cross-file resolution "
+                                "silently skipped."),
+                "action_required": ("Verify file architecture. If Pattern 2 (composition consumes "
+                                    "external Core), re-run via helix-client-extractor with "
+                                    "core=<foundation_key> client=<this_key>. If genuinely Pattern 3 "
+                                    "(self-contained), no action needed."),
+                "reference_files_to_check": ["Cover page for foundation reference notes",
+                                             "Layout page for design system link",
+                                             "any page with a 'consumes:' or 'uses:' annotation"],
+                "extraction_still_succeeded": True,
+                "lane6_status": "skipped_self_contained",
+            })
     return out
 
 
