@@ -69,9 +69,23 @@ client_file_key, additional_library_keys=[], freshness_threshold_days=7)`:
 4. Unified output + reconciliation contract. `emit` callback forwards Lane 6 events to SSE. Zero LLM.
 
 Proven end-to-end live (Modules→Core, all 17 pages): 925 frames, 63 remote refs, **23/25 unique
-resolved (92%)**. **Scope note:** the deployed AgentOS *workflow* registration of
-`extract_client_design_system` is the remaining thin wire (the orchestration function + SSE `emit`
-callback are complete and live-proven; registering a second Agno Workflow entry is a follow-up).
+resolved (92%)**.
+
+**Deployed workflow** — `extract_client_design_system` is registered as the AgentOS workflow
+**`helix-client-extractor`** (`app/workflows/helix_client_extractor.py`, in `app/main.py`'s
+`workflows=[…]`). Invoke via the direct-REST pattern; the run **message** carries two Figma
+keys/URLs (core first, client second) plus optional `additional=<k1,k2>` and `freshness=<days>`:
+
+```bash
+curl -sN -H "Authorization: Bearer $AGNO_MCP_TOKEN" \
+  -X POST https://poc-agno-api.services.plygrnd.tech/workflows/helix-client-extractor/runs \
+  --data-urlencode 'message=core=8qPSyetzviLR6eF6bkpL44 client=qMi5B9YeqAf9Ik1yN6erw4' \
+  --data-urlencode 'background=true'
+```
+
+Lane 6 streaming events ride, in deterministic order, inside the result's
+`client_extraction.resolution_events` (the workflow SSE emits Step events; per-event interleaving
+onto the workflow SSE beyond that is bounded by Agno's step-event model).
 
 ### Lane 6 — Cross-File Library Resolution (STREAMING) — ADDITIVE, Phase A
 
