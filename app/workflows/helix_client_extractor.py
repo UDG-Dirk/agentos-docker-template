@@ -59,18 +59,47 @@ def _parse_client_request(message: str) -> dict:
     return out
 
 
+def _missing_params_prompt(message: str) -> dict:
+    """Actionable prompt returned when required keys are absent — the 'give the user a chance to enter
+    their libs' UX (Dirk 2026-07-28). MCP/REST callers render this structured guidance instead of a
+    terse error, then re-invoke with the params. Deterministic, zero-LLM.
+
+    NOTE (Phase A investigation): true interactive elicitation is NOT available on the current surface —
+    the agno-prod MCP exposes a GENERIC `run_workflow(workflow_id, message)` (one string input, no
+    per-workflow typed params, no MCP `elicitation/create`), and Agno HITL is output-review, not
+    input-collection. So this structured prompt-on-missing is the achievable mechanism; first-class
+    elicitation would need an Agno/MCP capability we don't have (escalated in the deliverable)."""
+    found = _KEY_RE.findall(message or "") or _BARE_RE.findall(message or "")
+    return {
+        "workflow": "extract_client_design_system",
+        "status": "needs_parameters",
+        "needs_parameters": True,
+        "error_class": "missing_file_keys",
+        "message": "This workflow needs two Figma file keys. Re-invoke with them in the run message.",
+        "required": {
+            "core_file_key": "foundation/Core library file key (or a figma.com/design/<key>/… URL)",
+            "client_file_key": "client/composition file key (or URL)",
+        },
+        "optional": {
+            "additional_library_keys": "comma-separated extra library keys — 'additional=<k1>,<k2>'",
+            "freshness_threshold_days": "integer, default 7 — 'freshness=14'",
+        },
+        "message_format": "core=<coreKey> client=<clientKey> [additional=<k1>,<k2>] [freshness=<days>]",
+        "examples": [
+            "core=8qPSyetzviLR6eF6bkpL44 client=qMi5B9YeqAf9Ik1yN6erw4",
+            "https://www.figma.com/design/<coreKey>/Core https://www.figma.com/design/<clientKey>/Client",
+        ],
+        "detected_keys_in_message": found,
+    }
+
+
 async def client_extract_executor(step_input: StepInput, **kwargs) -> StepOutput:
     """Parse the two file keys from the run message and run the per-client multi-file extraction.
-    Never raises past the step boundary."""
+    Missing keys -> a structured, actionable parameters prompt (not a terse error). Never raises."""
     message = step_input.input or step_input.previous_step_content or ""
     req = _parse_client_request(str(message))
     if not req:
-        return StepOutput(
-            content={"workflow": "extract_client_design_system", "error": True,
-                     "error_class": "missing_file_keys",
-                     "message": "need two Figma keys/URLs in the run message (core first, client second; "
-                                "or 'core=<key> client=<key>')"},
-            success=False)
+        return StepOutput(content=_missing_params_prompt(str(message)), success=False)
     events: list = []
     result = await extract_client_design_system(
         req["core_file_key"], req["client_file_key"],

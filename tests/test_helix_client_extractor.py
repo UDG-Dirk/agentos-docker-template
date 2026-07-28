@@ -65,6 +65,18 @@ def test_executor_missing_keys_fails_cleanly(monkeypatch):
     out = asyncio.run(w.client_extract_executor(StepInput(input="no keys here")))
     assert out.success is False and out.content["error_class"] == "missing_file_keys"
     assert called["n"] == 0  # never invoked extraction without two keys
+    # rich, actionable parameters prompt (the "let the user enter their libs" UX)
+    c = out.content
+    assert c["needs_parameters"] is True
+    assert "core_file_key" in c["required"] and "client_file_key" in c["required"]
+    assert "additional_library_keys" in c["optional"] and c["examples"] and "message_format" in c
+
+
+def test_missing_params_prompt_reports_detected_partial_key():
+    # one key present -> still prompts (needs TWO), and surfaces what it did detect
+    out = asyncio.run(w.client_extract_executor(StepInput(input=f"only {CORE}")))
+    assert out.success is False and out.content["needs_parameters"] is True
+    assert CORE in out.content["detected_keys_in_message"]
 
 
 def test_executor_marks_failure_on_failed_client_extraction(monkeypatch):
