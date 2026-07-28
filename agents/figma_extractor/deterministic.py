@@ -42,6 +42,7 @@ from agents.figma_extractor.models import (
     PageInfo,
     TokenEntry,
 )
+from agents.figma_extractor.token_catalog import run_token_catalog
 
 PIPELINE = "figma-extractor-deterministic-v0-1"
 _LANE_VERSIONS = {"lane_2": "v0.2", "lane_3": "v0.1", "lane_5": "v0.1"}
@@ -288,6 +289,9 @@ async def run_deterministic_extraction(
     get_figma_data=None,
     download_images=None,
     do_assets: bool = True,
+    do_token_catalog: bool = True,
+    token_catalog_shared_doc=None,
+    freshness_threshold_days=None,
 ) -> dict:
     """Deterministic Step-1 extraction. All collaborators injectable for tests; defaults wire the
     real Lane funcs + Framelink MCP session. Returns a FigmaExtractionResult-shaped dict with the
@@ -486,4 +490,25 @@ async def run_deterministic_extraction(
 
     content = fer.model_dump()
     content["deterministic_extraction"] = section5  # §5 envelope nested (FER coercion drops it)
+
+    # 1.7 Lane 7 — Token Catalog (ADDITIVE, Phase A; spec:lane-7-token-catalog v0.1.2). Self-contained:
+    # its own status/failure_reports live under content["token_catalog"]; does NOT flip the main status
+    # (no downstream consumer yet). Divergence (Step 7.9) reads Lane-3's unique VariableID count.
+    if do_token_catalog:
+        lane3_vids = {b.get("variable_id") for node in bindings_payload.values()
+                      for grp in ("property_bindings", "component_property_bindings")
+                      for b in (node.get(grp) or {}).values() if b.get("variable_id")}
+        try:
+            tc = await run_token_catalog(
+                file_key, session=session, file_last_modified=last_touched,
+                lane3_variableid_count=(len(lane3_vids) if lane3_vids else None),
+                freshness_threshold_days=freshness_threshold_days,
+                shared_doc=token_catalog_shared_doc,
+            )
+            content["token_catalog"] = tc["token_catalog"]
+            content["reconciliation_contract"] = tc["reconciliation_contract"]
+        except Exception as e:  # noqa: BLE001 — Lane 7 is additive; never break the extraction
+            content["token_catalog"] = {"status": "failure", "source": "tokens-studio-shared-plugin-data",
+                                        "failure_reports": [{"error_class": "lane7_unexpected_error",
+                                                             "message": repr(e)[:300]}]}
     return content

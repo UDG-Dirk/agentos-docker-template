@@ -48,6 +48,35 @@ backed by `tests/fixtures/framelink_0_13_2_node_57_766.json`) asserts the top-le
 `[metadata, nodes, globalVars]` (+`elements`) — it fails loud if a future Framelink bump silently
 changes the schema, closing the process gap that let the default-format flip reach prod.
 
+### Lane 7 — Token Catalog (Tokens Studio) — ADDITIVE, Phase A
+
+`token_catalog.py` (`run_token_catalog`) extracts the **authoritative** design-token catalog from
+`document.sharedPluginData.tokens` — a **Tokens Studio** export (DTCG-claimed, legacy `name/value/type`
+keys), **PAT-accessible, no Enterprise** (the Figma Variables REST API is Enterprise-gated). The
+`values` blob is **LZString-UTF16** compressed and decompressed by a **pure-Python** port (zero deps,
+no subprocess, byte-identical to the `lz-string` npm reference). Spec: `spec:lane-7-token-catalog-v0-1-draft`
+v0.1.2.
+
+Emits two additive top-level fields on the extractor output (Phase A — no downstream consumer yet):
+- **`token_catalog`** — 720 tokens with `name`, `type`, `value_raw` + `value_resolved` (aliases emitted
+  BOTH ways; multi-hop bounded to 10 with cycle detection; deterministic resolution order = `primitive/Core`
+  then semantic sets alphabetical), `mode` (set-per-breakpoint: `semantic-dimension/{Tablet,Phone,Desktop,Wide}`;
+  dark-mode-ready via multi-variant-category detection), `$extensions` (scopes, hiddenFromPublishing),
+  plus `freshness_status`, `divergence_status`, `token_sets`, `modes_detected`, `unrecognized_schema_fields`.
+- **`reconciliation_contract`** — the `authoritative_catalog_with_usage_evidence_fallback` policy downstream
+  stations follow to reconcile Lane 7 (authoritative names) with Lane 1 (usage-derived values).
+
+**Fail-loud error classes (§7):** `missing_shared_plugin_data`, `tokens_studio_major_version_incompatible`,
+`lzstring_{empty,truncated,invalid_encoding,corrupt_data,iteration_bound_exceeded}_input`, `dtcg_parse_error`,
+`unrecognized_schema_field` / `unrecognized_extension_namespace`, `freshness_suspect`, `catalog_divergence_suspect`.
+Lane 7 is **self-contained**: its status/failure_reports live under `token_catalog`; it does **not** flip the
+main extraction status (Phase A additive — a stale-blob soft signal must not turn every run partial).
+
+**Version discipline:** parser verified against Tokens Studio `2.11.5`. patch bump → warn; minor → `partial`;
+**major → `failure`** (no parse). Freshness threshold: 7 days default, override via workflow param or
+`HELIX_LANE7_FRESHNESS_THRESHOLD_DAYS`. Divergence (Step 7.9): signal-only count-delta vs Lane 3's unique
+VariableIDs (>20% more referenced than catalogued → `catalog_divergence_suspect`).
+
 ### Fail-loud per-set enrichment (spec §3 — "fail loud, not silent")
 
 Per component_set, `get_figma_data` enrichment is classified before any data is emitted
