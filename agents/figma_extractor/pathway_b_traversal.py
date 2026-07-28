@@ -11,10 +11,37 @@ file_inaccessible, empty_composition_file, traversal_depth_exceeded, malformed_n
 """
 from __future__ import annotations
 
+import asyncio
 import os
 from datetime import UTC, datetime
 
 import httpx
+
+_BACKOFF = (1.0, 3.0, 8.0)  # (1,3,8)s — same pattern as Lane 1 _default_get_figma_data (MR !15)
+
+
+async def _sleep(seconds: float) -> None:  # indirection so tests can stub the backoff wait
+    await asyncio.sleep(seconds)
+
+
+async def _get_with_backoff(client: httpx.AsyncClient, url: str, params: dict) -> httpx.Response:
+    """GET with (1,3,8)s backoff-retry on 429 / timeout / 5xx (composition-mode page fetches share the
+    PAT with Core extraction, so the tail gets throttled). On exhaustion, raises — the caller records a
+    fail-loud failure_report (P1a discipline preserved; retries reduce noise, never hide failures)."""
+    for attempt in range(len(_BACKOFF) + 1):
+        try:
+            resp = await client.get(url, params=params)
+        except httpx.TimeoutException:
+            if attempt == len(_BACKOFF):
+                raise
+            await _sleep(_BACKOFF[attempt])
+            continue
+        if attempt < len(_BACKOFF) and (resp.status_code == 429 or 500 <= resp.status_code < 600):
+            await _sleep(_BACKOFF[attempt])
+            continue
+        resp.raise_for_status()  # final 429 / other client errors surface -> malformed_node_data
+        return resp
+    raise RuntimeError("unreachable")  # pragma: no cover
 
 LANE = "pathway-b-traversal"
 _FIGMA_API_BASE = "https://api.figma.com/v1"
@@ -34,16 +61,14 @@ def _figma_pat() -> str:
 
 
 async def _default_fetch_pages(file_key: str, client: httpx.AsyncClient) -> list[dict]:
-    resp = await client.get(f"{_FIGMA_API_BASE}/files/{file_key}", params={"depth": 1})
-    resp.raise_for_status()
+    resp = await _get_with_backoff(client, f"{_FIGMA_API_BASE}/files/{file_key}", {"depth": 1})
     doc = (resp.json().get("document") or {})
     return [{"id": c.get("id"), "name": c.get("name")} for c in (doc.get("children") or [])]
 
 
 async def _default_fetch_node(file_key: str, node_id: str, client: httpx.AsyncClient, depth: int) -> dict:
-    resp = await client.get(f"{_FIGMA_API_BASE}/files/{file_key}/nodes",
-                            params={"ids": node_id, "depth": depth})
-    resp.raise_for_status()
+    resp = await _get_with_backoff(client, f"{_FIGMA_API_BASE}/files/{file_key}/nodes",
+                                   {"ids": node_id, "depth": depth})
     return (resp.json().get("nodes") or {}).get(node_id) or {}
 
 
