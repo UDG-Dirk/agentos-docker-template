@@ -1,152 +1,183 @@
-# Figma Extractor — HELIX UC2 Pipeline Step 1
+# Figma Extractor — HELIX Pipeline Step 1 (DETERMINISTIC)
 
-> **Step 1 is now DETERMINISTIC (no LLM)** — spec `helix-poc-agno:spec:figma-extractor-deterministic-v0-1-draft` (RATIFIED).
-> `deterministic.py` (`run_deterministic_extraction`) replaced the LLM-orchestrated agent: reading
-> structured data from a structured API is not the LLM's job (the LLM invented component names not in
-> the authored roster — the fabrication surface). Fixed orchestration: Lane 5 meta → Lane 2 semantic
-> roster → per-component_set Framelink `get_figma_data` via `ClientSession.call_tool` (NO LLM) → Lane 3
-> bindings → asset download → Levenshtein+dictionary typo detection → compose. Same-input→same-output
-> (bulletproof). Emits a `FigmaExtractionResult`-shaped dict (Token Normalizer contract preserved) with
-> the §5 rich envelope nested under `deterministic_extraction`. `provenance.llm_involvement = "none"`.
-> The old LLM agent (`agent.py` + the drill-guard in the workflow) is retained as dead code / git
-> history per spec §9 (replace-in-place); removable in a cleanup follow-up.
+> **Deterministic Python. Zero LLM.** Reading structured data from a structured API is not the LLM's
+> job — the fabrication surface is unacceptable (previous LLM agent invented component names not in
+> the authored roster). Fixed orchestration, same-input→same-output, provenance on every emission,
+> fail loud on anything unusable.
+>
+> **Spec:** `helix-poc-agno:spec:figma-extractor-deterministic-v0-1-draft` v0.1.1 (RATIFIED).
+> `provenance.llm_involvement = "none"`.
 
-### Framelink pinned to 0.13.2 + `--format json` (required)
+## Architecture
 
-The Framelink server is spawned as `npx -y figma-developer-mcp@0.13.2 --stdio --format json`
-(`agent.py:_mcp_server_params`). Both the **pin** and the **format flag** are load-bearing:
+**Two-file design system context** (multi-instance productization):
+- **Core** (foundation) — atoms + molecules + Tokens Studio catalog. Shared substrate across all clients.
+- **Client instances** — organism compositions consuming Core (Modules is the white-label reference).
+  Reference Core (and optional additional libraries) via `remote:true` component instances.
 
-- **Version pin** — the arg was previously unpinned (`figma-developer-mcp`), so `npx` resolved a
-  stale **0.9.0** locally while the Dockerfile installs **0.13.2** globally in prod. That drift was
-  the root cause of the prod "thinness" (local rich, prod empty). The pin here MUST match the
-  Dockerfile's `npm install -g figma-developer-mcp@0.13.2`.
-- **`--format json`** — Framelink **v0.13.0 flipped the default output format from YAML to `tree`**
-  (PR #394). `tree` is a compact non-YAML format the distiller cannot parse (it surfaced as a YAML
-  `ScannerError` → every set failed). `--format json` returns the parseable
-  `[metadata, nodes, globalVars, elements]` schema. JSON (not `yaml`) is used deliberately — it
-  avoids the YAML edge-case surface that the `tree` default exposed.
+**Extractor has two modes to match this reality:**
 
-0.13.0 also **deduplicates** styles (a file's `globalVars.styles` shrinks vs 0.9.0's per-node
-duplicates) and adds an additive `elements` key whose `layout` fields are *references* into
-`globalVars.styles`. `_distill_tokens_from_globalvars` reads `globalVars.styles` and, via
-`_infer_style_category`, also distils **named** styles that carry no known prefix (e.g.
-`link/md/regular` → typography, `FocusRing` → effect) by inspecting the value shape — so token
-coverage is by-value, robust to naming/version changes, and never fabricated (opaque styleId name +
-resolved value). Note: a lower raw token count under 0.13.x is expected — it reflects dedup, not loss
-(0.9.0's ~733 raw tokens were ~67 distinct).
+| Mode | Target | Mechanism | Entry point |
+|---|---|---|---|
+| **Library** | Files publishing a component library (e.g. Core) | Lanes 1+2+3+5+7 | `deterministic.run_deterministic_extraction` |
+| **Composition** | Files with organisms as page frames (Modules, clients) | Pathway B + Lanes 1+5+6 (Lane 2 skipped; Lane 7 optional) | `composition_mode.run_composition_extraction` |
 
-**Rate-limit handling under load (0.13.x):** Framelink surfaces a Figma **429** two different ways —
-0.9.x as error *text* (`Too Many Requests`), **0.13.x as an *empty envelope*** (`metadata.components`
-and `globalVars.styles` both empty). `_default_get_figma_data` retries with backoff `(1,3,8)s` on
-**both** signals (`_is_rate_limited` OR `_is_empty_envelope`) — safe because a *component_set* is never
-legitimately empty. `_NODE_CONCURRENCY` is **2** (lowered from 3) to reduce throttle pressure on heavy
-subtrees (Input ≈ 233 KB, Button ≈ 141 KB). If a set is still empty after retries it is surfaced loud
-(`empty_response`), never silently dropped — the P1a fail-loud guard stays intact.
+**Per-client orchestration** — `composition_mode.extract_client_design_system(core_file_key, client_file_key, additional_library_keys=[], freshness_threshold_days=7)`:
+1. Library-mode Core extraction, **cached** per `(core_key, lastModified)`
+2. Composition-mode client extraction (Pathway B → remote refs)
+3. Lane 6 streaming resolution against `[core] + additional_library_keys` (UNBOUNDED N)
+4. Unified output + `reconciliation_contract`
 
-**Schema-guard test** (`tests/test_deterministic_extractor.py::test_framelink_0_13_2_schema_guard`,
-backed by `tests/fixtures/framelink_0_13_2_node_57_766.json`) asserts the top-level shape stays
-`[metadata, nodes, globalVars]` (+`elements`) — it fails loud if a future Framelink bump silently
-changes the schema, closing the process gap that let the default-format flip reach prod.
+**Live-proven end-to-end** (Modules → Core, all 17 pages): 925 frames, 63 remote refs, **23/25 unique resolved (92%)**.
 
-### Two-mode extraction + per-client orchestration (Path C rev.3.1) — ADDITIVE, Phase A
+## Deployed workflows
 
-The extractor now has **two modes**:
-- **Library mode** (`deterministic.py`) — published-library files like **Core** (Lanes 1/2/3/5/7).
-- **Composition mode** (`composition_mode.py`) — client / **Modules** files whose organisms live as
-  page frames (0 published entities). Runs **Pathway B** (`pathway_b_traversal.py`) + Lane 5 + **Lane 6**;
-  **skips Lane 2** (0/0/0 on composition files); Lane 7 optional (no token blob → handled gracefully).
+| Workflow | Purpose | Invocation |
+|---|---|---|
+| `helix-figma-extractor` | Library-mode single-file extraction (Core substrate) | `POST /workflows/helix-figma-extractor/runs` |
+| `helix-client-extractor` | Multi-file per-client extraction (Core + client + Lane 6 resolution) | `POST /workflows/helix-client-extractor/runs` |
 
-**Pathway B** (`pathway_b_traversal.run_pathway_b`) — deterministic page-frame walk (page order, then
-depth-first — matches Lane 6 traversal order), bounded depth (default 20) + per-page frame cap. Emits a
-`composition_tree` + the `remote:true` references Lane 6 consumes. Fail-loud: `file_inaccessible`,
-`empty_composition_file`, `traversal_depth_exceeded`, `malformed_node_data`.
-
-**Per-client entry point** — `composition_mode.extract_client_design_system(core_file_key,
-client_file_key, additional_library_keys=[], freshness_threshold_days=7)`:
-1. Library-mode Core extraction, **cached** per `(core_key, lastModified)` (MLOps/FinOps win),
-2. Composition-mode client extraction (Pathway B → remote refs),
-3. Lane 6 streaming resolution against `[core] + additional_library_keys` (UNBOUNDED N),
-4. Unified output + reconciliation contract. `emit` callback forwards Lane 6 events to SSE. Zero LLM.
-
-Proven end-to-end live (Modules→Core, all 17 pages): 925 frames, 63 remote refs, **23/25 unique
-resolved (92%)**.
-
-**Deployed workflow** — `extract_client_design_system` is registered as the AgentOS workflow
-**`helix-client-extractor`** (`app/workflows/helix_client_extractor.py`, in `app/main.py`'s
-`workflows=[…]`). Invoke via the direct-REST pattern; the run **message** carries two Figma
-keys/URLs (core first, client second) plus optional `additional=<k1,k2>` and `freshness=<days>`:
+**Direct-REST invocation examples:**
 
 ```bash
+# Library mode — Core-only extraction
+curl -sN -H "Authorization: Bearer $AGNO_MCP_TOKEN" \
+  -X POST https://poc-agno-api.services.plygrnd.tech/workflows/helix-figma-extractor/runs \
+  --data-urlencode 'message=8qPSyetzviLR6eF6bkpL44' \
+  --data-urlencode 'background=true'
+
+# Composition mode — full per-client extraction (Core + client + Lane 6 streaming resolution)
 curl -sN -H "Authorization: Bearer $AGNO_MCP_TOKEN" \
   -X POST https://poc-agno-api.services.plygrnd.tech/workflows/helix-client-extractor/runs \
   --data-urlencode 'message=core=8qPSyetzviLR6eF6bkpL44 client=qMi5B9YeqAf9Ik1yN6erw4' \
   --data-urlencode 'background=true'
 ```
 
-Lane 6 streaming events ride, in deterministic order, inside the result's
-`client_extraction.resolution_events` (the workflow SSE emits Step events; per-event interleaving
-onto the workflow SSE beyond that is bounded by Agno's step-event model).
+Optional `helix-client-extractor` params via message: `additional=<key1,key2>`, `freshness=<days>`.
+Lane 6 streaming events ride in the result's `client_extraction.resolution_events` in deterministic order.
 
-### Lane 6 — Cross-File Library Resolution (STREAMING) — ADDITIVE, Phase A
+## Modules
 
-`cross_file_resolution.py` (`resolve_stream` / `resolve`) resolves `remote:true` component references
-from a **composition file** (Modules / client files) against **registered foundation libraries**
-(Core + optional additional, UNBOUNDED N) — proving where each organism's Core dependencies live.
-Spec: `spec:lane-6-cross-file-library-resolution-v0-1-draft` v0.1.1 (STREAMING). Zero LLM.
+| Module | Purpose |
+|---|---|
+| `deterministic.py` | Library-mode extractor. Fixed orchestration Lane 5 → Lane 2 → per-set Framelink → Lane 3 → assets → typos → compose. Emits `FigmaExtractionResult`-shaped dict + `deterministic_extraction` rich envelope. |
+| `composition_mode.py` | Composition-mode extractor + `extract_client_design_system` per-client entry point. Pathway B + Lanes 5/6, Lane 2 skipped, Lane 7 optional. Core-extraction caching. `emit` callback forwards Lane 6 events. |
+| `pathway_b_traversal.py` | Deterministic page-frame walk for composition files. Bounded depth (default 20) + per-page frame cap. Emits `composition_tree` + `remote:true` reference list for Lane 6 consumption. |
+| `cross_file_resolution.py` | Lane 6 — streaming cross-file library resolution. `resolve_stream` (async generator, 8 SSE event types) + `resolve` (batch bridge). Registration-order priority, cache per `(lib_key, lastModified)`, cycle detection (bounded direct + one-hop), third-library suspect clustering. |
+| `token_catalog.py` | Lane 7 — Tokens Studio DTCG catalog via `sharedPluginData`. Pure-Python LZString-UTF16 decompression. 720 tokens with name/type/value_raw/value_resolved/mode/extensions. `reconciliation_contract` emission for downstream. |
+| `semantic_layer.py` | Lane 2 — REST semantic layer (`get_figma_semantic_layer`). Parallel fetch of `/component_sets`, `/components`, `/styles` for authored taxonomy + Text/Effect/Grid styles Framelink can't see. |
+| `binding_topology.py` | Lane 3 — REST binding topology (`get_figma_binding_topology`). Node-scoped `getFileNodes` parsing `boundVariables` at node + componentProperty level. Variable IDs surfaced opaque; resolution downstream. |
+| `cache_versioning.py` | Lane 5 — REST cache/versioning primitives. `get_figma_file_meta` (change-detection probe) + `get_figma_file_versions` (audit trail). |
+| `models.py` | `FigmaExtractionResult` + sub-models. Token Normalizer contract preserved. |
+| `agent.py` | **LEGACY** — LLM-orchestrated extractor. Retained as dead code / git history per spec §9 (replace-in-place); removable in cleanup follow-up. Also hosts the shared Framelink `figma_mcp_tools` MCP client used by the deterministic lanes. |
+
+> Workflow registration lives in `app/workflows/` (`helix_figma_extractor.py` Library mode,
+> `helix_client_extractor.py` per-client mode), wired into AgentOS in `app/main.py`.
+
+## Framelink pinned to 0.13.2 + `--format json` (required)
+
+The Framelink server is spawned as `npx -y figma-developer-mcp@0.13.2 --stdio --format json`
+(`_mcp_server_params`). Both the **pin** and the **format flag** are load-bearing:
+
+- **Version pin** — arg was previously unpinned (`figma-developer-mcp`), so `npx` resolved a stale
+  **0.9.0** locally while the Dockerfile installs **0.13.2** globally in prod. That drift was the root
+  cause of prod "thinness" (local rich, prod empty). Pin here MUST match Dockerfile's
+  `npm install -g figma-developer-mcp@0.13.2`.
+- **`--format json`** — Framelink **v0.13.0 flipped the default output format from YAML to `tree`**
+  (PR #394). `tree` is a compact non-YAML format the distiller cannot parse (surfaces as YAML
+  `ScannerError` — every set fails). `--format json` returns the parseable
+  `[metadata, nodes, globalVars, elements]` schema. JSON (not `yaml`) chosen deliberately — avoids the
+  YAML edge-case surface `tree` exposed.
+
+0.13.0 also **deduplicates** styles (`globalVars.styles` shrinks vs 0.9.0's per-node duplicates) and
+adds an additive `elements` key whose `layout` fields are *references* into `globalVars.styles`.
+`_distill_tokens_from_globalvars` reads `globalVars.styles` and, via `_infer_style_category`, distils
+**named** styles that carry no known prefix (e.g. `link/md/regular` → typography, `FocusRing` → effect)
+by value shape — so token coverage is by-value, robust to naming/version changes, never fabricated.
+Note: lower raw token count under 0.13.x is EXPECTED — reflects dedup, not loss (0.9.0's ~733 raw
+tokens were ~67 distinct).
+
+### Rate-limit handling under load (0.13.x)
+
+Framelink surfaces Figma **429** two different ways — 0.9.x as error *text* (`Too Many Requests`),
+**0.13.x as an *empty envelope*** (`metadata.components` and `globalVars.styles` both empty).
+`_default_get_figma_data` retries with backoff `(1,3,8)s` on **both** signals (`_is_rate_limited` OR
+`_is_empty_envelope`) — safe because a *component_set* is never legitimately empty.
+`_NODE_CONCURRENCY` is **2** (lowered from 3) to reduce throttle pressure on heavy subtrees
+(Input ≈ 233 KB, Button ≈ 141 KB). If a set is still empty after retries it is surfaced loud
+(`empty_response`), never silently dropped — P1a fail-loud guard stays intact.
+
+### Schema-guard test
+
+`tests/test_deterministic_extractor.py::test_framelink_0_13_2_schema_guard` (backed by
+`tests/fixtures/framelink_0_13_2_node_57_766.json`) asserts the top-level shape stays
+`[metadata, nodes, globalVars]` (+`elements`) — fails loud if a future Framelink bump silently
+changes the schema, closing the process gap that let the default-format flip reach prod.
+
+## Lane 6 — Cross-File Library Resolution (STREAMING)
+
+`cross_file_resolution.py` resolves `remote:true` component references from a composition file
+(Modules / client files) against registered foundation libraries (Core + optional additional,
+UNBOUNDED N). Spec: `spec:lane-6-cross-file-library-resolution-v0-1-draft` v0.1.1.
 
 **Streaming** — `resolve_stream(...)` is an async generator yielding SSE-compatible events in
 deterministic order (`page_then_depth_first` traversal × registration-order library priority):
-`resolution_started` → `library_registered`/`library_registration_failed` (per lib) →
-`library_dependency_cycle` (bounded direct+one-hop) → per-reference `resolved_reference` /
-`library_key_collision` / `unresolved_reference` (+ `third_library_suspect` when ≥3 unresolved cluster)
-→ `resolution_complete` (summary + per-library SLI metrics). `resolve(...)` is a batch-bridge that
-collects the stream for non-streaming consumers.
 
-**Mechanism** (proven 7/9 on Modules MediaText → Core): remote instances carry a global component
-`key`; exact-match against a registered library's `/components`(+`/component_sets`) map, **first match
-in registration-order priority** (Core first). Library maps cached per `(lib_key, lastModified)`.
+- `resolution_started` → `library_registered` / `library_registration_failed` (per lib) →
+- `library_dependency_cycle` (bounded direct + one-hop) →
+- per-reference `resolved_reference` / `library_key_collision` / `unresolved_reference`
+  (+ `third_library_suspect` when ≥3 unresolved cluster) →
+- `resolution_complete` (summary + per-library SLI metrics).
 
-**Scope note:** Lane 6 is the resolution **engine** — it consumes an enumerated reference list. Producing
-that list from a composition file is **Pathway B** (a separate, not-yet-built work stream; the current
-published-library extractor yields nothing on composition files). A minimal `enumerate_remote_references`
-helper is included for the live smoke only — NOT the production traversal. Phase A: emits events, no
-downstream consumer yet, safe single-MR revert.
+`resolve(...)` is a batch-bridge that collects the stream for non-streaming consumers.
 
-### Lane 7 — Token Catalog (Tokens Studio) — ADDITIVE, Phase A
+**Mechanism** (proven 7/9 on Modules MediaText → Core; 23/25 = 92% end-to-end on full Modules):
+remote instances carry a global component `key`; exact-match against a registered library's
+`/components`(+`/component_sets`) map, **first match in registration-order priority** (Core first).
+Library maps cached per `(lib_key, lastModified)`.
 
-`token_catalog.py` (`run_token_catalog`) extracts the **authoritative** design-token catalog from
-`document.sharedPluginData.tokens` — a **Tokens Studio** export (DTCG-claimed, legacy `name/value/type`
-keys), **PAT-accessible, no Enterprise** (the Figma Variables REST API is Enterprise-gated). The
-`values` blob is **LZString-UTF16** compressed and decompressed by a **pure-Python** port (zero deps,
-no subprocess, byte-identical to the `lz-string` npm reference). Spec: `spec:lane-7-token-catalog-v0-1-draft`
-v0.1.2.
+## Lane 7 — Token Catalog (Tokens Studio)
 
-Emits two additive top-level fields on the extractor output (Phase A — no downstream consumer yet):
-- **`token_catalog`** — 720 tokens with `name`, `type`, `value_raw` + `value_resolved` (aliases emitted
-  BOTH ways; multi-hop bounded to 10 with cycle detection; deterministic resolution order = `primitive/Core`
-  then semantic sets alphabetical), `mode` (set-per-breakpoint: `semantic-dimension/{Tablet,Phone,Desktop,Wide}`;
-  dark-mode-ready via multi-variant-category detection), `$extensions` (scopes, hiddenFromPublishing),
-  plus `freshness_status`, `divergence_status`, `token_sets`, `modes_detected`, `unrecognized_schema_fields`.
-- **`reconciliation_contract`** — the `authoritative_catalog_with_usage_evidence_fallback` policy downstream
-  stations follow to reconcile Lane 7 (authoritative names) with Lane 1 (usage-derived values).
+`token_catalog.py` extracts the **authoritative** design-token catalog from
+`document.sharedPluginData.tokens` — a **Tokens Studio** export (DTCG-claimed, legacy
+`name/value/type` keys), **PAT-accessible, no Enterprise** (Figma Variables REST API is
+Enterprise-gated for our tier). The `values` blob is **LZString-UTF16** compressed and decompressed
+by a **pure-Python** port (zero deps, no subprocess, byte-identical to `lz-string` npm reference).
+Spec: `spec:lane-7-token-catalog-v0-1-draft` v0.1.2.
 
-**Fail-loud error classes (§7):** `missing_shared_plugin_data`, `tokens_studio_major_version_incompatible`,
-`lzstring_{empty,truncated,invalid_encoding,corrupt_data,iteration_bound_exceeded}_input`, `dtcg_parse_error`,
-`unrecognized_schema_field` / `unrecognized_extension_namespace`, `freshness_suspect`, `catalog_divergence_suspect`.
-Lane 7 is **self-contained**: its status/failure_reports live under `token_catalog`; it does **not** flip the
-main extraction status (Phase A additive — a stale-blob soft signal must not turn every run partial).
+**Emits two additive top-level fields** (Phase A — no downstream consumer yet):
 
-**Version discipline:** parser verified against Tokens Studio `2.11.5`. patch bump → warn; minor → `partial`;
-**major → `failure`** (no parse). Freshness threshold: 7 days default, override via workflow param or
-`HELIX_LANE7_FRESHNESS_THRESHOLD_DAYS`. Divergence (Step 7.9): signal-only count-delta vs Lane 3's unique
-VariableIDs (>20% more referenced than catalogued → `catalog_divergence_suspect`).
+- **`token_catalog`** — 720 tokens with `name`, `type`, `value_raw` + `value_resolved` (aliases
+  emitted BOTH ways; multi-hop bounded to 10 with cycle detection; deterministic resolution order =
+  `primitive/Core` then semantic sets alphabetical), `mode` (set-per-breakpoint:
+  `semantic-dimension/{Tablet,Phone,Desktop,Wide}`; dark-mode-ready via multi-variant-category
+  detection), `$extensions` (scopes, hiddenFromPublishing), plus `freshness_status`,
+  `divergence_status`, `token_sets`, `modes_detected`, `unrecognized_schema_fields`.
+- **`reconciliation_contract`** — the `authoritative_catalog_with_usage_evidence_fallback` policy
+  downstream stations follow to reconcile Lane 7 (authoritative names) with Lane 1 (usage-derived
+  values).
 
-### Fail-loud per-set enrichment (spec §3 — "fail loud, not silent")
+**Fail-loud error classes:** `missing_shared_plugin_data`, `tokens_studio_major_version_incompatible`,
+`lzstring_{empty,truncated,invalid_encoding,corrupt_data,iteration_bound_exceeded}_input`,
+`dtcg_parse_error`, `unrecognized_schema_field` / `unrecognized_extension_namespace`,
+`freshness_suspect`, `catalog_divergence_suspect`.
+
+Lane 7 is **self-contained**: its status/failure_reports live under `token_catalog`; does **not**
+flip main extraction status (Phase A additive — a stale-blob soft signal must not turn every run
+partial).
+
+**Version discipline:** parser verified against Tokens Studio `2.11.5`. patch bump → warn;
+minor → `partial`; **major → `failure`** (no parse). Freshness threshold: 7 days default, override
+via workflow param or `HELIX_LANE7_FRESHNESS_THRESHOLD_DAYS`. Divergence detection (Step 7.9):
+signal-only count-delta vs Lane 3's unique VariableIDs (>20% more referenced than catalogued →
+`catalog_divergence_suspect`).
+
+## Fail-loud per-set enrichment (spec §3 — "fail loud, not silent")
 
 Per component_set, `get_figma_data` enrichment is classified before any data is emitted
 (`_classify_gfd_response`). A set is marked **failed** — added to `coverage_report.component_sets_failed`
-+ a structured `failure_report` + a `gaps_detected` entry — and emits **nothing** (anti-fabrication: no
-empty shell is backfilled) when Framelink returned no usable structure:
++ structured `failure_report` + `gaps_detected` entry — and emits **nothing** (anti-fabrication: no
+empty shell backfilled) when Framelink returned no usable structure:
 
 | `error_class` | Trigger | http_status |
 |---|---|---|
@@ -156,199 +187,149 @@ empty shell is backfilled) when Framelink returned no usable structure:
 | `server_error` | `get_figma_data` raised | — |
 | `client_error` | component_set had no `node_id` | — |
 
-**Thin-but-valid is NOT a failure:** a set with **either** components **or** styles present is treated as
-valid (e.g. a single-component set with no local styles), so genuinely sparse sets are never false-failed.
-The `error_class` names refine Lanes 2/3/5's generic `empty`/`malformed` for diagnostic precision.
+**Thin-but-valid is NOT a failure:** a set with **either** components **or** styles present is
+treated as valid (e.g. a single-component set with no local styles), so genuinely sparse sets are
+never false-failed.
 
-**Status aggregation:** any failed set → `partial`; **all** sets failed → `failure` (only the Lane-2
+**Status aggregation:** any failed set → `partial`; **all** sets failed → `failure` (only Lane-2
 skeleton survived); roster failed → `failure`. This is what made the prod-vs-local thinness
-(35 vs 733 tokens) surface as `partial`/`failure` + gaps instead of a silent `success`.
-
-Pulls design tokens, foundation styles, and component variant matrices from a client's Figma file
-and emits a typed `FigmaExtractionResult` for the next pipeline step (Token Normalizer).
-
-Built from: `agents:figma-extractor:step1-spec` / `step2-instructions` / `step2-test-criteria`.
-Feasibility proven by spikes S1 (extraction quality + headless Agno), S2 (Workflow spine), S3 (GitLab push).
-
-**Status:** Deployed to prod — AgentOS on Coolify, as Workflow **Step 1** of `helix-figma-extractor`
-(commit `b87f53b`; the retry-on-empty guard that recovers premature-finalize runs landed in `4fcd579`).
-Live-verified end-to-end (extract → normalize → HITL → complete) against Figma file `8qPSyetzviLR6eF6bkpL44`.
-
-## Files
-
-| File | Purpose |
-|---|---|
-| `models.py` | `FigmaExtractionResult` + sub-models (`PageInfo`, `TokenEntry`, `ComponentVariant`, `ComponentEntry`, `AssetEntry`). The pipeline contract. |
-| `agent.py` | The extractor. Two patterns (sequential / broadcast), enrichment loader, MCP-call capture, CLI. |
-| `workflow_step.py` | Wraps the extractor as Workflow Step 1 + AgentOS registration (`--check`). |
-| `runs/` | Run outputs (`{result, _meta}` JSON), logs, comparison, first-run report. |
-
-## Two patterns
-
-- **sequential** (Pattern B): one agent, sequential extraction. Cheap, deterministic baseline.
-- **broadcast** (Pattern A): `Team(2 members, delegate_to_all_members=True)` + leader consensus.
-
-Both produce the identical `FigmaExtractionResult` schema. Compared in `runs/COMPARISON.md`.
-
-## I/O
-
-**Input** — `session_state` dict: `figma_file_key`, `storybook_repo_url`, `cms_repo_url`,
-`cms_type` (`storyblok`), `framework` (`vue`). The agent reads `figma_file_key` via
-`add_session_state_to_context=True`.
-
-**Enrichment** (optional, A5) — instruction-context injection from `spike_s1/*_variable_defs.json`
-+ `*_design_context.json` (official-MCP proxy). If absent → extraction-only, `enrichment_coverage=0.0`,
-gap flagged. Chosen over an Agno Knowledge object to avoid the LiteLLM knowledge-search tool route
-(agno-dev gotcha #4).
-
-**Output** — `runs/run_<pattern>_NNN.json`:
-```jsonc
-{ "result": { /* FigmaExtractionResult */ },
-  "_meta": { "pattern", "model_id", "wall_clock_s", "enrichment_present",
-             "mcp_calls": [{tool,args}], "metrics", "run_status" } }
-```
-`_meta.mcp_calls` lets the harness verify discovery-first (BR-1) and token capture (BR-5)
-without parsing debug logs.
+(35 vs 733 tokens) surface as `partial`/`failure` + gaps instead of silent `success`.
 
 ## Tools / stack
 
-- **Framelink MCP** (`figma-developer-mcp`) over stdio via `MCPTools` + `StdioServerParameters`.
-  Tools (Lane 1 — values + assets): `get_figma_data`, `download_figma_images`.
-- **REST semantic layer** (Lane 2 — `agents/figma_extractor/semantic_layer.py`).
-  Tool: `get_figma_semantic_layer(file_key)` — one composite tool that pulls three
-  non-Enterprise PAT REST endpoints in parallel (`/component_sets`, `/components`,
-  `/styles`) for the authored taxonomy, variant census, and Text/Effect/Grid styles
-  that Framelink cannot see. Descriptions captured verbatim (naive, no parsing).
-  Never raises — returns `{status, coverage_report, provenance, failure_reports, ...}`.
-  Spec: `helix-poc-agno:spec:lane-2-semantic-layer-v0-1-draft`. Reconciliation:
-  REST canonical for structural names, Framelink for resolved values.
-- **REST cache/versioning** (Lane 5 — `agents/figma_extractor/cache_versioning.py`).
-  Two atomic tools: `get_figma_file_meta(file_key)` — cheap (~965 B) change-detection
-  probe (`version` + `last_touched_at`, no full tree); `get_figma_file_versions(file_key,
-  page_size=30)` — historical version list (reproducibility/audit). Same PAT/retry/
-  provenance pattern as Lane 2 v0.2 (error_class incl. `not_found`/`client_error`); single
-  `failure_report` object (not array). Primitives only — change-detection *logic* lives in
-  the workflow layer. Spec: `helix-poc-agno:spec:lane-5-cache-versioning-v0-1-draft`.
-- **REST binding topology** (Lane 3 — `agents/figma_extractor/binding_topology.py`).
-  Tool: `get_figma_binding_topology(file_key, node_ids, depth?, geometry?)` — node-scoped
-  `getFileNodes` call parsing `boundVariables` at node level (fills/strokes/effects/layout/
-  spacing) AND componentProperty level, returning a `{node_id → property → VariableID}` map
-  + `binding_summary`. Variable IDs surfaced OPAQUE (`VariableID:X:Y`) — resolution is
-  downstream. Missing requested ids = success with coverage gap (not failure). 30s timeout;
-  same v0.2 error_class/retry/provenance pattern; single `failure_report` object. Spec:
-  `helix-poc-agno:spec:lane-3-binding-topology-v0-1-draft`.
+- **Framelink MCP** (`figma-developer-mcp@0.13.2` pinned + `--format json`) over stdio via
+  `MCPTools` + `StdioServerParameters`. Tools (Lane 1 — values + assets): `get_figma_data`,
+  `download_figma_images`.
+- **Lane 2** — `get_figma_semantic_layer(file_key)` composite REST tool for authored taxonomy.
+- **Lane 3** — `get_figma_binding_topology(file_key, node_ids, depth?, geometry?)` for opaque
+  Variable ID surfacing.
+- **Lane 5** — `get_figma_file_meta` + `get_figma_file_versions` for change-detection + audit.
+- **Lane 6** — `resolve_stream` async generator + `resolve` batch bridge for cross-file resolution.
+- **Lane 7** — `run_token_catalog` for Tokens Studio DTCG catalog.
 - **PAT** injected ONLY at the MCP layer (`StdioServerParameters(env={"FIGMA_API_KEY": ...})`),
-  never in `session_state`/logs/output (RULE 6).
-- **Model**: `OpenAIChat` via LiteLLM (NOT `OpenAIResponses` — breaks tool round-trips, RULE 7).
-- **Secrets**: `FIGMA_PAT` from `helix-poc-agno/.env`; model creds from `poc-agno-template/.env` (dual dotenv).
+  never in `session_state` / logs / output.
+- **Secrets** — `FIGMA_PAT` from `.env`.
 
-## Node IDs — discovery-first (RULE 1)
+## Reconciliation contract (downstream consumers)
 
-The agent resolves page **names → node IDs at runtime** from its own file-level discovery.
-It NEVER trusts a hand-supplied name↔id list. Dirk's share-link IDs (and the step3 task spec)
-are off-by-one; `spike_s1/page_index.json` is the MCP-verified oracle used only for test validation.
-Authoritative: Button `57:645`, Checkbox `457:249`, Dropdown `457:729`, FormField `86:985`,
-Input `100:1426`, Toggle `552:985`; Typography `600:425`, Colors `360:38`, Layout `105:2147`,
-Icons `78:136`, ImageRatios `152:3814`, Text `54:2`.
+Extractor emits BOTH usage-derived tokens (Lane 1, ~61 Framelink globalVars-keyed) AND authoritative
+catalog (Lane 7, 720 Tokens Studio-named). Extractor does **NOT** attempt automatic reconciliation
+(no clean join key across the two naming conventions). Downstream stations follow the
+`reconciliation_contract`:
 
-## Run
+| Consumer scenario | Rule |
+|---|---|
+| Token in Lane 7 catalog | **PREFER** Lane 7 (authoritative name + resolved value) |
+| Token in client file but NOT in Lane 7 catalog | `client_override` category, client provenance preserved |
+| Component in Lane 2 (published library) | **PREFER** Lane 2 definition; client references are instances |
+| Component in client file with NO `remote:true` | `client_custom_component` category |
+| Remote key resolves to Core (Lane 6) | Use Core's authoritative definition |
+| Remote key resolves to third library | Use resolved definition with library provenance |
+| Remote key does NOT resolve | `unresolved_reference` for cross-team investigation; do NOT fabricate |
+| Library key collision (same key across libraries) | Emit `library_key_collision` warning; downstream reviews |
 
-```bash
-cd ~/opencode/workbench/agno-setup/poc-agno-template
-VENV=.venv/bin
-
-# sequential (Pattern B)
-$VENV/python ~/opencode/workbench/helix-poc-agno/agents/figma_extractor/agent.py \
-    --pattern sequential --out <ABS>/runs/run_sequential_001.json
-
-# broadcast (Pattern A)
-$VENV/python .../agent.py --pattern broadcast --out <ABS>/runs/run_broadcast_001.json
-
-# workflow registration smoke test
-$VENV/dotenv run -- $VENV/python .../workflow_step.py --check
-```
+Every emitted element carries file provenance: `{file_key, file_role, extracted_at, resolved_via?}`.
 
 ## Tests
 
 ```bash
-cd ~/opencode/workbench/helix-poc-agno
-<venv>/python -m pytest tests/test_figma_extractor.py --output=agents/figma_extractor/runs/run_sequential_001.json -q
+cd ~/opencode/workbench/agno-setup/poc-agno-template
+source .venv/bin/activate
+python -m pytest tests/test_deterministic_extractor.py -q
+python -m pytest tests/test_composition_mode.py -q      # composition mode + Pathway B traversal
+python -m pytest tests/test_cross_file_resolution.py -q  # Lane 6
+python -m pytest tests/test_token_catalog.py -q          # Lane 7
+python -m pytest tests/test_helix_client_extractor.py -q # deployed helix-client-extractor workflow
 ```
-Smoke (ST-1..6) + contract (CT-1..11) + behavioral (BR-1..5). No MCP mocking — tests run against
-real run output. Quality (QC-*) and pattern comparison (CMP-*) are human-reviewed in the run reports.
+
+Contract tests (per-lane), anti-fabrication guards (every emission traceable), cross-run consistency
+(byte-identical output modulo timestamps), streaming semantics (Lane 6 event order determinism),
+cache correctness (Lane 6 library maps + Core-extraction caching), pathological input handling
+(Lane 7 LZString edge cases), and live smokes against real files (gated on `FIGMA_PAT`).
 
 ## Known limitations
 
-1. **Context bloat (540K tokens per full extraction).** Each get_figma_data YAML response (~37.5K tokens) accumulates in conversation history. 14 calls for 17-page file = 525K input tokens. Instruction-level optimization (Option C) was measured and disproven — this is architectural. Files with 30+ components will hit context window limits. Fix: subagent swarm architecture (roadmap:context-decomposition-architecture). Not blocking for PoC.
+1. **Asset downloads verified for SVG only.** All downloaded assets in observed runs are SVG icons.
+   PNG/JPEG download via `download_figma_images` with `pngScale` is untested. Production files with
+   raster assets may need additional handling.
 
-2. **Asset downloads verified for SVG only.** All 20 downloaded assets are SVG icons. PNG/JPEG download via `download_figma_images` with `pngScale` parameter is untested. Production files with raster assets may need additional handling.
+2. **Container asset persistence not verified.** Assets download to
+   `agents/figma_extractor/runs/assets/` (app-owned via `StdioServerParameters(cwd=...)`), and prod
+   runs report assets successfully. Container asset-**files-on-disk** verification is still
+   outstanding — assets are reported in the result but on-disk existence check hasn't been run in the
+   container, and container storage is ephemeral (a redeploy wipes `runs/assets/`).
 
-3. **cwd sensitivity on deployment.** Asset downloads depend on `StdioServerParameters(cwd=...)` resolving to a writable directory (`/app/agents/figma_extractor/runs/assets/`, app-owned). Now deployed to the Coolify container and prod runs report assets successfully (21–23 SVGs per run). The container asset-**files-on-disk** verification (prod launch checklist item #13) is still outstanding — assets are reported in the result but the on-disk existence check hasn't been run in the container, and container storage is ephemeral (a redeploy wipes `runs/assets/`).
+3. **Lane 3 bindings off-by-default in composition mode.** Rate-limit prudence on large composition
+   files (925-frame Modules test showed sufficient pressure). Available via flag; enable per-need.
 
-4. **Enrichment data is optional but improves coverage.** Without enrichment (OAuth-extracted Variables, Code Connect, designer docs), enrichment_coverage drops to 0.0 and token $type metadata is unavailable. The agent works in extraction-only mode but Token Normalizer output is lower quality.
+4. **Divergence detection is signal-only, not authoritative.** Step 7.9 uses count-delta heuristic
+   (Lane 3 unique VariableIDs vs Lane 7 catalog count). Cannot detect if designer edits native Figma
+   Variables without re-syncing Tokens Studio (blob `updatedAt` stays old). Sascha ping REQUIRED to
+   confirm Tokens Studio source-of-truth policy.
 
-5. **Sequential context is not resumable.** If the agent fails mid-extraction (budget cap, MCP error after call 9 of 14), all previous extraction work is lost. No checkpointing. Must re-run from scratch.
-
-## HARDEN history
-
-- **Round 1 (Step 3):** Agent finalized output_schema after one MCP call, under-extracting. Fixed: instruction now mandates ≥7 get_figma_data calls before finalizing.
-- **Round 2 (Step 5):** Asset downloads fabricated (agent hallucinated file writes). Fixed: set cwd on StdioServerParameters, updated Phase 4 instructions, strengthened tests to assert file existence on disk. Context bloat measured (540K), Option C disproven, Option A (subagent swarm) deferred.
-
-## FinOps baseline
-
-| Metric | Value |
-|--------|-------|
-| Total tokens (sequential, 17-page file) | ~540K |
-| Input tokens | ~526K |
-| Output tokens | ~15K |
-| Per-call input tokens | ~37.5K |
-| Wall-clock time | ~230s |
-| Model | gpt-5.4 via LiteLLM |
-| Estimated cost per extraction | $1-2 (depends on model pricing) |
-
-Primary cost driver: input tokens from accumulated YAML tool responses. Output tokens are negligible. Optimization target: context decomposition (subagent swarm) or delta extraction (memory-based re-run optimization).
-
-## Production pattern
-
-**Sequential** confirmed as production pattern. Broadcast (2-member Team) added 2x cost and latency for zero quality gain — one member silently failed, the other carried alone. See `runs/COMPARISON.md` for full analysis.
+5. **Third-library detection is signal-only.** 2 recurring non-Core keys (`4af67109a6a4`,
+   `58b2fb9471fe`) suggest an unregistered third library referenced by Modules. Emitted as
+   `third_library_suspect` for cross-team investigation.
 
 ## Design Decisions
 
-Numbered for stable reference (matches the Token Normalizer README convention). Several map to the
-agent's hard `RULE`s in `step2-instructions`.
+Numbered for stable reference. Deterministic-era DDs supersede prior LLM-era DDs.
 
-- **DD-1 — Discovery-first extraction (RULE 1).** The agent resolves page/component names → node IDs at
-  runtime from its own file-level `get_figma_data` scan, before any node-specific extraction, and never
-  from a human-supplied node-ID list. Those lists proved unreliable three separate times (off-by-one
-  share-link labels); runtime discovery hit every authoritative node ID with zero hardcoding.
-- **DD-2 — Sequential over broadcast (Team).** Equal output quality, roughly half the cost and latency,
-  and full observability (a Team leader's RunResponse hides member calls/metrics). Broadcast's second
-  member silently failed and added nothing. Sequential is the production pattern. See `runs/COMPARISON.md`.
-- **DD-3 — Framelink (headless PAT) over the official Figma MCP.** The pipeline runs headless, which rules
-  out the official MCP's interactive OAuth. Framelink loses the named Variable slash-paths / Code Connect,
-  so that richer semantic data is captured separately, once per project, as enrichment by the application
-  layer (hybrid OAuth+PAT architecture).
-- **DD-4 — Two naming worlds preserved (RULE 4).** Every token carries BOTH its reconstructed CSS-var name
-  (`name`) and, when available, its Variable slash-path (`enrichment_match`). The extractor does not
-  reconcile them — reconciliation is a downstream (Token Normalizer / Semantic Matcher) concern. Dropping
-  either world here would lose information the downstream needs.
-- **DD-5 — Ephemeral asset URLs are never persisted; download immediately (RULE 3).** Figma's MCP asset
-  URLs expire, so `download_figma_images` writes files to disk in the same run and the agent records only
-  the local path; `original_url` is left empty. A persisted URL would be a dead reference.
-- **DD-6 — Enrichment supplements, never replaces (graceful degradation).** With enrichment absent the
-  agent runs extraction-only: `enrichment_coverage=0.0`, `$type` metadata unavailable, gap flagged — but
-  it still produces a valid `FigmaExtractionResult`. Enrichment improves quality; it is not required to run.
-- **DD-7 — Enrichment as instruction-context injection, not an Agno Knowledge object.** Injecting enrichment
-  into the instructions avoids the LiteLLM knowledge-search tool round-trip (a known LiteLLM/agno failure
-  mode) while still giving the agent the Variable taxonomy and Code Connect data.
-- **DD-8 — PAT security: MCP layer only (RULE 6).** `FIGMA_PAT` is injected via
-  `StdioServerParameters(env=...)` into the MCP child process only — never in `session_state` (persisted to
-  db + visible in REST responses), logs, or output.
-- **DD-9 — `OpenAIChat`, never `OpenAIResponses` (RULE 7).** As a tool + `output_schema` agent, it breaks on
-  the OpenAIResponses → Anthropic-via-LiteLLM route ("sequence item 0: expected str instance, NoneType
-  found"). `OpenAIChat` (chat/completions) round-trips tools correctly. Model id is centralized via
-  `app.settings.default_chat_model()` (`OPENAI_MODEL_ID`, default `gpt-5.4`).
-- **DD-10 — `cwd` on StdioServerParameters.** The Framelink server writes downloaded assets relative to its
-  working directory, so the agent sets `cwd` to the agent dir to make `download_figma_images
-  localPath="runs/assets"` resolve into `agents/figma_extractor/runs/assets/`. Without it, downloads landed
-  nowhere and the agent fabricated paths (fixed in HARDEN round 2).
+- **DD-3 — Framelink over official Figma MCP.** Pipeline runs headless, ruling out the official
+  MCP's interactive OAuth. Framelink loses named Variable slash-paths, addressed by Lane 7's
+  Tokens Studio catalog. Hybrid architecture: Framelink (headless PAT) for structural + Lane 7
+  (`sharedPluginData`) for authoritative token names.
+
+- **DD-5 — Ephemeral asset URLs never persisted; download immediately.** Figma MCP asset URLs
+  expire, so `download_figma_images` writes files to disk in the same run and only the local path
+  is recorded; `original_url` left empty. Persisted URL would be a dead reference.
+
+- **DD-8 — PAT security: MCP layer only.** `FIGMA_PAT` injected via
+  `StdioServerParameters(env=...)` into the MCP child process only — never in `session_state`
+  (persisted to db + visible in REST responses), logs, or output.
+
+- **DD-10 — `cwd` on StdioServerParameters.** Framelink server writes downloaded assets relative
+  to its working directory, so the composition-mode + Library-mode extractors set `cwd` to the
+  agent dir. Without it, downloads land nowhere and would silently fail.
+
+- **DD-11 — Deterministic-first extraction (replaces prior DD-1 discovery-first / RULE 1).**
+  Reading structured data from a structured API is not the LLM's job. Fixed orchestration in Python
+  (Lane 5 → Lane 2 → per-set Framelink → Lane 3 → assets → typos → compose). Same-input →
+  same-output, always. Anti-fabrication guard: every emission traces to REST payload node_id.
+
+- **DD-12 — Two-mode extraction (Library + Composition).** Library-mode for published-library
+  files (Core), Composition-mode with Pathway B for organism-composition files (Modules, clients).
+  Different mechanisms because different file structures — publishing 0/0/0 to a library while
+  organisms live only as page frames requires page-frame walk instead of library REST.
+
+- **DD-13 — Version-pin discipline extends to invocation args.** `npx -y figma-developer-mcp`
+  (unpinned) drifted from Dockerfile's pinned 0.13.2. Local resolved to cached 0.9.0; prod ran
+  0.13.2 with different default format. Silent env parity break took hours to diagnose. Pin +
+  format flag now explicit; schema-guard test catches silent format changes on future bumps.
+
+- **DD-14 — UNBOUNDED N libraries with observability.** Lane 6 supports any number of registered
+  foundation libraries per client extraction. No hard architectural limit. Observability tracks
+  per-library resolution rate + resolution latency; empirical monitoring is the safety net rather
+  than static bounds. If load reveals issues, bounds can be added retroactively.
+
+- **DD-15 — Streaming Lane 6 resolution.** Cross-file resolution emits SSE events as they occur
+  (8 event types) rather than batch-collecting-then-emitting. Aligns with existing direct-REST
+  background+SSE workflow primitive. Enables real-time downstream progress observability; batch
+  bridge available for non-streaming consumers via `resolve(...)`.
+
+- **DD-16 — Tokens Studio via `sharedPluginData` as authoritative catalog source.** Figma Variables
+  REST API is Enterprise-gated for our tier (403 on `/v1/files/{key}/variables/local`); Enterprise
+  dependency violates the productization constraint. Tokens Studio catalog lives in
+  `document.sharedPluginData.tokens` — PAT-accessible with `file_content:read` (which we have).
+  Full 720 authoritative tokens without Enterprise.
+
+- **DD-17 — Reconciliation contract downstream, not in extractor.** Lane 1 (usage-derived) and
+  Lane 7 (authoritative catalog) use different naming conventions with no clean join key.
+  Extractor emits both separately + explicit `reconciliation_contract` policy so all downstream
+  stations reconcile consistently. Prevents divergent semantics across consumers.
+
+- **DD-18 — Contract-driven parsing, NOT shape-assumed.** External-dependency schema version-check
+  informs parsing decisions. Tokens Studio blob uses non-`$` legacy keys (`name/value/type`, NOT
+  `$name/$value/$type`) despite `tokenFormat=dtcg` claim. Parser branches on Tokens Studio version;
+  major bump escalates rather than silently continues. Applies same discipline as DD-13 to schema
+  contracts beyond invocation args.
