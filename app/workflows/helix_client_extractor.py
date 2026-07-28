@@ -2,6 +2,8 @@
 
 Registers `composition_mode.extract_client_design_system` as a PROD workflow endpoint invocable via
 the direct-REST pattern (`POST /workflows/helix-client-extractor/runs`, form-urlencoded `message=…`).
+`background=true` is REQUIRED (a sustained-429 retry can extend the run to ~4 min; retrieve via
+`get_session_run`; the guard emits `sustained_429_retry_heartbeat` events during any wait).
 
 Multi-parameter shape is carried in the run `message` (Agno workflows take a single string input),
 parsed deterministically: two Figma keys/URLs (first = Core / foundation library, second = client /

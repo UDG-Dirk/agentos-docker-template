@@ -4,7 +4,10 @@ For files like DGX Brandportal: own components authored as page frames, publishi
 and referencing no external Core. Runs Pathway B (composition_tree + local components) and SKIPS Lane 6
 entirely (nothing external to resolve). No wasteful Core-mode pass, no self-referential resolution.
 
-Invoke: `POST /workflows/helix-composition-only-extractor/runs` with `message=<figma-key-or-URL>`.
+Invoke: `POST /workflows/helix-composition-only-extractor/runs` with `message=<figma-key-or-URL>` and
+`background=true` (REQUIRED — a sustained-429 retry can extend the run to ~4 min; foreground SSE for a
+run of that duration is the wrong shape. Retrieve via `get_session_run`. The sustained-429 guard emits
+`sustained_429_retry_heartbeat` events during any wait to keep SSE alive + stay observable).
 Distinct from helix-client-extractor (Pattern 2, needs a remote Core) and helix-figma-extractor
 (Pattern 1, published library). Zero LLM.
 """
