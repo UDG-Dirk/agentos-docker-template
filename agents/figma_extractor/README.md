@@ -57,6 +57,13 @@ curl -sN -H "Authorization: Bearer $AGNO_MCP_TOKEN" \
 Optional `helix-client-extractor` params via message: `additional=<key1,key2>`, `freshness=<days>`.
 Lane 6 streaming events ride in the result's `client_extraction.resolution_events` in deterministic order.
 
+**`background=true` is REQUIRED** for all three endpoints (sustained-429 retry can extend a run to ~4 min;
+foreground SSE for a run of that duration is the wrong shape). The canonical pattern is `background=true`
++ retrieve via `get_session_run`. During a sustained-429 wait the guard emits
+`sustained_429_retry_heartbeat` events (~every 40 s) so any foreground SSE stays alive and background
+runs remain observable; a foreground (`background=false`) caller may still see an SSE idle-drop at
+~180 s, but the run completes server-side and stays retrievable.
+
 **Missing-parameter prompt:** if the run message lacks the two required keys, the workflow returns a
 structured `needs_parameters` prompt (required/optional params, `message_format`, examples, and any
 keys it *did* detect) instead of a terse error — so MCP/REST callers see exactly what to supply and
@@ -76,6 +83,7 @@ exposes a generic `run_workflow(workflow_id, message)` with no per-workflow type
 | `semantic_layer.py` | Lane 2 — REST semantic layer (`get_figma_semantic_layer`). Parallel fetch of `/component_sets`, `/components`, `/styles` for authored taxonomy + Text/Effect/Grid styles Framelink can't see. |
 | `binding_topology.py` | Lane 3 — REST binding topology (`get_figma_binding_topology`). Node-scoped `getFileNodes` parsing `boundVariables` at node + componentProperty level. Variable IDs surfaced opaque; resolution downstream. |
 | `cache_versioning.py` | Lane 5 — REST cache/versioning primitives. `get_figma_file_meta` (change-detection probe) + `get_figma_file_versions` (audit trail). |
+| `http_errors.py` | **Sustained-429 guard** (workflow-level, v3.1). `with_account_level_retry` wraps an extraction: bare `/files/{key}?depth=1` preflight-probe detects a *sustained* throttle (distinct from per-request 429s the lanes already handle), waits a bounded deterministic `30→60→120s` re-probing between, emitting `sustained_429_retry_heartbeat` events (~40s cadence, INFO) throughout, and on persistence returns a fail-loud escalation (`error_class: account_level_rate_limit`) with `throttle_scope` (`per_file`\|`pat_wide`\|`undetermined`) + `undetermined_reason` (`reference_env_unset`\|`reference_probe_error`\|`cross_probe_cap_exceeded`) from a cross-probe of a configured reference file (env `FIGMA_RATE_LIMIT_REFERENCE_FILE`; unset → loud startup warning + scope disabled), a global cross-probe cap (FM-1, env `FIGMA_RATE_LIMIT_CROSS_PROBE_MAX_PER_HOUR`, default 10/h), `retry_after` hint, `heartbeats_emitted`, and a `metrics` block. No partial results. Per-lane backoff untouched. |
 | `models.py` | `FigmaExtractionResult` + sub-models. Token Normalizer contract preserved. |
 | `agent.py` | **LEGACY** — LLM-orchestrated extractor. Retained as dead code / git history per spec §9 (replace-in-place); removable in cleanup follow-up. Also hosts the shared Framelink `figma_mcp_tools` MCP client used by the deterministic lanes. |
 

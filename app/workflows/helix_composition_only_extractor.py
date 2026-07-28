@@ -4,7 +4,10 @@ For files like DGX Brandportal: own components authored as page frames, publishi
 and referencing no external Core. Runs Pathway B (composition_tree + local components) and SKIPS Lane 6
 entirely (nothing external to resolve). No wasteful Core-mode pass, no self-referential resolution.
 
-Invoke: `POST /workflows/helix-composition-only-extractor/runs` with `message=<figma-key-or-URL>`.
+Invoke: `POST /workflows/helix-composition-only-extractor/runs` with `message=<figma-key-or-URL>` and
+`background=true` (REQUIRED — a sustained-429 retry can extend the run to ~4 min; foreground SSE for a
+run of that duration is the wrong shape. Retrieve via `get_session_run`. The sustained-429 guard emits
+`sustained_429_retry_heartbeat` events during any wait to keep SSE alive + stay observable).
 Distinct from helix-client-extractor (Pattern 2, needs a remote Core) and helix-figma-extractor
 (Pattern 1, published library). Zero LLM.
 """
@@ -16,6 +19,11 @@ from agno.workflow import Step, Workflow
 from agno.workflow.types import StepInput, StepOutput
 
 from agents.figma_extractor.composition_mode import run_composition_extraction
+from agents.figma_extractor.http_errors import (
+    make_account_probe,
+    make_scope_classifier,
+    with_account_level_retry,
+)
 from db import get_postgres_db
 
 
@@ -40,8 +48,16 @@ async def composition_only_executor(step_input: StepInput, **kwargs) -> StepOutp
                      "error_class": "missing_file_key",
                      "message": "provide a Figma file key or design URL in the run message"},
             success=False)
-    # registered_libraries=[] -> composition-only (Lane 6 skipped) per run_composition_extraction
-    result = await run_composition_extraction(fk, registered_libraries=[], file_role="self_contained")
+    # registered_libraries=[] -> composition-only (Lane 6 skipped) per run_composition_extraction.
+    # Guarded against account-level 429 (bounded auto-retry + escalation) at the orchestration level;
+    # per-page 429s still handled inside Pathway B.
+    result = await with_account_level_retry(
+        run_extraction=lambda: run_composition_extraction(
+            fk, registered_libraries=[], file_role="self_contained"),
+        probe=make_account_probe(fk),
+        scope_classifier=make_scope_classifier(fk),
+        target_key=fk,
+    )
     return StepOutput(content=result, success=(result.get("status") != "failure"))
 
 
