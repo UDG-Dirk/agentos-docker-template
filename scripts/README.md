@@ -28,14 +28,18 @@ Prod AgentOS (`RUNTIME_ENV=prd`) requires a **Bearer RS256 JWT**, verified serve
   attributable and individually revocable (rotate the keypair to revoke).
 
 ### Fastest path — get a token, install nothing (recommended)
-If you just need MCP/API **access**, don't clone or install anything. Ask the **key-holder**
-(currently Dirk) to mint you one:
-```bash
-# key-holder runs, then sends you the token string over a secure channel:
-python3 scripts/mint_token.py --user <your-handle> --days 30
-```
-Then jump straight to **step 4** (wire into Claude Code). No clone, no Python, no private key on your
-side. This is also the least-privilege model — the signing key stays with one person.
+If you just need MCP/API **access**, don't clone or install anything:
+
+- **Self-serve via CI (best):** GitLab → **Build → Pipelines → Run pipeline** on `main`, set
+  `MINT_USER=<handle>` (+ optional `MINT_DAYS`, `MINT_SCOPES`) → open the **`mint-token`** job →
+  download the **`agno_mcp_token`** artifact (expires 1 h). No key handling by anyone. Then go to
+  **step 4**. (Setup/rotation/revocation: [`../docs/AUTH_KEYS.md`](../docs/AUTH_KEYS.md).)
+- **Or ask the key-holder** to mint one and send you the token string:
+  ```bash
+  python3 scripts/mint_token.py --user <your-handle> --days 30
+  ```
+Either way: no clone, no Python, no private key on your side — least-privilege (the signing key
+stays in the protected CI variable / vault, never in git).
 
 ### Self-mint (only if you hold the private key)
 Minting needs **just two libraries — NOT the whole app**:
