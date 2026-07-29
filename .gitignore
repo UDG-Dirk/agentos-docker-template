@@ -41,6 +41,14 @@ ENV/
 .env
 .env.production
 .envrc
+# Keypairs / minted tokens — signing material + live credentials, NEVER commit (mint_token.py)
+*.pem
+*.key
+*_token
+*_token.txt
+*.jwt
+agno-keys/
+.agno-keys/
 
 # =========================
 # Jupyter / notebooks
