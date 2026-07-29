@@ -46,7 +46,7 @@ Sensitivity: **secret** = credential/never-log; **config** = non-secret.
 | `OPENAI_MODEL_ID` / `FIGMA_PARSER_MODEL_ID` / `OPENAI_EMBEDDER_ID` | model + embedder ids (keep `openai/` prefix on the embedder) | Coolify / `.env` | config |
 | `AGENTOS_URL` | scheduler base URL (public domain in prod) | Coolify | config |
 | `BASELINE_REPO_URL` | credential-free helix-code clone URL | Coolify (default in code) | config |
-| `HELIX_CODE_CEM_ARTIFACT_URL` | **Cycle 3** CEM artifact URL fetched at startup | Coolify | config |
+| `HELIX_CODE_CEM_ARTIFACT_URL` | **Cycle 3** CEM download URL fetched at startup. **Stable** generic-package URL: `…/api/v4/projects/<id>/packages/generic/cem/latest/custom-elements.json` (never changes; `build-cem` overwrites `latest` each run) | Coolify | config |
 | `FIGMA_RATE_LIMIT_REFERENCE_FILE` | known-good file for sustained-429 scope cross-probe | Coolify (unset → scope `undetermined`) | config |
 
 ### Internal service config
@@ -72,11 +72,11 @@ Sensitivity: **secret** = credential/never-log; **config** = non-secret.
 |---|---|---|---|
 | security_scanning | gitleaks / grype / socket (**gating**) + osv / checkov (allow_failure) | every push/MR | security gate (component `security-scanner@v4.0.1`) |
 | mint | `mint-token` | web run on `main` + `MINT_USER` (`needs: []`) | mint an AgentOS JWT → 1-day artifact (uses `AGNO_PRIVATE_KEY`) |
-| baseline | `build-cem` | web run + `BUILD_CEM=1` (+ optional `HELIX_CODE_REF`) (`needs: []`) | clone helix-code, `pnpm analyze:flat`, publish `custom-elements.json` (uses `BASELINE_REPO_TOKEN`/`_USERNAME`) |
+| baseline | `build-cem` | web run + `BUILD_CEM=1` (+ optional `HELIX_CODE_REF`) (`needs: []`) | clone helix-code (uses `BASELINE_REPO_TOKEN`/`_USERNAME`), `pnpm analyze:flat`, then **publish `custom-elements.json` to the generic package registry** at `cem/latest` via `CI_JOB_TOKEN` (+ keep the job artifact for backward compat) |
 
 CI-only vars (not app env): `MINT_USER` `MINT_DAYS` `MINT_SCOPES` (mint), `BUILD_CEM` `HELIX_CODE_REF` `HELIX_CODE_REPO_URL` `CEM_REL_PATH` (build-cem).
 
 ## Discrepancy / dead-entry flags
-- **`HELIX_CODE_CEM_ARTIFACT_URL` (open, 2026-07-29):** a "latest-on-`main` `?job=build-cem`" URL **404s** — `build-cem` is opt-in and not on `main`'s regular pipelines, so the latest pipeline has no such job. Use a **pinned job-artifact URL** (`…/api/v4/projects/<id>/jobs/<job_id>/artifacts/custom-elements.json`, verified 197010 bytes) or run `build-cem` on a schedule. Tracked in `shared-results:cycle-3-baseline-reader-implementation-result-2026-07-29`.
+- **`HELIX_CODE_CEM_ARTIFACT_URL` (RESOLVED 2026-07-29 → stable package URL):** the old "latest-on-`main` `?job=build-cem`" artifact URL was fragile — it 404'd (build-cem is opt-in, not on `main`'s regular pipelines) and, once repointed, served a **12929-byte non-CEM page** → reader `CEM_MALFORMED`. **Fix (shipped):** `build-cem` now publishes to the **generic package registry** at a stable URL `…/api/v4/projects/<id>/packages/generic/cem/latest/custom-elements.json` (overwritten each run). No more pinned-job-URL re-pin. Download auth = a `read_api` token in `..._AUTH_HEADER` (unchanged; the registry download accepts `read_api`). Tracked in `shared-results:cycle-3-stable-cem-artifact-result-2026-07-29`.
 - **`AGNO_PRIVATE_KEY`** lives in *both* the group CI var (for `mint-token`) and Coolify (historical) — intentional (two consumers), but keep both in sync on rotation.
 - No dead entries found: every code env var above maps to a real consumer.
