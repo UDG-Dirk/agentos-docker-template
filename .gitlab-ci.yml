@@ -124,7 +124,7 @@ build-cem:
         echo "  fix - add BASELINE_REPO_TOKEN (+ optional BASELINE_REPO_USERNAME) at the msq-turbo group."
         exit 1
       fi
-      apt-get update -qq && apt-get install -y -qq git >/dev/null
+      apt-get update -qq && apt-get install -y -qq git curl >/dev/null   # curl: node:*-slim omits it; needed for the package-registry publish below
       # credential helper reads the token from env -> token stays out of argv and out of .git/config
       git config --global credential.helper '!f() { echo "username=${BASELINE_REPO_USERNAME:-token}"; echo "password=${BASELINE_REPO_TOKEN}"; }; f'
       git clone --depth 1 --branch "$HELIX_CODE_REF" "$HELIX_CODE_REPO_URL" helix-code
