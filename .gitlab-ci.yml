@@ -70,6 +70,7 @@ grype-fs-scan:
 # Full setup / rotation / revocation runbook: docs/AUTH_KEYS.md.
 mint-token:
   stage: mint
+  needs: []          # DAG: start immediately, don't wait for security_scanning (utility job, not gated by it)
   image: python:3.12-slim
   rules:
     - if: '$CI_PIPELINE_SOURCE == "web" && $MINT_USER && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
@@ -104,6 +105,7 @@ mint-token:
 #     defaults to the known clean URL below (not a secret). Fails loud if the token is absent.
 build-cem:
   stage: baseline
+  needs: []          # DAG: start immediately, don't wait for security_scanning (produces its own artifact)
   image: node:22-bookworm-slim
   rules:
     - if: '$BUILD_CEM'
