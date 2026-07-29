@@ -35,6 +35,31 @@ minting is self-serve and survives anyone's departure — **without committing t
 > committing it means allowlisting it past gitleaks. Restricted-repo ≠ safe-for-secrets. Use the
 > variable/vault — same squad access, none of the downsides.
 
+### ⚠️ GitLab variable gotchas (the settings that actually work)
+
+Setting `AGNO_PRIVATE_KEY` (or any PEM value) trips people up because GitLab's **Add variable** form
+defaults to **Masked**, and Masked **rejects multi-line PEMs**. Use exactly:
+
+| Setting | Value | Why |
+|---|---|---|
+| **Type** | **File** | Multi-line content; the job reads it via the `$AGNO_PRIVATE_KEY` *path* (`mint_token.py --key "$AGNO_PRIVATE_KEY"`), not inline. |
+| **Protect variable** | **✔ checked** | The real security guarantee — exposed only to pipelines on protected branches (`main`); untrusted MR pipelines can't read it. |
+| **Visibility** | **Visible** (NOT Masked, NOT "Masked and hidden") | Masked requires a base64-safe, whitespace-free value — a multi-line PEM can't satisfy its regex. A File variable doesn't need masking: it's written to a file path and read by reference, never echoed into logs. "Visible" = revealable in the CI/CD settings UI by authorized users — same threat model as a local `.pem`. |
+
+**The mistake (and the error you'll see):** saving with **Visibility = Masked** →
+> `Unable to create masked variable because: The value cannot contain the following characters: whitespace characters`
+
+**Do NOT** "fix" this by stripping the PEM header/footer lines (the `-----`-wrapped `BEGIN PRIVATE KEY`
+/ `END PRIVATE KEY` lines) or the newlines — those are **required** for PEM parsing (the key won't load without them).
+The fix is simply **Visibility → Visible** (keep the full PEM, markers and all). If you staged the
+base64 copy (`agno_private.pem.b64`), that's for a *vault* field that dislikes multi-line — the GitLab
+**File** variable wants the **raw PEM**, not the base64.
+
+**Verify after saving** — click **Reveal** and confirm the value:
+- starts with the `-----`-wrapped `BEGIN PRIVATE KEY` header line
+- ends with the `-----`-wrapped `END PRIVATE KEY` footer line
+- has the base64 body lines between those markers, newlines intact
+
 ## Mint a token — three ways
 
 ### A. Self-serve via CI (no key handling) — preferred
