@@ -21,6 +21,7 @@
 
 stages:
   - security_scanning
+  - mint
 
 include:
   - component: $CI_SERVER_FQDN/pipeline-templates/security/security-scanner@v4.0.1
@@ -51,3 +52,39 @@ grype-fs-scan:
 #   2) append this item to the include: block above:
 #        - component: $CI_SERVER_FQDN/pipeline-templates/security/sbom-generation@v4.0.1
 # ---------------------------------------------------------------------------
+
+# --- Token minting (self-serve; the private key NEVER touches git) ---------
+# Mint an AgentOS RS256 JWT without anyone handling the raw private key. The key lives ONLY as a
+# PROTECTED, File-type CI/CD variable `AGNO_PRIVATE_KEY` — set it at the `msq-turbo` GROUP level so
+# it is shared across the squad and survives project transfers. It is NEVER committed.
+#
+# Mint (GitLab UI):  Build > Pipelines > "Run pipeline" on `main`, add variables:
+#     MINT_USER=<handle>            (required)
+#     MINT_DAYS=30                  (optional, default 30)
+#     MINT_SCOPES="agents:run workflows:run ..."   (optional; default = full scope set)
+#   -> open the `mint-token` job -> download the `agno_mcp_token` artifact (expires in 1h).
+#
+# Protected CI variables are only exposed on PROTECTED refs, so this runs on `main` only, and only
+# for a web-triggered pipeline that sets MINT_USER (never on ordinary pushes/MRs).
+# Full setup / rotation / revocation runbook: docs/AUTH_KEYS.md.
+mint-token:
+  stage: mint
+  image: python:3.12-slim
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "web" && $MINT_USER && $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
+  variables:
+    MINT_DAYS: "30"
+  script:
+    - |
+      if [ -z "${AGNO_PRIVATE_KEY:-}" ]; then
+        echo "ERROR: AGNO_PRIVATE_KEY (protected File CI/CD variable) is not set/exposed."
+        echo "  fix: add it at the msq-turbo group (Settings > CI/CD > Variables; Type=File, Protected,"
+        echo "       Masked-if-possible) AND run this pipeline on a PROTECTED branch (main). See docs/AUTH_KEYS.md."
+        exit 1
+      fi
+    - pip install --quiet --no-input pyjwt cryptography
+    - python3 scripts/mint_token.py --user "$MINT_USER" --days "$MINT_DAYS" ${MINT_SCOPES:+--scopes $MINT_SCOPES} --key "$AGNO_PRIVATE_KEY" > agno_mcp_token
+    - echo "Minted RS256 JWT for user=$MINT_USER days=$MINT_DAYS. Download the 'agno_mcp_token' artifact (expires 1h); never commit it. Wire into Claude Code per scripts/README.md."
+  artifacts:
+    paths: [agno_mcp_token]
+    expire_in: 1 hour

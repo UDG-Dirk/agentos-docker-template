@@ -1,4 +1,18 @@
-# AgentOS Docker Template
+# HELIX Agents (AgentOS)
+
+> **This repo = `helix-agents`** (HELIX PoC AgentOS; hosted on GitLab under `msq-turbo/helix-agents`,
+> deployed to Coolify at `poc-agno-api.services.plygrnd.tech`). It began as the upstream
+> **AgentOS Docker Template** (below, kept largely intact) — what we changed is tracked in
+> [`CUSTOMIZATIONS.md`](CUSTOMIZATIONS.md).
+>
+> **New here?** Clone via **GitLab → Clone** (the project has been transferred before — don't trust a
+> hardcoded path). Then: local dev setup → [`docs/SETUP.md`](docs/SETUP.md); AgentOS access token +
+> Claude Code MCP → [`scripts/README.md`](scripts/README.md); the Figma extractor →
+> [`agents/figma_extractor/README.md`](agents/figma_extractor/README.md).
+>
+> *(All the links above are repo-relative on purpose, so they survive the next rename/transfer.)*
+
+---
 
 An agent platform you build, improve, and run using coding agents.
 

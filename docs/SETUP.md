@@ -147,3 +147,5 @@ python3 scripts/mint_token.py --user <handle> --days 30 > ~/.agno-keys/agno_mcp_
   never committed (`.gitignore` blocks `*.pem` / `*_token` / `*.jwt`).
 - To reach the deployed AgentOS from **Claude Code** (the `agno-prod` HTTP MCP) or any API client,
   see the full clone → mint → wire walkthrough in **[`scripts/README.md`](../scripts/README.md)**.
+- Squad self-serve minting (CI job, no key handling) + key custody / rotation / revocation:
+  **[`AUTH_KEYS.md`](AUTH_KEYS.md)**.

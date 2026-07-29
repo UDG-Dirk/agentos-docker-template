@@ -27,13 +27,34 @@ Prod AgentOS (`RUNTIME_ENV=prd`) requires a **Bearer RS256 JWT**, verified serve
   version-controlled config. Prefer **one token per person** (`--user <handle>`) so tokens are
   attributable and individually revocable (rotate the keypair to revoke).
 
-### 1. Clone + env
+### Fastest path — get a token, install nothing (recommended)
+If you just need MCP/API **access**, don't clone or install anything:
+
+- **Self-serve via CI (best):** GitLab → **Build → Pipelines → Run pipeline** on `main`, set
+  `MINT_USER=<handle>` (+ optional `MINT_DAYS`, `MINT_SCOPES`) → open the **`mint-token`** job →
+  download the **`agno_mcp_token`** artifact (expires 1 h). No key handling by anyone. Then go to
+  **step 4**. (Setup/rotation/revocation: [`../docs/AUTH_KEYS.md`](../docs/AUTH_KEYS.md).)
+- **Or ask the key-holder** to mint one and send you the token string:
+  ```bash
+  python3 scripts/mint_token.py --user <your-handle> --days 30
+  ```
+Either way: no clone, no Python, no private key on your side — least-privilege (the signing key
+stays in the protected CI variable / vault, never in git).
+
+### Self-mint (only if you hold the private key)
+Minting needs **just two libraries — NOT the whole app**:
 ```bash
-git clone git@rmvc01.rm.udg.de:customer-udg-ai/projects/poc-agno-docker.git
-cd poc-agno-docker
+git clone <clone-url-from-gitlab>          # canonical URL: GitLab → Clone
+cd "$(basename "$_" .git)"
 python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt        # ships pyjwt + cryptography
+pip install pyjwt cryptography             # ONLY these two
 ```
+> ⚠️ Do **NOT** run `pip install -r requirements.txt` just to mint — that's the entire AgentOS
+> service (agno, aiofile, …) and it **requires Python ≥3.12**, so on older Python it fails with
+> `Requires-Python >=3.11` / `No matching distribution found for aiofile==…`. `pyjwt` + `cryptography`
+> alone install on any modern Python 3. (You only need the full `requirements.txt` to *run* the service.)
+
+All paths below are **repo-relative** — they don't change if the project is renamed or moved again.
 
 ### 2. Place the signing key (given to you separately — NOT from git)
 ```bash
