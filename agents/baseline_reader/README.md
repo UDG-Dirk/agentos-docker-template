@@ -145,7 +145,7 @@ Registered as the standalone **`helix-baseline-reader`** workflow (Cycle 2). Inv
 | `BASELINE_REPO_URL` / `BASELINE_REPO_USERNAME` / `BASELINE_REPO_TOKEN` | helix-code checkout (deploy token; token never logged/in-URL) |
 | `BASELINE_REPO_PATH` / `BASELINE_OUTPUT_DIR` | checkout dir + inventory output (Coolify volumes) |
 | `HELIX_CODE_CEM_PATH` | where the CI-built CEM is read from (Cycle 2 seam) |
-| `HELIX_CODE_CEM_ARTIFACT_URL` / `HELIX_CODE_CEM_ARTIFACT_AUTH_HEADER` | **Cycle 3 (1b-ii):** `scripts/fetch_cem.py` fetches the `build-cem` artifact to `HELIX_CODE_CEM_PATH` at container startup (`entrypoint.sh`). Unset → loud skip → `CEM_MISSING` fallback. Auth-header note: artifact download needs a token with **`read_api`** (a `read_repository`-only deploy token won't work). |
+| `HELIX_CODE_CEM_ARTIFACT_URL` / `HELIX_CODE_CEM_ARTIFACT_AUTH_HEADER` | **Cycle 3 (1b-ii):** `scripts/fetch_cem.py` fetches the CEM to `HELIX_CODE_CEM_PATH` at container startup (`entrypoint.sh`). Point the URL at the **stable generic-package URL** `…/api/v4/projects/<id>/packages/generic/cem/latest/custom-elements.json` (`build-cem` overwrites `latest` each run — no per-run re-pin). Unset → loud skip → `CEM_MISSING` fallback. Auth-header note: the download needs a token with **`read_api`** (a `read_repository`-only deploy token won't work). |
 
 Response `meta` carries **`last_cem_fetch_timestamp`** + **`cem_size_bytes`** (Cycle 3 minimal health;
 null/0 when no CEM). Blocking conditions surface as `blocking_warnings` (`BASELINE_AUTH_MISSING`,
@@ -162,10 +162,11 @@ Pipelines → Run pipeline** on `main`, add variables:
 | `BUILD_CEM` | `1` (required — the job is opt-in) |
 | `HELIX_CODE_REF` | e.g. `feature/organisms/MediaText` (default `master`) |
 
-The job clones that ref of `msq-turbo/helix-code` (READ-ONLY), runs `analyze:flat`, and publishes the
-`custom-elements.json` artifact. A non-existent ref fails the clone **loudly** (SP-6). Env-driven, no
-hardcoded ref (SP-9). *(Per-branch artifact URL disambiguation is an ops concern for the startup-fetch
-side — see the Cycle-3 delivery result; the build side is branch-agnostic.)*
+The job clones that ref of `msq-turbo/helix-code` (READ-ONLY), runs `analyze:flat`, and **publishes
+`custom-elements.json` to the generic package registry** at the stable `cem/latest` URL (overwriting the
+previous copy) as well as keeping a job artifact. A non-existent ref fails the clone **loudly** (SP-6).
+Env-driven, no hardcoded ref/URL (SP-9). The container always fetches the same stable URL, so a rebuild
+of any ref is picked up on the next redeploy with **no re-pin** — the last `build-cem` run wins.
 
 ## Files
 

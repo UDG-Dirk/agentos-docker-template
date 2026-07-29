@@ -113,6 +113,8 @@ build-cem:
     HELIX_CODE_REPO_URL: "https://rmvc01.rm.udg.de/msq-turbo/helix-code.git"
     HELIX_CODE_REF: "master"
     CEM_REL_PATH: "packages/elements/custom-elements.json"   # helix-code layout (probe 2026-07-29)
+    CEM_PACKAGE_NAME: "cem"           # generic package registry: stable name/version -> stable download URL
+    CEM_PACKAGE_VERSION: "latest"     # re-published (overwritten) each run; download URL never changes
   # single |-block literal so YAML never tokenizes shell ':'/'{'/'[' inside the commands
   script:
     - |
@@ -131,6 +133,17 @@ build-cem:
       test -f "$CEM_REL_PATH" || { echo "ERROR - CEM not produced at $CEM_REL_PATH after analyze:flat"; exit 1; }
       cp "$CEM_REL_PATH" "$CI_PROJECT_DIR/custom-elements.json"
       echo "CEM built - $(wc -c < "$CI_PROJECT_DIR/custom-elements.json") bytes"
+      # Publish to the generic package registry at a STABLE url (retires the pinned-job-URL re-pin toil).
+      # Upload auth = CI_JOB_TOKEN (no extra scope/token needed for THIS project's generic packages).
+      # Download side (container fetch_cem.py) uses a read_api token, unchanged. Fail LOUD (SP-6): a
+      # non-2xx aborts the job so a stale package is never silently kept.
+      PKG_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CEM_PACKAGE_NAME}/${CEM_PACKAGE_VERSION}/custom-elements.json"
+      echo "Publishing CEM -> $PKG_URL"
+      code=$(curl -sS -o /tmp/cem_publish.out -w '%{http_code}' --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file "$CI_PROJECT_DIR/custom-elements.json" "$PKG_URL")
+      case "$code" in
+        200|201) echo "CEM published OK (http $code): $(cat /tmp/cem_publish.out)";;
+        *) echo "ERROR - CEM publish to package registry failed (http $code): $(cat /tmp/cem_publish.out)"; exit 1;;
+      esac
   artifacts:
     paths: [custom-elements.json]
     expire_in: 1 week
