@@ -19,7 +19,7 @@ ours vs. upstream.
 - **Our base commit:** `113864d` (upstream `main` HEAD at fork time). We are **4 commits ahead, 0 behind**.
 - **agno version pinned:** `agno[os,slack]` → `agno==2.6.7` (`pyproject.toml` / `requirements.txt`).
 - **Remotes:**
-  - **GitLab `gitlab` — source of truth / Coolify deploys from here:** `git@rmvc01.rm.udg.de:customer-udg-ai/projects/poc-agno-docker.git` (branch `main`, currently `df9efbf`).
+  - **GitLab `gitlab` — source of truth / Coolify deploys from here** (branch `main`). Canonical clone URL: **GitLab → Clone** (the project has been transferred before — `customer-udg-ai/projects/poc-agno-docker` → `msq-turbo/helix-agents` as of 2026-07-29; prefer the Clone button over a hardcoded path, and no pinned SHA here so it can't go stale).
   - **GitHub `origin` (fork):** `https://github.com/UDG-Dirk/agentos-docker-template` — **NOT kept in sync** (still at `09e1d86`; our agent work was pushed only to GitLab).
 
 ## Our commits on top of upstream

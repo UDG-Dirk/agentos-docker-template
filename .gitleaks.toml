@@ -1,4 +1,4 @@
-# Gitleaks configuration for poc-agno-docker.
+# Gitleaks configuration for helix-agents (formerly poc-agno-docker).
 #
 # Keeps ALL default gitleaks rules (useDefault = true) and narrowly allowlists
 # known FALSE POSITIVES of the broad `generic-api-key` rule: Figma FILE KEYS
@@ -18,7 +18,7 @@
 # Verified false-positive during the security-pipeline setup: `generic-api-key`
 # matched Figma file keys like 8qPSyetzviLR6eF6bkpL44.
 
-title = "poc-agno-docker"
+title = "helix-agents"
 
 [extend]
 useDefault = true
@@ -27,7 +27,7 @@ useDefault = true
 description = "Figma dev artifacts (spikes/ scratch + extractor run logs) and the public Figma file key — verified false positives, not credentials."
 # NOTE: unanchored (no leading ^) on purpose — the CI component runs gitleaks with
 # an ABSOLUTE --source ($CI_PROJECT_DIR), so reported paths are absolute
-# (/builds/.../poc-agno-docker/spikes/...). An anchored ^spikes/ matches a local
+# (/builds/.../helix-agents/spikes/...). An anchored ^spikes/ matches a local
 # relative scan but NOT the CI absolute path. Substring match works for both.
 paths = [
   '''spikes/''',

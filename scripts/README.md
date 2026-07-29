@@ -28,12 +28,15 @@ Prod AgentOS (`RUNTIME_ENV=prd`) requires a **Bearer RS256 JWT**, verified serve
   attributable and individually revocable (rotate the keypair to revoke).
 
 ### 1. Clone + env
+> Grab the **canonical clone URL from GitLab → Clone** (the project has been transferred before, so
+> don't trust a hardcoded path). At time of writing it's `git@rmvc01.rm.udg.de:msq-turbo/helix-agents.git`.
 ```bash
-git clone git@rmvc01.rm.udg.de:customer-udg-ai/projects/poc-agno-docker.git
-cd poc-agno-docker
+git clone <clone-url-from-gitlab>       # e.g. git@rmvc01.rm.udg.de:msq-turbo/helix-agents.git
+cd "$(basename "$_" .git)"              # into the cloned repo dir
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt        # ships pyjwt + cryptography
 ```
+All paths below are **repo-relative** — they don't change if the project is renamed or moved again.
 
 ### 2. Place the signing key (given to you separately — NOT from git)
 ```bash
