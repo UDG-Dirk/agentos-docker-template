@@ -62,7 +62,7 @@ grype-fs-scan:
 #     MINT_USER=<handle>            (required)
 #     MINT_DAYS=30                  (optional, default 30)
 #     MINT_SCOPES="agents:run workflows:run ..."   (optional; default = full scope set)
-#   -> open the `mint-token` job -> download the `agno_mcp_token` artifact (expires in 1h).
+#   -> open the `mint-token` job -> download the `agno_mcp_token` artifact (expires in 1 day).
 #
 # Protected CI variables are only exposed on PROTECTED refs, so this runs on `main` only, and only
 # for a web-triggered pipeline that sets MINT_USER (never on ordinary pushes/MRs).
@@ -84,7 +84,7 @@ mint-token:
       fi
     - pip install --quiet --no-input pyjwt cryptography
     - python3 scripts/mint_token.py --user "$MINT_USER" --days "$MINT_DAYS" ${MINT_SCOPES:+--scopes $MINT_SCOPES} --key "$AGNO_PRIVATE_KEY" > agno_mcp_token
-    - echo "Minted RS256 JWT for user=$MINT_USER days=$MINT_DAYS. Download the 'agno_mcp_token' artifact (expires 1h); never commit it. Wire into Claude Code per scripts/README.md."
+    - echo "Minted RS256 JWT for user=$MINT_USER days=$MINT_DAYS. Download the 'agno_mcp_token' artifact (expires in 1 day); never commit it. Wire into Claude Code per scripts/README.md."
   artifacts:
     paths: [agno_mcp_token]
-    expire_in: 1 hour
+    expire_in: 1 day   # enough to grab it same-day; the token itself is short-lived (--days). Dial down for tighter exposure.

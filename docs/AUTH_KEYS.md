@@ -65,7 +65,7 @@ base64 copy (`agno_private.pem.b64`), that's for a *vault* field that dislikes m
 ### A. Self-serve via CI (no key handling) — preferred
 GitLab → **Build → Pipelines → Run pipeline** on `main`, set variables:
 - `MINT_USER=<handle>` (required), `MINT_DAYS=30` (optional), `MINT_SCOPES="agents:run workflows:run …"` (optional).
-Run → open the **`mint-token`** job → download the **`agno_mcp_token`** artifact (expires in 1 h). Never printed to logs, never committed. Then wire into Claude Code per [`../scripts/README.md`](../scripts/README.md).
+Run → open the **`mint-token`** job → download the **`agno_mcp_token`** artifact (expires in 1 day). Never printed to logs, never committed. Then wire into Claude Code per [`../scripts/README.md`](../scripts/README.md).
 
 ### B. Key-holder mints locally
 ```bash
