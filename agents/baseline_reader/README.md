@@ -151,6 +151,22 @@ Response `meta` carries **`last_cem_fetch_timestamp`** + **`cem_size_bytes`** (C
 null/0 when no CEM). Blocking conditions surface as `blocking_warnings` (`BASELINE_AUTH_MISSING`,
 `BASELINE_FETCH_FAILED`, `CEM_MISSING`), never raised.
 
+### Building the CEM for a specific helix-code branch (cross-team / FE-DEV)
+
+The `build-cem` CI job reads **`HELIX_CODE_REF`** (default `master`), so a colleague can build the CEM
+from an in-progress branch and have the agents run against it *before* merge. GitLab → **Build →
+Pipelines → Run pipeline** on `main`, add variables:
+
+| Variable | Value |
+|---|---|
+| `BUILD_CEM` | `1` (required — the job is opt-in) |
+| `HELIX_CODE_REF` | e.g. `feature/organisms/MediaText` (default `master`) |
+
+The job clones that ref of `msq-turbo/helix-code` (READ-ONLY), runs `analyze:flat`, and publishes the
+`custom-elements.json` artifact. A non-existent ref fails the clone **loudly** (SP-6). Env-driven, no
+hardcoded ref (SP-9). *(Per-branch artifact URL disambiguation is an ops concern for the startup-fetch
+side — see the Cycle-3 delivery result; the build side is branch-agnostic.)*
+
 ## Files
 
 ```
