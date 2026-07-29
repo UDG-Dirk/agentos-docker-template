@@ -132,3 +132,18 @@ On prod, secrets go in **Coolify environment variables** — not in `.env` files
 AgentOS deploys to the `projects-01` Coolify server (`poc-agno-api.services.plygrnd.tech`). Review the prod launch checklist (`bestpractice:helix-workflow-prod-launch-checklist`) before deploying.
 
 > Coolify is playground/experimentation only — no SLA. Operational workloads migrate to IT-managed infrastructure later.
+
+### AgentOS access token (MCP / API)
+
+With `RUNTIME_ENV=prd`, every request needs a **Bearer RS256 JWT**, verified against
+`JWT_VERIFICATION_KEY` (the RSA **public** key; must match the private key below). Mint client
+tokens with **[`scripts/mint_token.py`](../scripts/mint_token.py)**:
+
+```bash
+python3 scripts/mint_token.py --user <handle> --days 30 > ~/.agno-keys/agno_mcp_token
+```
+
+- Private key lives at `~/.agno-keys/agno_private.pem` (chmod 600), delivered **out-of-band** —
+  never committed (`.gitignore` blocks `*.pem` / `*_token` / `*.jwt`).
+- To reach the deployed AgentOS from **Claude Code** (the `agno-prod` HTTP MCP) or any API client,
+  see the full clone → mint → wire walkthrough in **[`scripts/README.md`](../scripts/README.md)**.

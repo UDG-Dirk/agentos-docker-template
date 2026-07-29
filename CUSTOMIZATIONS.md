@@ -65,9 +65,10 @@ ours vs. upstream.
 - **`Dockerfile`** — `CMD` runs uvicorn (`uvicorn app.main:app --host 0.0.0.0 --port 8000`); upstream shipped `["chill"]`. `EXPOSE 8000`, entrypoint `scripts/entrypoint.sh` (waits for DB, then execs). **Build Pack = Dockerfile; container port = 8000** (Coolify "Ports Exposes" must be 8000, not the 3000 default, or Traefik 502s).
 - **`requirements.txt` / `pyproject.toml`** — added `fastmcp` (+ `agno[os,slack]`); pinned `agno==2.6.7`.
 - **`example.env`** — added a `# --- MCP Tool Secrets ---` section (`CONTEXT7_API_KEY`).
-- **`.gitignore`** — excludes local scratch **not** part of the deployable template: `.omc/`, `agents/--first-contact/`, `standalone/`.
+- **`.gitignore`** — excludes local scratch **not** part of the deployable template: `.omc/`, `agents/--first-contact/`, `standalone/`; plus **signing material / live credentials** (`*.pem`, `*.key`, `*_token`, `*.jwt`, `.agno-keys/`) so a keypair or minted token can never be committed.
 - **Untracked/gitignored scratch (ours, never deployed):** `agents/--first-contact/` (hackathon scripts + generated `output/`), `standalone/` (`hello_agent.py`, helix experiments), `.omc/`.
-- **Upstream, unchanged:** `docs/`, `evals/`, `scripts/`, `compose.yaml`, `AGENTS.md`, `CLAUDE.md`, `.github/`, `.mcp.json`, `README.md`, `LICENSE`.
+- **Project additions:** `scripts/mint_token.py` + `scripts/README.md` — mint AgentOS RS256 JWTs (BYO-keypair auth) and wire the `agno-prod` HTTP MCP into Claude Code; `docs/SETUP.md` §8 gained the token/MCP subsection.
+- **Upstream, unchanged:** `evals/`, `compose.yaml`, `AGENTS.md`, `CLAUDE.md`, `.github/`, `.mcp.json`, `README.md`, `LICENSE`. (`docs/` + `scripts/` now carry the additions above.)
 
 ## Deploy / runtime notes (hard-won)
 
