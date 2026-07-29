@@ -14,6 +14,7 @@ from agents.code_search import code_search
 from agents.knowledge_agent import knowledge_agent
 from agents.reasoning_agent import reasoning_agent
 from agents.web_search import web_search
+from app.workflows.helix_baseline_reader import helix_baseline_reader_workflow
 from app.workflows.helix_client_extractor import helix_client_extractor_workflow
 from app.workflows.helix_composition_only_extractor import helix_composition_only_extractor_workflow
 from app.workflows.helix_figma_extractor import helix_figma_extractor_workflow
@@ -81,7 +82,7 @@ agent_os = AgentOS(
     db=get_postgres_db(),
     agents=[web_search, code_search, reasoning_agent, knowledge_agent],
     workflows=[helix_figma_extractor_workflow, helix_client_extractor_workflow,
-               helix_composition_only_extractor_workflow],
+               helix_composition_only_extractor_workflow, helix_baseline_reader_workflow],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
     enable_mcp_server=True,

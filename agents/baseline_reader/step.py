@@ -60,6 +60,11 @@ ENV_TOKEN = "BASELINE_REPO_TOKEN"
 ENV_REPO_PATH = "BASELINE_REPO_PATH"
 ENV_OUTPUT_DIR = "BASELINE_OUTPUT_DIR"
 ENV_CLEAN_URL = "BASELINE_REPO_URL"  # credential-free remote URL (override-able)
+# Cycle 2 (decision 1b): the CEM is built by a SEPARATE CI job (pnpm analyze:flat) and delivered to
+# the container — it is NOT committed to helix-code. Point the reader at that CI-built CEM via this
+# env var (absolute path recommended; SP-9 env-only, no hardcoded default). Unset -> reader uses its
+# in-repo default and, finding no committed CEM, emits CEM_MISSING (fail-loud) as before.
+ENV_CEM_PATH = "HELIX_CODE_CEM_PATH"
 
 _GIT_TIMEOUT_SECONDS = 180
 
@@ -195,8 +200,12 @@ def baseline_read_executor(step_input: StepInput, **kwargs) -> StepOutput:
             success=False,
         )
 
+    # Cycle 2: consume the CI-built CEM when configured (absolute path wins in `repo / cem_source`);
+    # unset -> None -> reader's in-repo default + heuristic (CEM_MISSING loud if truly absent).
+    cem_source = os.environ.get(ENV_CEM_PATH) or None
     try:
-        inventory = read_baseline(baseline_repo_path=repo_path, ref=ref, output_dir=output_dir)
+        inventory = read_baseline(baseline_repo_path=repo_path, ref=ref,
+                                  cem_source=cem_source, output_dir=output_dir)
     except BaselineReaderError as e:
         return StepOutput(
             step_name=STEP_NAME_BASELINE,
