@@ -37,6 +37,13 @@ if [[ "$WAIT_FOR_DB" = true || "$WAIT_FOR_DB" = True ]]; then
     echo ""
 fi
 
+# Cycle 3 (1b-ii): fetch the CI-built Custom Elements Manifest before boot. Env-driven (SP-9);
+# self-skips + warns loudly if unset; NEVER blocks startup on failure (reader falls back to
+# CEM_MISSING). `|| true` is belt-and-braces — fetch_cem.py already always exits 0.
+echo -e "    ${DIM}Baseline CEM startup fetch...${NC}"
+python3 /app/scripts/fetch_cem.py || true
+echo ""
+
 case "$1" in
     chill)
         echo -e "    ${DIM}Mode: chill${NC}"
