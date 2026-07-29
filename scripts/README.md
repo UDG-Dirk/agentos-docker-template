@@ -27,15 +27,29 @@ Prod AgentOS (`RUNTIME_ENV=prd`) requires a **Bearer RS256 JWT**, verified serve
   version-controlled config. Prefer **one token per person** (`--user <handle>`) so tokens are
   attributable and individually revocable (rotate the keypair to revoke).
 
-### 1. Clone + env
-> Grab the **canonical clone URL from GitLab → Clone** (the project has been transferred before, so
-> don't trust a hardcoded path). At time of writing it's `git@rmvc01.rm.udg.de:msq-turbo/helix-agents.git`.
+### Fastest path — get a token, install nothing (recommended)
+If you just need MCP/API **access**, don't clone or install anything. Ask the **key-holder**
+(currently Dirk) to mint you one:
 ```bash
-git clone <clone-url-from-gitlab>       # e.g. git@rmvc01.rm.udg.de:msq-turbo/helix-agents.git
-cd "$(basename "$_" .git)"              # into the cloned repo dir
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt        # ships pyjwt + cryptography
+# key-holder runs, then sends you the token string over a secure channel:
+python3 scripts/mint_token.py --user <your-handle> --days 30
 ```
+Then jump straight to **step 4** (wire into Claude Code). No clone, no Python, no private key on your
+side. This is also the least-privilege model — the signing key stays with one person.
+
+### Self-mint (only if you hold the private key)
+Minting needs **just two libraries — NOT the whole app**:
+```bash
+git clone <clone-url-from-gitlab>          # canonical URL: GitLab → Clone
+cd "$(basename "$_" .git)"
+python3 -m venv .venv && source .venv/bin/activate
+pip install pyjwt cryptography             # ONLY these two
+```
+> ⚠️ Do **NOT** run `pip install -r requirements.txt` just to mint — that's the entire AgentOS
+> service (agno, aiofile, …) and it **requires Python ≥3.12**, so on older Python it fails with
+> `Requires-Python >=3.11` / `No matching distribution found for aiofile==…`. `pyjwt` + `cryptography`
+> alone install on any modern Python 3. (You only need the full `requirements.txt` to *run* the service.)
+
 All paths below are **repo-relative** — they don't change if the project is renamed or moved again.
 
 ### 2. Place the signing key (given to you separately — NOT from git)
