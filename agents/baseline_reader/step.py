@@ -34,8 +34,8 @@ from __future__ import annotations
 import os
 import subprocess
 import time
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 from agno.workflow.types import StepInput, StepOutput
 
@@ -69,6 +69,21 @@ ENV_CEM_PATH = "HELIX_CODE_CEM_PATH"
 _GIT_TIMEOUT_SECONDS = 180
 
 
+def _cem_health() -> dict:
+    """Cycle 3 minimal health: size + last-fetch of the CI-delivered CEM at HELIX_CODE_CEM_PATH.
+    `last_cem_fetch_timestamp` = the file's mtime (the startup fetch wrote it), None if no CEM;
+    `cem_size_bytes` = its size, 0 if CEM_MISSING. Present on every response, incl. blocking ones."""
+    p = os.environ.get(ENV_CEM_PATH)
+    if p and os.path.isfile(p):
+        try:
+            st = os.stat(p)
+            ts = datetime.fromtimestamp(st.st_mtime, tz=UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+            return {"last_cem_fetch_timestamp": ts, "cem_size_bytes": st.st_size}
+        except OSError:
+            pass
+    return {"last_cem_fetch_timestamp": None, "cem_size_bytes": 0}
+
+
 # ---------------------------------------------------------------------------
 # Pure helpers (unit-tested)
 # ---------------------------------------------------------------------------
@@ -88,7 +103,7 @@ def _credential_helper() -> str:
     return "!f() { echo username=$%s; echo password=$%s; }; f" % (ENV_USERNAME, ENV_TOKEN)
 
 
-def _scrub(text: Optional[str]) -> Optional[str]:
+def _scrub(text: str | None) -> str | None:
     """Defensive: replace any accidental credential material in surfaced text."""
     if not text:
         return text
@@ -100,7 +115,7 @@ def _scrub(text: Optional[str]) -> Optional[str]:
     return out.strip()
 
 
-def _run_git(args: list[str], *, cwd: Optional[str] = None, env: Optional[dict] = None):
+def _run_git(args: list[str], *, cwd: str | None = None, env: dict | None = None):
     return subprocess.run(
         ["git", *args],
         cwd=cwd,
@@ -117,7 +132,7 @@ def ensure_baseline_checkout(
     *,
     clean_url: str,
     env: dict,
-) -> tuple[float, Optional[str]]:
+) -> tuple[float, str | None]:
     """Clone (if empty) then fetch+checkout ``ref`` at depth 1.
 
     Credentials come from a per-command credential helper reading ``env``; the
@@ -150,10 +165,11 @@ def ensure_baseline_checkout(
 
 
 def _blocking_result(ref: str, repo_path: str, code: str, message: str,
-                     remediation: str, extra_meta: Optional[dict] = None) -> dict:
+                     remediation: str, extra_meta: dict | None = None) -> dict:
     meta = {"baseline_ref": ref, "baseline_repo_path": repo_path}
     if extra_meta:
         meta.update(extra_meta)
+    meta.update(_cem_health())  # Cycle 3: health fields present even on blocking results
     return {
         "meta": meta,
         "blocking_warnings": [{"code": code, "message": message, "remediation": remediation}],
@@ -220,6 +236,7 @@ def baseline_read_executor(step_input: StepInput, **kwargs) -> StepOutput:
     inventory.setdefault("meta", {})
     inventory["meta"]["baseline_ref"] = ref
     inventory["meta"]["baseline_repo_path"] = repo_path
+    inventory["meta"].update(_cem_health())  # Cycle 3: last_cem_fetch_timestamp + cem_size_bytes
     inventory["meta"]["fetch_checkout_seconds"] = round(duration, 3)
     blocking = inventory.get("blocking_warnings") or []
     return StepOutput(step_name=STEP_NAME_BASELINE, content=inventory, success=not blocking)

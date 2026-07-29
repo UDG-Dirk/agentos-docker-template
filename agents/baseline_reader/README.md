@@ -134,12 +134,48 @@ inventory = read_baseline(
 python -m pytest tests/baseline_reader/
 ```
 
+## Deployment
+
+Registered as the standalone **`helix-baseline-reader`** workflow (Cycle 2). Invoke via the AGNO MCP
+`run_workflow(workflow_id="helix-baseline-reader", …)` or REST `POST /workflows/helix-baseline-reader/runs`
+(use `background=true`). Env config (all SP-9 env-only — no hardcoded paths/URLs/keys):
+
+| Env | Purpose |
+|---|---|
+| `BASELINE_REPO_URL` / `BASELINE_REPO_USERNAME` / `BASELINE_REPO_TOKEN` | helix-code checkout (deploy token; token never logged/in-URL) |
+| `BASELINE_REPO_PATH` / `BASELINE_OUTPUT_DIR` | checkout dir + inventory output (Coolify volumes) |
+| `HELIX_CODE_CEM_PATH` | where the CI-built CEM is read from (Cycle 2 seam) |
+| `HELIX_CODE_CEM_ARTIFACT_URL` / `HELIX_CODE_CEM_ARTIFACT_AUTH_HEADER` | **Cycle 3 (1b-ii):** `scripts/fetch_cem.py` fetches the `build-cem` artifact to `HELIX_CODE_CEM_PATH` at container startup (`entrypoint.sh`). Unset → loud skip → `CEM_MISSING` fallback. Auth-header note: artifact download needs a token with **`read_api`** (a `read_repository`-only deploy token won't work). |
+
+Response `meta` carries **`last_cem_fetch_timestamp`** + **`cem_size_bytes`** (Cycle 3 minimal health;
+null/0 when no CEM). Blocking conditions surface as `blocking_warnings` (`BASELINE_AUTH_MISSING`,
+`BASELINE_FETCH_FAILED`, `CEM_MISSING`), never raised.
+
+### Building the CEM for a specific helix-code branch (cross-team / FE-DEV)
+
+The `build-cem` CI job reads **`HELIX_CODE_REF`** (default `master`), so a colleague can build the CEM
+from an in-progress branch and have the agents run against it *before* merge. GitLab → **Build →
+Pipelines → Run pipeline** on `main`, add variables:
+
+| Variable | Value |
+|---|---|
+| `BUILD_CEM` | `1` (required — the job is opt-in) |
+| `HELIX_CODE_REF` | e.g. `feature/organisms/MediaText` (default `master`) |
+
+The job clones that ref of `msq-turbo/helix-code` (READ-ONLY), runs `analyze:flat`, and publishes the
+`custom-elements.json` artifact. A non-existent ref fails the clone **loudly** (SP-6). Env-driven, no
+hardcoded ref (SP-9). *(Per-branch artifact URL disambiguation is an ops concern for the startup-fetch
+side — see the Cycle-3 delivery result; the build side is branch-agnostic.)*
+
 ## Files
 
 ```
 agents/baseline_reader/
   reader.py            # read_baseline() — deterministic fn step + entry point
+  step.py              # baseline_read_executor — pull-on-invocation + CEM path + health fields
   README.md            # this file
+app/workflows/helix_baseline_reader.py   # standalone workflow registration (Cycle 2)
+scripts/fetch_cem.py                     # Cycle 3 startup CEM fetch (1b-ii, env-driven, fail-loud)
 tests/baseline_reader/
   fixtures/            # frozen inputs for the determinism suite
 ```
