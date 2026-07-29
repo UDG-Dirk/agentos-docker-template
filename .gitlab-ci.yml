@@ -22,6 +22,7 @@
 stages:
   - security_scanning
   - mint
+  - baseline
 
 include:
   - component: $CI_SERVER_FQDN/pipeline-templates/security/security-scanner@v4.0.1
@@ -88,3 +89,46 @@ mint-token:
   artifacts:
     paths: [agno_mcp_token]
     expire_in: 1 day   # enough to grab it same-day; the token itself is short-lived (--days). Dial down for tighter exposure.
+
+# --- Baseline CEM build (Cycle 2, decision 1b) -----------------------------
+# The Custom Elements Manifest is NOT committed to helix-code (State 3 per the CEM-availability probe
+# 2026-07-29) — the FE team added `analyze:flat` specifically for external CI consumers. This job
+# clones helix-code (READ-ONLY), builds the CEM with pnpm, and publishes `custom-elements.json` as an
+# artifact for the helix-baseline-reader workflow to consume (delivery to the container via
+# HELIX_CODE_CEM_PATH — see docs/AUTH_KEYS.md / cycle-2 deliverable; NO pnpm in the Agno runtime image).
+#
+# OPT-IN: runs ONLY when the pipeline is started with BUILD_CEM set (Run pipeline / schedule / trigger),
+# so it never reds ordinary push/MR pipelines while helix-code CI access is still being provisioned.
+# [U] REQUIRES CI variables on msq-turbo/helix-agents (group scope): BASELINE_REPO_TOKEN (+ optional
+#     BASELINE_REPO_USERNAME) — the SAME helix-code deploy token the reader uses. HELIX_CODE_REPO_URL
+#     defaults to the known clean URL below (not a secret). Fails loud if the token is absent.
+build-cem:
+  stage: baseline
+  image: node:22-bookworm-slim
+  rules:
+    - if: '$BUILD_CEM'
+  variables:
+    HELIX_CODE_REPO_URL: "https://rmvc01.rm.udg.de/msq-turbo/helix-code.git"
+    HELIX_CODE_REF: "master"
+    CEM_REL_PATH: "packages/elements/custom-elements.json"   # helix-code layout (probe 2026-07-29)
+  # single |-block literal so YAML never tokenizes shell ':'/'{'/'[' inside the commands
+  script:
+    - |
+      set -e
+      if [ -z "${BASELINE_REPO_TOKEN:-}" ]; then
+        echo "ERROR - BASELINE_REPO_TOKEN (helix-code deploy token) not set as a CI/CD variable."
+        echo "  fix - add BASELINE_REPO_TOKEN (+ optional BASELINE_REPO_USERNAME) at the msq-turbo group."
+        exit 1
+      fi
+      apt-get update -qq && apt-get install -y -qq git >/dev/null
+      # credential helper reads the token from env -> token stays out of argv and out of .git/config
+      git config --global credential.helper '!f() { echo "username=${BASELINE_REPO_USERNAME:-token}"; echo "password=${BASELINE_REPO_TOKEN}"; }; f'
+      git clone --depth 1 --branch "$HELIX_CODE_REF" "$HELIX_CODE_REPO_URL" helix-code
+      cd helix-code && corepack enable && pnpm install --frozen-lockfile
+      pnpm --filter @helix/elements run analyze:flat
+      test -f "$CEM_REL_PATH" || { echo "ERROR - CEM not produced at $CEM_REL_PATH after analyze:flat"; exit 1; }
+      cp "$CEM_REL_PATH" "$CI_PROJECT_DIR/custom-elements.json"
+      echo "CEM built - $(wc -c < "$CI_PROJECT_DIR/custom-elements.json") bytes"
+  artifacts:
+    paths: [custom-elements.json]
+    expire_in: 1 week
