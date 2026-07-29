@@ -32,7 +32,7 @@ If you just need MCP/API **access**, don't clone or install anything:
 
 - **Self-serve via CI (best):** GitLab → **Build → Pipelines → Run pipeline** on `main`, set
   `MINT_USER=<handle>` (+ optional `MINT_DAYS`, `MINT_SCOPES`) → open the **`mint-token`** job →
-  download the **`agno_mcp_token`** artifact (expires 1 h). No key handling by anyone. Then go to
+  download the **`agno_mcp_token`** artifact (expires in 1 day). No key handling by anyone. Then go to
   **step 4**. (Setup/rotation/revocation: [`../docs/AUTH_KEYS.md`](../docs/AUTH_KEYS.md).)
 - **Or ask the key-holder** to mint one and send you the token string:
   ```bash
