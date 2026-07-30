@@ -17,12 +17,24 @@ Design decisions worth flagging (see README "Design Decisions"):
   into the DTCG tree, so ``token_tree`` stays spec-valid (every leaf has a real
   $type). This is a spec interpretation — surfaced for HITL/QA confirmation.
 
+QUARANTINE — enrichment is currently INACTIVE in the live pipeline.
+  Phases 1 & 2 read ``enrichment_type`` / ``enrichment_match`` as the *authoritative*
+  type/path signal, but the deterministic Figma extractor never populates those fields
+  (only the legacy LLM ``agent.py``, kept as dead code, ever did). So every token today
+  arrives WITHOUT enrichment and the code always takes the value/name-inference fallback.
+  These read-paths are retained DELIBERATELY (enrichment may become real if Code Connect /
+  Variable slash-path metadata is wired later) — do not delete them. As a tripwire,
+  ``normalize_tokens`` logs a WARNING if any token *does* arrive with enrichment (unexpected
+  in the current pipeline). See agents/figma_extractor/README.md "enrichment fields are
+  currently inactive" and TokenEntry.enrichment_* in figma_extractor/models.py.
+
 Public API: ``normalize_tokens(extraction) -> NormalizedTokens``.
 """
 from __future__ import annotations
 
 import importlib.util as _ilu
 import json
+import logging
 import re
 import sys
 from pathlib import Path
@@ -77,6 +89,8 @@ from parsers.dimension import parse_dimension  # noqa: E402
 from parsers.paths import css_var_to_dotted, enrichment_path_to_dotted  # noqa: E402
 from parsers.shadow import parse_box_shadow  # noqa: E402
 from parsers.typography import parse_font_family, parse_typography  # noqa: E402
+
+log = logging.getLogger("token_normalizer")
 
 # enrichment_type → DTCG $type (spec mapping table). borderRadius collapses to
 # dimension; the original category is preserved in $extensions.originalCategory.
@@ -144,6 +158,9 @@ def _infer_type_from_name(name: str, category: str) -> Optional[str]:
 
 def _assign_type(tok) -> tuple[Optional[str], str, Optional[str], Optional[str]]:
     """Return (dtcg_type, confidence, type_source, fallback_warning)."""
+    # QUARANTINE: enrichment_type is the authoritative signal, but no token carries it in the
+    # current deterministic pipeline (see module docstring) — this branch is dead today, retained
+    # for a future Code Connect / Variable-slash-path integration. Live path falls through to inference.
     et = (tok.enrichment_type or "").strip()
     if et and et in ENRICHMENT_TO_DTCG:
         return ENRICHMENT_TO_DTCG[et], "authoritative", "enrichment", None
@@ -202,6 +219,8 @@ def _dump_value(value) -> Union[dict, list]:
 
 
 def _derive_path(tok) -> tuple[str, str]:
+    # QUARANTINE: enrichment slash-path is preferred when present, but no token carries it in the
+    # current pipeline (see module docstring) — dead today, retained for future integration.
     enrichment = (tok.enrichment_match or "").strip()
     if enrichment:
         return enrichment_path_to_dotted(enrichment), "enrichment"
@@ -372,6 +391,18 @@ def normalize_tokens(extraction) -> NormalizedTokens:
             report.composites_decomposed.append(final_path)
 
     report.total_output_tokens = len(report.all_entries)
+
+    # QUARANTINE tripwire: enrichment is inactive in the current pipeline (see module docstring).
+    # If any token DID arrive with enrichment, that's unexpected — surface it loudly (non-fatal;
+    # the enrichment read-paths handle it correctly, this only flags that the assumption changed).
+    if report.tokens_with_enrichment:
+        log.warning(
+            "enrichment is unexpectedly ACTIVE: %d/%d tokens carried enrichment_match/type. The "
+            "deterministic extractor is not supposed to populate enrichment today (see normalizer "
+            "module docstring / figma_extractor README). If Code Connect / Variable-slash-path "
+            "enrichment was intentionally wired, remove this quarantine tripwire.",
+            report.tokens_with_enrichment, report.total_input_tokens,
+        )
 
     # duplicate value groups (semantic aliases — observed, NOT merged)
     for value_key, paths in value_to_paths.items():

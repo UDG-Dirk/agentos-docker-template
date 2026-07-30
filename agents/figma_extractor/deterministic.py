@@ -456,6 +456,11 @@ async def run_deterministic_extraction(
             for fr in failure_reports
         ],
         typos_detected=typos_flat,
+        # QUARANTINE: hardcoded 0.0 — enrichment (Variable slash-path / Code Connect metadata) is NOT
+        # wired in the deterministic path; no token here carries enrichment_match/type. This is the only
+        # enrichment write in the live extractor and it merely restates the model default. Reserved for a
+        # future integration; see agents/figma_extractor/README.md "enrichment fields are currently
+        # inactive" and the QUARANTINE note in agents/token_normalizer/normalizer.py.
         enrichment_coverage=0.0,
     )
 
