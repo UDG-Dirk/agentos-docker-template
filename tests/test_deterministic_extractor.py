@@ -139,9 +139,41 @@ def test_lane2_failure_is_status_failure():
             {"endpoint": "getFileComponentSets", "error_class": "auth", "http_status": 401,
              "message": "x", "attempted_at": "t", "retry_count": 0}]}
     r = _run(lane_semantic=sem_fail)
-    assert r["deterministic_extraction"]["status"] == "failure"
-    assert r["deterministic_extraction"]["failure_reports"]
+    de = r["deterministic_extraction"]
+    assert de["status"] == "failure"
+    assert de["failure_reports"]
     assert r["components"] == []
+    # regression: sem already recorded a reason (auth) -> the Lane-2 roster classifier must NOT add a
+    # second roster note (no double-report), and must not overwrite the real reason.
+    assert not any(f["error_class"] in ("roster_unavailable", "rate_limit_exhausted")
+                   for f in de["failure_reports"])
+    assert any(f["error_class"] == "auth" for f in de["failure_reports"])
+
+
+def test_lane2_empty_roster_classified_roster_unavailable_not_bare():
+    """No-roster failure with NO recorded reason must be CLASSIFIED (roster_unavailable), never a bare
+    zero-coverage failure (the live-fire DGX gap, 2026-07-30)."""
+    async def sem_empty(fk):
+        return {"status": "success", "component_sets": [], "components": [], "styles": [], "failure_reports": []}
+    r = _run(lane_semantic=sem_empty)
+    de = r["deterministic_extraction"]
+    assert de["status"] == "failure"
+    assert de["coverage_report"]["component_sets_expected"] == 0
+    fr = de["failure_reports"]
+    assert len(fr) == 1 and fr[0]["error_class"] == "roster_unavailable" and fr[0]["http_status"] is None
+
+
+def test_lane2_roster_429_classified_rate_limit_exhausted():
+    """A roster fetch that came back empty WITH a visible 429 signal classifies as rate_limit_exhausted
+    (429), not a bare failure and not roster_unavailable."""
+    async def sem_429(fk):
+        return {"status": "failure", "component_sets": [], "components": [], "styles": [],
+                "reason": "Too Many Requests", "failure_reports": []}
+    r = _run(lane_semantic=sem_429)
+    de = r["deterministic_extraction"]
+    assert de["status"] == "failure"
+    fr = de["failure_reports"]
+    assert len(fr) == 1 and fr[0]["error_class"] == "rate_limit_exhausted" and fr[0]["http_status"] == 429
 
 
 def test_get_figma_data_error_is_partial_not_raise():

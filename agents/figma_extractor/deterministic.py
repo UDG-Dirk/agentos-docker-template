@@ -435,6 +435,24 @@ async def run_deterministic_extraction(
     # status (spec §3 fail-loud): ALL per-set enrichment failed → failure; ANY failed → partial
     if not roster_ok:
         status = "failure"
+        # SP-6: a no-roster failure must carry a CLASSIFIED reason — never a bare zero-coverage failure
+        # (live-fire DGX gap, 2026-07-30). A real semantic-layer 429 already lands in failure_reports as
+        # error_class "rate_limit" (semantic_layer._fetch). If NOTHING recorded a reason, classify the
+        # empty roster here: rate_limit_exhausted when a 429 signal is visible in the roster response,
+        # else roster_unavailable — so the operator always sees WHY, not a phantom zero-coverage failure.
+        if not failure_reports:
+            _roster_rate_limited = _is_rate_limited(str(sem))
+            failure_reports.append({
+                "endpoint": "get_figma_semantic_layer",
+                "http_status": 429 if _roster_rate_limited else None,
+                "error_class": "rate_limit_exhausted" if _roster_rate_limited else "roster_unavailable",
+                "message": (
+                    "Lane-2 roster fetch rate-limited (429 persisted after backoff); no component_set roster returned"
+                    if _roster_rate_limited else
+                    f"Lane-2 roster empty/unavailable (semantic-layer status={sem.get('status')!r}); no component_sets returned"
+                ),
+                "attempted_at": _now_iso(), "retry_count": 0,
+            })
     elif component_sets_raw and len(sets_failed) >= len(component_sets_raw):
         status = "failure"  # every component_set's get_figma_data enrichment failed (Lane-2 skeleton only)
     elif failure_reports or sets_failed:
