@@ -1,0 +1,29 @@
+# Local-dev Postgres + pgvector for helix-agents.
+# This is the ONLY container in local dev — the app itself runs bare-metal (venv + uvicorn).
+#
+#   docker compose -f docker-compose.dev.yml up -d      # start
+#   docker compose -f docker-compose.dev.yml down        # stop (keeps data)
+#   docker compose -f docker-compose.dev.yml down -v     # stop + wipe data
+#
+# Credentials/db match the .env.example defaults (ai/ai/ai). The pgvector/pgvector
+# image ships the `vector` extension; the app enables it on first connect.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: helix-agents-db
+    environment:
+      POSTGRES_USER: ai
+      POSTGRES_PASSWORD: ai
+      POSTGRES_DB: ai
+    ports:
+      - "5432:5432"
+    volumes:
+      - helix_agents_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai -d ai"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  helix_agents_pgdata:
