@@ -207,6 +207,22 @@ def test_malformed_response_is_failed_set():
     assert any(f["error_class"] == "malformed" for f in de["failure_reports"])
 
 
+def test_export_lock_classified_file_export_disabled_not_malformed():
+    """Framelink surfaces a 'File not exportable' 403 as an error STRING (not valid YAML). It must be
+    classified file_export_disabled BEFORE the yaml parse — otherwise it raises a ScannerError and is
+    mis-tagged `malformed` (the B&S 2026-07-30 bug: 36 sets → 36 malformed instead of file_export_disabled)."""
+    body = "scrollbar (97:1090): Error 403 Forbidden: File not exportable"
+    ec, http, _ = d._classify_gfd_response(body)
+    assert ec == "file_export_disabled"
+    assert http == 403
+    # end-to-end: an export-locked set is a failed set tagged file_export_disabled, NOT malformed
+    r = _run(get_figma_data=_gfd_map(default=body))
+    de = r["deterministic_extraction"]
+    assert de["status"] == "failure"
+    assert any(f["error_class"] == "file_export_disabled" for f in de["failure_reports"])
+    assert not any(f["error_class"] == "malformed" for f in de["failure_reports"])
+
+
 def test_genuine_thin_but_valid_not_failed():
     """A set with metadata.components present (≥1 variant) but empty globalVars.styles is VALID —
     must NOT be false-failed (spec thin-but-valid caveat)."""
