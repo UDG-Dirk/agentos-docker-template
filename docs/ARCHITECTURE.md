@@ -7,37 +7,37 @@ HELIX UC2 is a Figma-to-design-system agentic pipeline: it derives design **toke
 ## Pipeline Flow
 
 ```
-Application Layer (OAuth + project config)
-  └─ Enrichment extraction via OFFICIAL Figma MCP (OAuth):
-       Variables taxonomy + $type, Code Connect Vue snippets,
-       designer agent-instructions, composite alias tokens
-         └─ stored as the project knowledge base
-              (format TBD; currently spike_s1/ proxy files)
-
-Agno Workflow (headless, Framelink MCP + PAT):
+Agno Workflow (headless: reads Figma with the Framelink community MCP + a Personal Access Token):
 
   Step 1  Figma Extractor      → FigmaExtractionResult          [BUILT + DEPLOYED]
+                                  deterministic, ZERO LLM
   Step 2  Token Normalizer     → W3C DTCG tokens                [BUILT + DEPLOYED]
-                                  [HITL: requires_output_review]
-  Step 3  Component Scaffolder → theme CSS + new Vue SFCs       [PLANNED — restructured,
-                                  + Storybook stories             see Output Model below]
-  Step 4  CMS Model Generator  → Storyblok bloks                [PLANNED]
-  Step 5  Quality Gate         → validation (function steps,    [PLANNED]
-                                  zero-LLM)
-  Step 6  Git Push             → GitLab REST API                [PLANNED]
-                                  (api-scope PAT, atomic
-                                  multi-file commit)
+                                  pauses for a human review
+  Step 3a Baseline Reader      → baseline inventory             [BUILT + DEPLOYED]
+  Step 3b Semantic Matcher     → client→baseline match          [LIBRARY ONLY — no endpoint yet]
+  Step 3c Theme Generator      → CSS theme overrides            [PLANNED]
+  Step 3d New-Component Scaffolder → new Vue components         [PLANNED]
+  Step 4  CMS Model Generator  → Storyblok content models       [PLANNED]
+  Step 5  Quality Gate         → validation (no LLM)            [PLANNED]
+  Step 6  Git Push             → GitLab REST API commit          [PLANNED]
 ```
 
-> Steps 1–2 are built and **deployed to prod** (Agno Workflow `helix-figma-extractor` on Coolify);
-> Steps 3–6 are planned. Step 3 (Component Scaffolder) is being restructured — see **Output Model** below.
+**Step 1 is deterministic — no LLM in the extraction path.** It reads structured Figma data through
+fixed Python "lanes" (structure/values, published taxonomy, variable bindings, versions, cross-file
+references, and a Tokens Studio token catalog) — the earlier LLM-driven extractor was removed because it
+invented component names that weren't in the file. Details: [`../agents/figma_extractor/README.md`](../agents/figma_extractor/README.md).
+
+> **Deployed workflows** (all on Coolify): `helix-figma-extractor` (single published-library file),
+> `helix-client-extractor` (a client file resolved against its libraries), `helix-composition-only-extractor`
+> (a standalone/unpublished file), and `helix-baseline-reader` (Step 3a on its own). Steps 3c–6 are planned;
+> Step 3b (Semantic Matcher) exists as a tested library, not yet a running endpoint — see **Output Model** below.
 
 ---
 
 ## Single Source of Truth — the derived design system
 
 The **derived design system is the SSOT — not Storybook.** Storybook is the presentation layer; it renders
-what the design system contains, it does not own it. (See `decision:storybook-as-source-of-truth`.)
+what the design system contains, it does not own it.
 
 The SSOT is the full, npm-distributable artifact tree:
 
@@ -71,19 +71,19 @@ system from scratch each run; it compares the extraction against an existing bas
 - **New Vue SFCs only for genuinely new components** that don't exist in the baseline (and they must
   conform to the baseline's conventions).
 
-**Planned restructure (not yet built):** the single "Component Scaffolder" (old Step 3/4/5) splits into
-four capabilities:
+The single "Component Scaffolder" (old Step 3/4/5) splits into four capabilities, now at different
+stages of maturity:
 
-| Step | Capability | Role |
-|---|---|---|
-| 3a | **Baseline Reader** | index the existing baseline repo (tokens, components, interfaces) |
-| 3b | **Semantic Matcher / Reconciler** | LLM agent; map client → baseline with confidence + HITL flags |
-| 3c | **Theme Generator** | produce CSS overrides for `themes/<client>/` |
-| 3d | **New Component Scaffolder** | scaffold only genuinely new components, to baseline conventions |
+| Step | Capability | Role | Status |
+|---|---|---|---|
+| 3a | **Baseline Reader** | read the existing baseline design-system repo into an inventory (tokens, components, conventions) | **Built + deployed** — runs alongside Step 1 and as the standalone `helix-baseline-reader` workflow |
+| 3b | **Semantic Matcher** | match each client token/component to its baseline counterpart, with a confidence score and a human-review flag when unsure | **Library only** — the scoring logic is built and tested (`agents/semantic_matcher/`); no running endpoint/workflow yet |
+| 3c | **Theme Generator** | produce CSS overrides for `themes/<client>/` | Planned |
+| 3d | **New-Component Scaffolder** | scaffold only genuinely new components, following the baseline's conventions | Planned |
 
-This restructure is **pending Sascha's baseline repo + a three-way meeting**, and the Semantic Matcher
-needs multiple client Figmas (Bausch und Ströbel, GEMÜ, Bosch) to validate its pattern space. Steps 1–2
-(Extractor, Normalizer) are unaffected. (Source: FE-DEV gap register, GAP-09.)
+Step 3b's matching quality still benefits from more real client Figma files (Bausch und Ströbel, GEMÜ,
+Bosch) to widen its tested pattern space before it's wired as a live endpoint. Steps 1–2 (Extractor,
+Normalizer) and 3a are independent of that. (Source: FE-DEV gap register, gap GAP-09.)
 
 ---
 
@@ -110,11 +110,32 @@ The pipeline uses two Figma MCP clients with complementary roles:
 - The **OFFICIAL Figma MCP** returns rich semantic data (named Variables with `$type`, Code Connect, designer docs) but requires interactive OAuth — unsuitable for a headless pipeline.
 - The **FRAMELINK community MCP** (`figma-developer-mcp`) runs headless with a PAT but loses the named Variable slash-paths, Code Connect, and designer docs (it reconstructs CSS-var names + resolved values + geometry).
 
-**Resolution:** the application layer does OAuth once per project and extracts the rich data as **enrichment**; the pipeline runs Framelink+PAT per run; enrichment bridges the gap. (See decision: `hybrid-figma-extraction-architecture`.)
+**Resolution (as designed):** the application layer does OAuth once per project and extracts the rich data as **enrichment**; the pipeline runs Framelink+PAT per run; enrichment bridges the gap. (See decision: `hybrid-figma-extraction-architecture`.)
+
+> **Today:** only the Framelink+PAT half runs. The OAuth/enrichment half is not wired (see the inactive
+> note under *Enrichment Concept*). What the deterministic extractor recovers instead of the OAuth
+> Variable names is the **Tokens Studio token catalog**, read straight from the file's plugin data — an
+> authoritative token list without needing OAuth or an Enterprise Figma tier.
+
+### Custom Elements Manifest (CEM) delivery
+
+Step 3a (Baseline Reader) needs the baseline's Custom Elements Manifest — a generated file that is *not*
+committed to the baseline repo. A GitLab CI job (`build-cem`) clones the baseline read-only, builds the
+manifest with `pnpm`, and publishes it to the project's package registry at a stable address. On startup
+the container fetches that file (`scripts/fetch_cem.py`, driven by the `HELIX_CODE_CEM_*` environment
+variables) so the reader serves real component data. If the fetch is unset or fails, the reader falls
+back loudly to a "manifest missing" state rather than guessing. Details:
+[`../agents/baseline_reader/README.md`](../agents/baseline_reader/README.md).
 
 ---
 
 ## Enrichment Concept
+
+> **Currently inactive.** "Enrichment" (the extra naming/typing layer described below) is **not populated
+> by today's deterministic pipeline** — `enrichment_coverage` is hard-set to `0.0` and no token carries
+> enrichment fields. It's kept in the schema, and documented here, as a reserved concept for a future
+> Code Connect / Variable-slash-path integration. Treat the table below as the *intended* design, not
+> current behaviour.
 
 | Aspect | Detail |
 |---|---|
@@ -142,14 +163,14 @@ The pipeline uses two Figma MCP clients with complementary roles:
 
 ## Key Architectural Decisions
 
-| Decision | One-liner | Memory pointer |
-|---|---|---|
-| Sequential extraction, not broadcast | Equal quality, ~½ cost/latency, full observability | `agents:figma-extractor:step3-result`, `runs/COMPARISON.md` |
-| Vue for the PoC | Matches the file's Code Connect (Lit/Web Components is the production target) | `decision:storybook-target-stack-update` |
-| Storyblok as CMS target | — | `decision:cms-target` |
-| Agno Workflow as pipeline spine | — | `lesson:agno-workflow-patterns`, `spike:S2-result` |
-| GitLab REST API for output | PAT with `api` scope | `lesson:gitlab-pat-scopes-self-hosted`, `spike:S3-result` |
-| Secrets in Coolify env vars (interim) | Agents stay in helix-poc-agno during PoC | `decision:agent-repo-location`, `infra:coolify-server-organization` |
+| Decision | Why |
+|---|---|
+| Sequential extraction, not broadcast | Equal quality at roughly half the cost/latency, with full observability |
+| Vue for the PoC | Matches the file's Code Connect (Lit / Web Components is the production target) |
+| Storyblok as CMS target | — |
+| Agno Workflow as the pipeline spine | — |
+| GitLab REST API for output | Needs a Personal Access Token with `api` scope |
+| Secrets in Coolify env vars | The pipeline now lives in one repo, `msq-turbo/helix-agents` (transferred from the earlier layout) |
 
 ---
 
@@ -157,6 +178,6 @@ The pipeline uses two Figma MCP clients with complementary roles:
 
 | Constraint | Detail | Status |
 |---|---|---|
-| **Context bloat** | ~37.5K tokens per `get_figma_data` call, accumulating linearly in one context (~540K for the 17-page test file). Instruction-level fix disproven; real fix is a subagent-swarm architecture. | Planned — see `roadmap:context-decomposition-architecture` |
-| **Delta extraction** | Re-runs extract the whole file every time; a memory-based delta-detection optimization is planned. | Planned |
-| **No checkpointing** | Sequential extraction is not resumable: a mid-run failure loses all prior work. | Planned |
+| **Context bloat** *(historical — LLM extractor only)* | The old LLM-driven extractor accumulated ~37.5K tokens per Figma call in one context (~540K for the 17-page test file). The **deterministic Step-1 rewrite removed this** — there is no LLM in the extraction path anymore, so it no longer applies. Kept here for history. | Resolved by the deterministic rewrite |
+| **Delta extraction** | Re-runs extract the whole file every time; a memory-based change-detection optimization is planned. | Planned |
+| **No checkpointing** | A run isn't resumable: a mid-run failure loses prior work. (The sustained-rate-limit guard does retry within a run.) | Planned |

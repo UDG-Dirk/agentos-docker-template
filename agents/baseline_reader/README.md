@@ -44,7 +44,7 @@ hard-coded:
 
 The returned **`dict` is the PRIMARY surface**; callers should consume it directly.
 
-`output_dir` is an **opt-in disk write** (per `lesson:agent-output-persistence-pattern`).
+`output_dir` is an **opt-in disk write**.
 When set, the reader writes:
 
 - `baseline-inventory-{commit}-{iso-timestamp}.json` — the immutable run artifact.
@@ -65,7 +65,7 @@ warnings           # informational only; pipeline continues
 
 ## Warnings — two arrays, two behaviours
 
-Per `decision:blocking-warnings-convention`, the reader **never raises** for
+By convention, the reader **never raises** for
 expected baseline problems. It reports them instead:
 
 - **`warnings`** — informational strings. The pipeline continues.

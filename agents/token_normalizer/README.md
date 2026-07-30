@@ -4,17 +4,23 @@ Deterministic Python transformer (zero LLM, zero tokens, sub-second) that consum
 the Figma Extractor's `FigmaExtractionResult` and produces a **W3C DTCG 2025.10**
 compliant token tree plus a normalization quality report.
 
-The `token_tree` is the **foundation layer of the derived design system (the SSOT)**.
-Downstream it feeds Style Dictionary (deterministic transforms → CSS custom
-properties) and the future Semantic Matcher agent (LLM reasoning about design intent).
+The `token_tree` is the **foundation layer of the derived design system** — the single
+source of truth for its tokens. Downstream it feeds Style Dictionary (deterministic
+transforms → CSS custom properties) and, later, the Semantic Matcher (which reasons about
+how a client's tokens map onto the baseline).
 
-**Status:** Deployed to prod — AgentOS on Coolify, as **Workflow Step 2** of `helix-figma-extractor`
-(commit `1ea648b`). Wired as `Step(executor=normalize_step_executor, requires_output_review=True)`;
-Step 1 (extract) flows straight into it and the single HITL gate sits here. Live-verified against a real
-prod extraction: `in=74 out=74 | authoritative=0 high=40 medium=34 unresolved=0`, with `token_tree` +
+**Status:** Deployed to prod — AgentOS on Coolify, as the **normalize step** of the
+`helix-figma-extractor` workflow (`app/workflows/helix_figma_extractor.py`). The workflow shape is
+`Parallel(extract, baseline-read) → normalize → smoke-test`: extraction and the baseline read run in
+parallel, then normalize (a top-level step) reads extraction's output by name via
+`get_step_output('extract')` across the parallel boundary. Wired as
+`Step(executor=normalize_step_executor, requires_output_review=True)`; normalize must be top-level for
+the single human-in-the-loop (HITL) review gate to fire — Agno only honours `requires_output_review`
+on top-level steps. Live-verified against a real prod extraction:
+`in=74 out=74 | authoritative=0 high=40 medium=34 unresolved=0`, with `token_tree` +
 `normalization_report` + `component_token_map` in the run output and 93 component paths all resolving.
 (The DEV reference run below, `run_sequential_003`, differs because extraction is non-deterministic
-run-to-run — see `shared-results:verify-prod-normalizer-output`. The normalizer itself is deterministic.)
+run-to-run. The normalizer itself is deterministic.)
 
 ## I/O
 
@@ -23,7 +29,7 @@ run-to-run — see `shared-results:verify-prod-normalizer-output`. The normalize
 | **Input** | `FigmaExtractionResult` (from `agents/figma_extractor/models.py`) — tokens + components + enrichment metadata |
 | **Output** | `NormalizedTokens` (`models.py`) — `token_tree` (dict → `.tokens.json`), `normalization_report`, `component_token_map` |
 | **Entry point** | `normalizer.normalize_tokens(extraction) -> NormalizedTokens` |
-| **Workflow** | `workflow_step.py` — `Step(executor=fn, requires_output_review=True)` (HITL gate) |
+| **Workflow** | `app/workflows/helix_figma_extractor.py` — `normalize_step = Step(executor=normalize_step_executor, requires_output_review=True)`, the human-in-the-loop (HITL) review gate |
 
 ## Pipeline (7 phases)
 
@@ -37,19 +43,15 @@ run-to-run — see `shared-results:verify-prod-normalizer-output`. The normalize
 ## Run
 
 ```bash
-VENV=~/opencode/workbench/agno-setup/poc-agno-template/.venv
-cd ~/opencode/workbench/helix-poc-agno
+# from the repo root:
+source .venv/bin/activate
 
 # Normalize the reference run → writes runs/design.tokens.json + report + full output
-$VENV/bin/python agents/token_normalizer/normalizer.py \
+python agents/token_normalizer/normalizer.py \
   --input agents/figma_extractor/runs/run_sequential_003.json
 
-# Tests (39 automated + 1 golden regression)
-$VENV/bin/python -m pytest tests/test_token_normalizer.py \
-  --output=agents/figma_extractor/runs/run_sequential_003.json -q
-
-# Workflow registration + HITL smoke check (needs template .env / db)
-$VENV/bin/dotenv run -- $VENV/bin/python agents/token_normalizer/workflow_step.py --check
+# Tests (behavioral + golden regression + adversarial mutations)
+python -m pytest tests/test_token_normalizer.py tests/test_token_normalizer_mutations.py -q
 ```
 
 ## Reference run results (`run_sequential_003.json`)
@@ -85,7 +87,7 @@ the one calibration file.
 ## Limitations / known gaps
 
 - Parser rules are tuned to the evidence in `run_sequential_003`. Unseen naming conventions or composite formats land in the UNRESOLVED bucket (the safety net) and surface at the HITL gate — they do not crash. Add new parser patterns as new client Figmas appear (GAP-11 Semantic Matcher handles non-DTCG-compliant client files downstream).
-- `get_step_output` for **non-adjacent** steps is unverified here (Step 2 reads Step 1, which is adjacent). It must be confirmed for the Scaffolder (Step 3+) before relying on it; fallback is passthrough fields.
+- Reading a step's output by name across a `Parallel(...)` boundary (`get_step_output('extract')`) is now **proven in production** — it's how the normalize step reads extraction today. Later steps (Theme Generator, Scaffolder) can rely on the same pattern.
 - DTCG dimension officially allows only `px`/`rem`; we widen to `em`/`%` for source fidelity. Verify Style Dictionary v4 handling during the prod spike.
 
 ## Files
@@ -94,9 +96,10 @@ the one calibration file.
 agents/token_normalizer/
   models.py            # frozen contract: DTCG value types, NormalizedTokens, report, audit entry
   normalizer.py        # 7-phase pipeline + CLI (normalize_tokens is the public API)
-  workflow_step.py     # Agno Workflow Step 2 wrapper + HITL gate + --check
   parsers/             # color, dimension, typography, shadow, paths (pure functions)
-  runs/                # design.tokens.json, normalization_report.json, .golden.json, ...
+  runs/                # .golden.json (committed regression baseline); generated outputs are gitignored
+app/workflows/
+  helix_figma_extractor.py   # the normalize step wrapper (normalize_step_executor) + the human-review gate
 tests/
   test_token_normalizer.py            # smoke/contract/behavioral + golden + parser-scope (BT-19..22)
   test_token_normalizer_mutations.py  # 10 adversarial input mutations (M1..M10)

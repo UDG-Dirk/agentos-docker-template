@@ -5,8 +5,7 @@
 > the authored roster). Fixed orchestration, same-input→same-output, provenance on every emission,
 > fail loud on anything unusable.
 >
-> **Spec:** `helix-poc-agno:spec:figma-extractor-deterministic-v0-1-draft` v0.1.1 (RATIFIED).
-> `provenance.llm_involvement = "none"`.
+> **Design:** deterministic extractor spec v0.1.1 (ratified). `provenance.llm_involvement = "none"`.
 
 ## Plain-language terms (read this first)
 
@@ -369,7 +368,7 @@ Every emitted element carries file provenance: `{file_key, file_role, extracted_
 ## Tests
 
 ```bash
-cd ~/opencode/workbench/agno-setup/poc-agno-template
+# from the repo root:
 source .venv/bin/activate
 python -m pytest tests/test_deterministic_extractor.py -q
 python -m pytest tests/test_composition_mode.py -q      # composition mode + Pathway B traversal

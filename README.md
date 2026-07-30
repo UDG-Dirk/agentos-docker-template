@@ -16,7 +16,10 @@
 
 An agent platform you build, improve, and run using coding agents.
 
-The platform runs locally with Docker Compose, behind your auth, with all your data stored in your database. Because trace data, agent code, system logs, and the iteration tool all live in one place, coding agents like Claude Code can read, update, and improve the platform end-to-end.
+The app itself runs **bare-metal** locally (a Python virtualenv + `uvicorn`); the only container is its
+Postgres database. It runs behind your auth, with all your data in your own database. Because trace
+data, agent code, system logs, and the iteration tools all live in one place, coding agents like Claude
+Code can read, update, and improve the platform end-to-end.
 
 ## Built for coding agents
 
@@ -41,26 +44,69 @@ This codebase is designed primarily for coding agents. It comes with five prompt
 
 > See [`CUSTOMIZATIONS.md`](CUSTOMIZATIONS.md) for how this repo diverges from the upstream agno-agi template (added agents, env-configurable embedder, deploy notes).
 
+## The HELIX pipeline — what this project actually does
+
+New to the project (or to Agno)? Start here. **HELIX turns a client's Figma design file into a
+usable, standards-compliant design system** — the colours, spacing, fonts, and components a
+front-end team can build with. It does that as a short assembly line of steps.
+
+Two kinds of step, and the difference matters:
+
+- **Deterministic workflow** — plain Python, **no AI/LLM involved**. Same input always gives the same
+  output. Most of the pipeline is this, on purpose: reading a structured design file is a job for
+  code, not a language model (an earlier LLM version invented components that weren't in the file —
+  exactly what we don't want).
+- **AI-assisted step** — uses a language model for judgement calls, and asks a human when it's unsure.
+  Only one step needs this.
+
+| Step | What it does, in plain terms | Kind | Status |
+|---|---|---|---|
+| **Figma Extractor** | Reads a Figma file and pulls its building blocks — colours, spacing, fonts, components, and its design-token catalog — into one structured inventory. | Deterministic workflow (no AI) | **Live** |
+| **Client Extractor** | Same idea, for a client file: also follows the components a client borrows from shared libraries and resolves them. | Deterministic workflow (no AI) | **Live** |
+| **Composition-Only Extractor** | Extractor for a standalone / unpublished file whose components live as page frames rather than a published library. | Deterministic workflow (no AI) | **Live** |
+| **Token Normalizer** | Cleans the extracted tokens into a standards-compliant token tree (W3C Design Tokens), then **pauses for a person to review** before moving on. | Deterministic step (no AI) + human review | **Live** |
+| **Baseline Reader** | Reads the team's existing baseline design system into an inventory, so later steps can compare a client against it. | Deterministic workflow (no AI) | **Live** |
+| **Semantic Matcher** | Matches each client token/component to its closest counterpart in the baseline, with a confidence score — and asks a human when it isn't sure. | AI-assisted (the one LLM step) | Tested library; live endpoint planned |
+| **Theme Generator** | Turns the matches into the CSS theme overrides for that client. | Deterministic workflow (no AI) | Planned |
+| **New-Component Builder** | Scaffolds only the genuinely new components a client needs, following the baseline's conventions. | Deterministic workflow (no AI) | Planned |
+
+```mermaid
+flowchart TD
+    F["Client Figma file"] --> EX["Figma Extractor<br/>(deterministic)"]
+    EX --> TN["Token Normalizer<br/>(deterministic + human review)"]
+    B["Baseline design system"] --> BR["Baseline Reader<br/>(deterministic)"]
+    TN --> SM["Semantic Matcher<br/>(AI-assisted · endpoint planned)"]
+    BR --> SM
+    SM --> TG["Theme Generator<br/>(planned)"]
+    SM --> NC["New-Component Builder<br/>(planned)"]
+    TG --> OUT["Themed design system<br/>(CSS + components)"]
+    NC --> OUT
+```
+
+Each live step is an Agno **workflow** you can call over HTTP; the deep-dive for each lives in its own
+README under [`agents/`](agents/) (each opens with a plain-language glossary). Architecture overview:
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
 ## Get Started
 
 ### Step 1: Run locally
 
-> **Prerequisite:** [Docker](https://www.docker.com/get-started/) installed and running.
+The full, verified walkthrough (prerequisites, database, model access, troubleshooting) is in
+[`docs/SETUP.md`](docs/SETUP.md) — it takes a clean clone to a running server. The short version:
 
 ```sh
-# Clone the repo
-git clone https://github.com/agno-agi/agentos-docker-template.git agentos
-cd agentos
+# Clone via GitLab → Clone (the project has been transferred before — don't trust a hardcoded path)
+cd helix-agents
 
-# Add OPENAI_API_KEY
-cp example.env .env
-# Edit .env and add your key
+./scripts/venv_setup.sh && source .venv/bin/activate   # Python venv + deps
+cp .env.example .env                                    # then fill in the placeholders
 
-# Start the application
-docker compose up -d --build
+docker compose -f docker-compose.dev.yml up -d          # Postgres + pgvector (the only container)
+dotenv run -- uvicorn app.main:app --reload --port 8000 # the app, bare-metal
 ```
 
-Confirm AgentOS is running at [http://localhost:8000/docs](http://localhost:8000/docs).
+Confirm it's up: `curl -sf http://localhost:8000/health` returns `200` (no auth in local dev). The API
+docs are at [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ### Step 2: Connect to the Web UI
 
@@ -70,8 +116,10 @@ Confirm AgentOS is running at [http://localhost:8000/docs](http://localhost:8000
 
 ### Step 3: Stop the application
 
+Stop the server with `Ctrl-C` in its terminal. To stop the database too:
+
 ```sh
-docker compose down
+docker compose -f docker-compose.dev.yml down     # add -v to also wipe the data
 ```
 
 ## Extending the Platform
@@ -169,7 +217,7 @@ my_agent = Agent(
 )
 ```
 
-Register in `app/main.py` and restart: `docker compose restart agentos-api`
+Register in `app/main.py`. With `uvicorn --reload` running, saving the file reloads it automatically; otherwise restart the `uvicorn` process.
 
 ### Add tools to an agent
 
@@ -194,8 +242,8 @@ my_agent = Agent(
 # 1. Edit pyproject.toml
 # 2. Regenerate requirements
 ./scripts/generate_requirements.sh upgrade
-# 3. Rebuild
-docker compose up -d --build
+# 3. Reinstall into the venv, then restart uvicorn
+pip install -r requirements.txt
 ```
 
 ### Use a different model provider
@@ -218,7 +266,9 @@ def default_model():
 |----------|----------|---------|-------------|
 | `OPENAI_API_KEY` | Yes | - | OpenAI API key |
 | `RUNTIME_ENV` | No | `prd` | `dev` enables hot-reload and disables JWT |
-| `JWT_VERIFICATION_KEY` | Prd | - | Public key from os.agno.com |
+| `JWT_VERIFICATION_KEY` | Prd | - | RSA **public** PEM that verifies minted access tokens (see `docs/AUTH_KEYS.md`) |
+| `OPENAI_BASE_URL` | Dev/Prd | - | LiteLLM proxy URL |
+| `OPENAI_EMBEDDER_ID` | No | `openai/text-embedding-3-small` | Keep the `openai/` prefix on LiteLLM |
 | `AGENTOS_URL` | No | `http://127.0.0.1:8000` | Scheduler base URL |
 | `PARALLEL_API_KEY` | No | - | Parallel SDK key (optional for WebSearch) |
 | `SLACK_BOT_TOKEN` | No | - | Enable Slack interface |

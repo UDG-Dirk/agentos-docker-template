@@ -1,7 +1,7 @@
 # Semantic Matcher (3b) — Testbench
 
 Empirical grounding for the HELIX 3b "deterministic-first with LLM escalation"
-architecture (spec `helix-poc-agno:spec:semantic-matcher-v1-draft`). It validates
+architecture (the 3b semantic-matcher spec). It validates
 the scoring/decision logic in isolation against labelled test cases, where ground
 truth is known. The default input source synthesizes "client" catalogs from
 controlled mutations of the real HELIX baseline (`helix-code@220a327`); other
@@ -41,7 +41,7 @@ tests/semantic_matcher/
 
 ## How to run
 ```bash
-cd ~/opencode/workbench/agno-setup/poc-agno-template
+# from the repo root:
 # full testbench run (mock LLM, < 60s), default input source = mutations
 .venv/bin/python -m tests.semantic_matcher.testbench.run_testbench
 #   (direct-script form also works, and takes the flag)
