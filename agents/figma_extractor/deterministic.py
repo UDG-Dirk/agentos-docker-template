@@ -42,6 +42,7 @@ from agents.figma_extractor.models import (
     PageInfo,
     TokenEntry,
 )
+from agents.figma_extractor.http_errors import _EXPORT_LOCK_MARKER
 from agents.figma_extractor.token_catalog import run_token_catalog
 
 PIPELINE = "figma-extractor-deterministic-v0-1"
@@ -214,6 +215,12 @@ def _classify_gfd_response(gfd_yaml: str) -> tuple[str | None, int | None, str]:
     error_class names refine Lane 2/3/5's generic `empty`/`malformed` for diagnostic precision."""
     if _is_rate_limited(gfd_yaml):
         return "rate_limit_exhausted", 429, "429 persisted after get_figma_data backoff"
+    # Export-lock 403 BEFORE the YAML parse: Framelink surfaces a "File not exportable" 403 as an error
+    # STRING (not valid YAML), which would otherwise raise a ScannerError and mis-classify as `malformed`.
+    # Same content-protection lock the REST lanes (3/5/7 + Pathway B) already classify — match it here so
+    # an export-locked file reads as `file_export_disabled`, not 36× confusing YAML errors. (B&S, 2026-07-30.)
+    if _EXPORT_LOCK_MARKER in (gfd_yaml or "").lower():
+        return "file_export_disabled", 403, "Figma 'File not exportable' content-protection lock (REST body export blocked)"
     try:
         data = yaml.safe_load(gfd_yaml)
     except Exception as e:  # noqa: BLE001 — any parse failure is a failed set
