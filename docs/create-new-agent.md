@@ -1,5 +1,12 @@
 # Create a New Agent
 
+> **Dev-loop note (updated 2026-07):** this guide predates the switch to bare-metal local dev, so some
+> commands below are stale. Where it says `docker compose … agentos-api` or `docker compose up -d --build`,
+> instead restart the local **`uvicorn`** process (run with `--reload`, saving a file reloads it
+> automatically). Where it says `docker logs agentos-api`, read the `uvicorn` console. The only container
+> in local dev is Postgres — `docker compose -f docker-compose.dev.yml up -d` (container `helix-agents-db`).
+> Full current setup: [`SETUP.md`](SETUP.md). The step-by-step *method* below is still correct.
+
 > Claude Code prompt. Open Claude Code in this repo and paste:
 > `Run docs/create-new-agent.md`
 
@@ -125,7 +132,7 @@ from agents.<slug_underscore> import <slug_underscore>
 
 agent_os = AgentOS(
     ...
-    agents=[web_search, code_search, <slug_underscore>],
+    agents=[web_search, code_search, reasoning_agent, knowledge_agent, <slug_underscore>],
     ...
 )
 ```

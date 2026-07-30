@@ -118,7 +118,7 @@ result = score_candidates(client_token, candidates)
 Run the tests / harness:
 
 ```bash
-cd ~/opencode/workbench/agno-setup/poc-agno-template
+# from the repo root:
 source .venv/bin/activate
 python -m pytest tests/semantic_matcher/ -q                       # unit + defense-layer + mutation tests
 python -m tests.semantic_matcher.testbench.run_testbench          # harness with a MOCK LLM (<60s)

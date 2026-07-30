@@ -28,6 +28,12 @@ Agents may also be created at runtime via the **Components API** (config-only:
 model + instructions + memory + history + db, no redeploy). Those are REST-only and
 do **not** carry tools/knowledge — see the skill's GOTCHAS.
 
+The repo also hosts the **HELIX design-token pipeline** — deterministic, zero-LLM
+Agno workflows registered in `app/main.py` and defined in `app/workflows/`:
+`helix-figma-extractor`, `helix-client-extractor`, `helix-composition-only-extractor`,
+and `helix-baseline-reader`. Their per-stage logic lives in the `agents/figma_extractor/`,
+`agents/token_normalizer/`, and `agents/baseline_reader/` subpackages.
+
 Shared:
 - PostgreSQL + pgvector for sessions, memory, knowledge.
 - Models route through a **LiteLLM proxy** (`OPENAI_BASE_URL` / `OPENAI_API_KEY`).
@@ -41,10 +47,10 @@ Shared:
 
 | File | Purpose |
 |------|---------|
-| [`app/main.py`](app/main.py) | AgentOS entrypoint — agent registry, lifespan (KB ingest), Slack, MCP server, auth gate. |
+| [`app/main.py`](app/main.py) | AgentOS entrypoint — agent + workflow registry (the four HELIX workflows in `app/workflows/`), lifespan (KB ingest), Slack, MCP server, auth gate. |
 | [`app/settings.py`](app/settings.py) | `default_model()` factory. |
 | [`app/config.yaml`](app/config.yaml) | Quick prompts per agent (keyed by agent `id`). |
-| [`agents/`](agents/) | One file per agent (see Architecture). |
+| [`agents/`](agents/) | Single-file for the generic agents (see Architecture); multi-file subpackages for the HELIX pipeline (`figma_extractor/`, `token_normalizer/`, `baseline_reader/`, `semantic_matcher/`). |
 | [`tools/`](tools/) | Shared tool factories (e.g. `parallel_search.py`, `context7.py`). |
 | [`knowledge/`](knowledge/) | Knowledge-base definitions + ingestion (e.g. `dark_factory_kb.py`). |
 | [`db/session.py`](db/session.py) | `get_postgres_db()` (id `agentos-db`), `create_knowledge()`, embedder id. |
@@ -55,7 +61,7 @@ Shared:
 ## Dev quickstart (bare metal — no containers)
 
 ```bash
-cd ~/opencode/workbench/agno-setup/poc-agno-template
+# from the repo root:
 source .venv/bin/activate
 dotenv run -- uvicorn app.main:app --reload --port 8000     # http://localhost:8000
 curl -sSf http://localhost:8000/health                      # 200 = up (no auth in dev)

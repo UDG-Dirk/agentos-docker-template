@@ -1,5 +1,10 @@
 # Eval and Improve
 
+> **Dev-loop note (updated 2026-07):** this guide is already mostly bare-metal (venv + `python -m evals`).
+> The only stale bits are the Postgres-container commands — the dev database is now
+> `docker compose -f docker-compose.dev.yml up -d` (container `helix-agents-db`). Full current setup:
+> [`SETUP.md`](SETUP.md).
+
 > Claude Code prompt. Open Claude Code in this repo and paste:
 > `Run docs/eval-and-improve.md`
 
@@ -7,7 +12,7 @@ You're running the agent platform's eval suite, diagnosing every failure, fixing
 
 ## 0. Preconditions
 
-- Postgres reachable on 5432: `nc -z localhost 5432` returns 0. If not, `docker compose up -d agentos-db` from the source repo. (`docker compose ps` is unreliable from worktrees or alternate clones.)
+- Postgres reachable on 5432: `nc -z localhost 5432` returns 0. If not, `docker compose -f docker-compose.dev.yml up -d` (service `db` / container `helix-agents-db`). (`docker compose ps` is unreliable from worktrees or alternate clones.)
 - Venv active: `source .venv/bin/activate`. If `.venv` doesn't exist (fresh checkout or worktree), run `./scripts/venv_setup.sh` first. `evals/cases.py` imports the agents directly from `agents/`, so no AgentOS server has to be running.
 - `.env` populated with `OPENAI_API_KEY` (and `PARALLEL_API_KEY` if you have one — the runner pins the expected web-search tool name based on it). `evals/__main__.py` calls `evals.dotenv.load_dotenv()` at startup, so you do not need to source `.env` first. Worktrees don't inherit `.env` (it's gitignored) — copy it from the source repo if missing.
 
@@ -37,7 +42,7 @@ For every failed case, decide which kind of failure it is and fix at the appropr
 | Same case flips PASS/FAIL across consecutive runs with no code change | Judge variance — rubric is too loose | Re-run 2-3 times to confirm; if it keeps flipping, tighten the case's `criteria` (more specific, more falsifiable) |
 | Single case fails on full suite but passes alone | Transient flake or upstream rate limit (429s, MCP shutdown traceback) | Re-run the case in isolation. If it passes, re-run the full suite. If 429s persist, back off — don't fix the agent. |
 | Many cases fail at once | Broad regression — model swap, MCP server down, tool removed | Diagnose the root cause first; do NOT paper over with prompt edits |
-| `eval_db` write errors | Postgres down or migration missing | Bring DB up; check `docker logs agentos-db` |
+| `eval_db` write errors | Postgres down or migration missing | Bring DB up; check `docker logs helix-agents-db` |
 
 **Rule:** never weaken a case to make it green. Edit a case only when the assertion was wrong (overspecified rubric, wrong tool name, mismatch with how the agent's tools are named today). Catching a real regression is the whole point.
 
