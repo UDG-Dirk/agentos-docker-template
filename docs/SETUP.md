@@ -92,8 +92,10 @@ Then edit `.env`:
   `openai/` prefix on `OPENAI_EMBEDDER_ID` — a bare id is rejected by the proxy.
 - **Database:** the defaults (`ai` / `ai` / `ai` on `localhost:5432`) match the Docker option in the
   next step. Change them only if you use a different Postgres.
-- **Figma:** set `FIGMA_PAT` only if you'll run the Figma-extraction workflows (figma.com → Settings →
-  Personal access tokens; read access to file content is enough).
+- **Figma:** set `FIGMA_PAT` only if you'll run the Figma-extraction workflows. Get one at
+  **figma.com → your avatar → Settings → Security tab → Personal access tokens → "Generate new
+  token"**. A name + **read** access to *file content* is enough (the extractor only reads). Copy the
+  token immediately — Figma shows it **once** — and paste it into `.env` as `FIGMA_PAT`.
 
 `.env` is gitignored — never commit real keys. Full variable reference: [`ENV.md`](ENV.md).
 
@@ -187,16 +189,36 @@ On prod, secrets are **Coolify environment variables**, not `.env` files. AgentO
 at `poc-agno-api.services.plygrnd.tech`; deploy = push to `main` (Coolify auto-builds).
 
 With `RUNTIME_ENV=prd`, every request needs a **Bearer RS256 JWT**, verified against
-`JWT_VERIFICATION_KEY` (the RSA **public** key). Mint client tokens with
-[`scripts/mint_token.py`](../scripts/mint_token.py):
+`JWT_VERIFICATION_KEY` (the RSA **public** key). You do **not** need this for local dev
+(`RUNTIME_ENV=dev` has no auth). To call the deployed prod AgentOS, mint yourself a token.
+
+**Full key custody, rotation, and the CI-variable setup live in [`AUTH_KEYS.md`](AUTH_KEYS.md) — read
+that for anything beyond minting your own token.**
+
+### Preferred — the `mint-token` CI job (you never touch the private key)
+
+The signing key stays server-side as a **protected group CI variable** (`AGNO_PRIVATE_KEY`); the
+pipeline signs for you:
+
+1. GitLab → **Build → Pipelines → Run pipeline** on `main` (the protected default branch).
+2. Add a variable **`MINT_USER`** = your handle. Optional: `MINT_DAYS` (default `30`), `MINT_SCOPES`.
+3. Run it → open the `mint-token` job → **download the `agno_mcp_token` artifact** (it expires in
+   1 day; the token itself lasts `MINT_DAYS`). Never commit it.
+
+The job only runs on a web/manual pipeline on the protected `main` branch (that's what exposes the
+protected key). Setup of the `AGNO_PRIVATE_KEY` CI variable + the whole key lifecycle:
+[`AUTH_KEYS.md`](AUTH_KEYS.md).
+
+### Local — `scripts/mint_token.py` (only if you hold the private key)
+
+If the private key was handed to you out-of-band:
 
 ```bash
 python3 scripts/mint_token.py --user <handle> --days 30 > ~/.agno-keys/agno_mcp_token
 ```
 
-- The private key lives at `~/.agno-keys/agno_private.pem` (chmod 600), delivered **out-of-band** —
-  never committed (`.gitignore` blocks `*.pem` / `*_token` / `*.jwt`).
-- To reach the deployed AgentOS from Claude Code (the `agno-prod` HTTP MCP) or any API client, see the
-  clone → mint → wire walkthrough in [`scripts/README.md`](../scripts/README.md).
-- Team self-serve minting (CI job, no key handling) + key custody / rotation:
-  [`AUTH_KEYS.md`](AUTH_KEYS.md).
+The private key lives at `~/.agno-keys/agno_private.pem` (chmod 600), delivered out-of-band — never
+committed (`.gitignore` blocks `*.pem` / `*_token` / `*.jwt`).
+
+To wire a minted token into Claude Code (the `agno-prod` HTTP MCP) or any API client, see the
+clone → mint → wire walkthrough in [`scripts/README.md`](../scripts/README.md).
