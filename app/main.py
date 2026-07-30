@@ -22,6 +22,36 @@ from db import get_postgres_db
 from knowledge.dark_factory_kb import ingest as ingest_dark_factory_kb
 
 # ---------------------------------------------------------------------------
+# MCP serialization fix — "Circular reference detected (id repeated)"
+# ---------------------------------------------------------------------------
+# Agno's built-in MCP tools (run_workflow / run_agent / run_team) return a RAW WorkflowRunOutput /
+# RunOutput @dataclass and let FastMCP serialize it. FastMCP's pydantic_core.to_json then walks the
+# object's cyclic fields (step_results / events / step_requirements) and raises "Circular reference
+# detected", so the MCP call fails on any real run. The REST layer avoids this by calling .to_dict(),
+# which explicitly drops those cyclic fields. We wrap FastMCP's module-level serializer so any object
+# exposing .to_dict() (all agno run objects) is converted first. Placed BEFORE AgentOS() because
+# get_mcp_server() is imported/run at app-build time (agent_os.get_app() below), so the wrap is in
+# effect when the MCP tools are registered. INTERIM: remove once agno ships the upstream fix (return
+# .to_dict() in agno/os/mcp.py). See shared-results:mcp-run-workflow-circular-ref-fix-scoping-probe-result-2026-07-30.
+try:
+    import fastmcp.tools.base as _fmcp_base
+
+    _orig_default_serializer = _fmcp_base.default_serializer
+
+    def _helix_safe_serializer(data):  # noqa: ANN001, ANN202
+        if hasattr(data, "to_dict"):
+            try:
+                data = data.to_dict()
+            except Exception:  # noqa: BLE001 — fall back to the original on any to_dict failure
+                pass
+        return _orig_default_serializer(data)
+
+    _fmcp_base.default_serializer = _helix_safe_serializer
+    log_info("MCP serializer patch applied (agno run objects -> .to_dict() before FastMCP JSON).")
+except Exception as _patch_err:  # noqa: BLE001 — never let the patch block startup
+    log_info(f"MCP serializer patch SKIPPED ({_patch_err!r}); run_workflow may still hit the cycle.")
+
+# ---------------------------------------------------------------------------
 # Environment
 # ---------------------------------------------------------------------------
 runtime_env = getenv("RUNTIME_ENV", "prd")
