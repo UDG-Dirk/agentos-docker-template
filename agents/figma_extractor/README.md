@@ -8,6 +8,30 @@
 > **Spec:** `helix-poc-agno:spec:figma-extractor-deterministic-v0-1-draft` v0.1.1 (RATIFIED).
 > `provenance.llm_involvement = "none"`.
 
+## Plain-language terms (read this first)
+
+This document uses internal shorthand. If you have never used this toolchain, start here — every
+term below is spelled out where it first appears, and this table is the quick reference.
+
+| Shorthand | Plain-language name | What it actually is |
+|---|---|---|
+| **Lane 1** | Structure & values reader | Reads components, styles/values, and assets from Figma (via the Framelink tool). |
+| **Lane 2** | Authored-taxonomy reader | Reads the file's published catalog of component sets, components, and styles (Figma REST). |
+| **Lane 3** | Variable-binding reader | Reads which layers are bound to which Figma Variables. |
+| **Lane 5** | Change-detection & history reader | Reads file metadata + version history (to detect changes / keep an audit trail). |
+| **Lane 6** | Cross-file reference resolver | Follows `remote:true` references from one file to the library files they point at. |
+| **Lane 7** | Tokens Studio catalog extractor | Reads the authoritative design-token catalog produced by the Tokens Studio Figma plugin. |
+| **Library mode** | Published-library extraction | For a file that *publishes* a component library (e.g. the Core foundation file). |
+| **Composition mode** | Page-frame extraction | For a file whose components live as frames on pages, not as a published library. |
+| **Pathway B** | Page-frame walk | The deterministic traversal of those page frames used by Composition mode. |
+| **Core** | The shared foundation file | Atoms/molecules/tokens shared across all clients. |
+| **PAT** | Personal Access Token | The Figma API credential (`FIGMA_PAT`). |
+| **enrichment** | Variable-slash-path / Code Connect metadata | An extra layer of naming/props — **currently inactive**; see the "enrichment fields are inactive" note below. |
+| **DD-NN** | Design Decision #NN | A numbered rationale entry in the "Design Decisions" section at the end. |
+| **FM-N** | Failure Mode #N | A catalogued failure scenario. |
+| **Phase A** | First rollout phase | Lane 7's catalog is emitted, but no downstream step consumes it yet. |
+| **HITL gate** | Human-in-the-loop review point | A checkpoint where a person reviews output before the pipeline continues. |
+
 ## Architecture
 
 **Two-file design system context** (multi-instance productization):
@@ -70,6 +94,93 @@ keys it *did* detect) instead of a terse error — so MCP/REST callers see exact
 re-invoke. (True interactive elicitation isn't available on the current surface — the agno-prod MCP
 exposes a generic `run_workflow(workflow_id, message)` with no per-workflow typed params or
 `elicitation/create`, and Agno HITL is output-review, not input-collection.)
+
+## Inputs and outputs (what you send, what you get back)
+
+Written for a reader who has not used the toolchain. Field-level source of truth is
+[`models.py`](models.py); this section documents the shapes inline so you don't have to open it.
+
+### What you send (inputs)
+
+The run `message` is a single string (Agno workflows take one string input). Grammar per workflow:
+
+- **Single published-library file — `helix-figma-extractor`:** the message is a **Figma file key**, given
+  **either** as a full Figma URL (`https://figma.com/file/<key>/…` or `…/design/<key>/…`) **or** as the
+  **bare key on its own** — a 20–40 character letters-and-digits string, e.g. `8qPSyetzviLR6eF6bkpL44`.
+  (Parser: [`app/workflows/helix_figma_extractor.py:290`](../../app/workflows/helix_figma_extractor.py).)
+- **Per-client extraction — `helix-client-extractor`:** the message carries several `key=value` pairs in
+  one string: `core=<key>` (**required** — the foundation file), `client=<key>` (**required** — the client
+  file), `additional=<key1,key2>` (optional — extra library files), `freshness=<days>` (optional). Example:
+  `core=8qPSyetzviLR6eF6bkpL44 client=qMi5B9YeqAf9Ik1yN6erw4`.
+- **Self-contained / unpublished file — `helix-composition-only-extractor`:** a single file key (same
+  grammar as the single-file case).
+- **`background=true` is required** on all three (see the Deployed-workflows note above).
+- If the required keys are missing, the workflow returns a structured `needs_parameters` prompt (what to
+  supply + examples), not a terse error.
+- **Auth:** Bearer token on the request; the **Figma PAT** (`FIGMA_PAT`) is injected only at the Figma-tool
+  layer, never logged (see DD-8 — "PAT security" in Design Decisions).
+
+### What you get back (outputs)
+
+The top-level result is a `FigmaExtractionResult`. Its two main record types:
+
+**A design token — `TokenEntry`:**
+
+| Field | Type | Meaning |
+|---|---|---|
+| `name` | string | Reconstructed CSS-variable name, e.g. `--color-primary-500`. |
+| `value` | string | Resolved value, e.g. `#3388F0`. |
+| `style_id` | string (optional) | Figma style ID, for cross-referencing. |
+| `category` | `color` \| `typography` \| `spacing` \| `sizing` \| `effect` \| `other` | Coarse kind. |
+| `enrichment_match` | string (optional) | **Inactive today** (see note below). |
+| `enrichment_type` | string (optional) | **Inactive today** (see note below). |
+| `suspected_typo` | string (optional) | e.g. `disbled -> disabled`. |
+
+**A component — `ComponentEntry`:**
+
+| Field | Type | Meaning |
+|---|---|---|
+| `name` | string | e.g. `Button`. |
+| `node_id` | string | The component-set node. |
+| `variants` | list | Each `{variant, size, state, node_id}` (e.g. `Solid` / `md` / `Hover`). |
+| `props` | dict (optional) | Component props **from Code Connect** — inactive today (see note). |
+| `code_connect_snippet` | string (optional) | Framework snippet from Code Connect — inactive today. |
+| `designer_instructions` | string (optional) | Agent-instructions taken from the component description. |
+| `tokens_consumed` | list of strings | Token names this component references. |
+
+**Top-level `FigmaExtractionResult` fields:** `file_key`, `pages_discovered[]`, `tokens[]`,
+`components[]`, `assets[]`, `extraction_runs`, `consensus_confidence`, `gaps_detected[]`,
+`typos_detected[]`, `enrichment_coverage`.
+
+**Composition mode adds an envelope** (fields from [`composition_mode.py`](composition_mode.py)):
+
+| Field | Meaning |
+|---|---|
+| `status` | `success` \| `partial` \| `failure`. |
+| `composition_tree` | The page-frame tree walked by Pathway B (the page-frame walk). |
+| `resolution_events` | Ordered list of cross-file-resolver (Lane 6) events (one per reference). |
+| `resolution_summary` | `{references_total, references_resolved, references_unresolved}`. |
+| `client_extraction` | (per-client workflow) the client file's own extraction result, nested. |
+
+### ⚠️ The "enrichment" fields are currently inactive
+
+`enrichment_match`, `enrichment_type` (on tokens), `props` / `code_connect_snippet` (on components), and
+the top-level `enrichment_coverage` all exist in the schema but are **not populated by today's
+deterministic pipeline**: `enrichment_coverage` is hard-set to `0.0`
+([`deterministic.py:459`](deterministic.py)), and the `enrichment_*` fields are only ever written by the
+**legacy LLM extractor** (`agent.py`), which is retained as dead code. They are reserved for a future
+Code Connect / Variable-slash-path integration. **Do not assume enrichment data is present** — today it
+never is, so any downstream reader should treat these as always empty.
+
+### The Tokens Studio catalog is optional (the `do_token_catalog` toggle)
+
+The Tokens Studio catalog extractor (Lane 7) runs by default but is controlled by a `do_token_catalog`
+flag (**default `True`**) in the Library-mode extractor ([`deterministic.py:292`](deterministic.py)). It
+is **additive and self-contained**: the call is wrapped so a failure never breaks the run. If the file has
+no Tokens Studio plugin data, the run still succeeds and the catalog sub-object is flagged
+`missing_shared_plugin_data`. Set the flag to `False` to skip the catalog entirely. Either way, a raw
+Figma with no Tokens Studio plugin still yields full structure, values, and components from the other
+readers (Lanes 1/2/3/5/6).
 
 ## Modules
 
