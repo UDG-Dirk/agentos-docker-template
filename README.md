@@ -110,6 +110,77 @@ Picking the wrong one usually returns an empty/`failure` result rather than an e
 published-library extractor on a client composition finds no published component sets and comes back with
 nothing. If a run is unexpectedly empty, re-check this list first.
 
+### How to read a run result
+
+You call a workflow and get back a run object (JSON). Here's how to read it without asking the team.
+
+**Where the result lives.** The MCP `run_workflow` call returns the whole run object. The actual
+extraction sits under `step_results → the "extract" step → content`; that content carries the
+`deterministic_extraction` block described below. (Over REST it's the same object:
+`GET /workflows/<id>/runs/<run_id>?session_id=<sid>`.)
+
+**Top-level `status`:**
+- **`success`** — everything the file offered was extracted. Consume it.
+- **`partial`** — most of it came through, but some pieces failed (e.g. a few component sets, or 2 of 25
+  remote references). Safe to consume *with caveats* — check `failure_reports` to see what's missing.
+- **`failure`** — nothing usable came back. Read `failure_reports` for the reason; don't consume.
+
+**The four fields to check, in order:**
+1. **`status`** — the headline (above).
+2. **`failure_reports[]`** — *why* things went wrong. Each entry has an `error_class`, an `http_status`,
+   and a `message`. This is where you look first when `status` isn't `success`.
+3. **`coverage_report`** — *what* was and wasn't extracted: `component_sets_expected` vs
+   `component_sets_extracted`, styles, assets. (e.g. expected 30 / extracted 28 = two sets failed — see
+   `failure_reports`.)
+4. **`warnings[]`** — non-blocking notes worth knowing, but not failures.
+
+**`error_class` glossary — what it means + what to do:**
+
+| `error_class` | Typically | What to do |
+|---|---|---|
+| `file_export_disabled` (403) | The Figma file has content-protection ("File not exportable") turned on | Ask the **file owner** to disable export protection. No retry helps. |
+| `rate_limit_exhausted` (429) | Figma throttled a request and our backoff was used up | Wait a bit and re-run. If it keeps happening, ping the HELIX team lead. |
+| `account_level_rate_limit` (429) | Figma is throttling the whole account/PAT, not one file | Wait longer before retrying; if persistent, the HELIX team lead. |
+| `roster_unavailable` | The file's component roster came back empty (and it wasn't a 429) | Check the file key is right and the PAT can see the file; then re-run. |
+| `auth` (401) | The PAT is invalid or lacks access to this file | Check your `FIGMA_PAT` and that it has access to the file. |
+| `malformed` | Figma returned something unparseable (often an error page) | Usually transient or an access issue — re-run once; if it persists, escalate. |
+| `empty_response` | A call returned 200 but with no usable content | Re-run once; if it persists, escalate. |
+| `server_error` (5xx, and other unexpected statuses incl. 404) | A Figma-side error, or a wrong/deleted file key (404 lands here) | For a 404, verify the file key. For 5xx, retry; escalate if persistent. |
+
+*(These are the exact classes the extractor emits — there's no separate `not_found`; a 404 surfaces as
+`server_error` with the real `http_status` recorded.)*
+
+**For the composition / client workflows** (`helix-client-extractor`, `helix-composition-only-extractor`)
+there's also a **`resolution_summary`** + **`resolution_events`** — the trace of matching this file's
+remote component references back to their source library. Read it as *N total → M resolved → K
+unresolved*; e.g. `25 total, 23 resolved (92%)` is healthy, and the `K` unresolved usually means those
+references point at a library we didn't register (or can't access) — verify the source-library key.
+
+**When to escalate vs retry:** `rate_limit_exhausted` / `server_error` / `malformed` / `empty_response`
+are usually transient — **retry first**. `file_export_disabled` and `auth` are **access** problems that
+won't fix themselves — sort the file's export setting / your PAT, or ask the file owner. If a retry
+doesn't clear a transient class, bring it to the HELIX team lead.
+
+### Recommended MCP clients
+
+HELIX exposes an **MCP interface**, and extractor outputs are structured JSON with rich diagnostics
+(above). To read those results *conversationally* instead of parsing JSON by hand, drive HELIX from an
+MCP-capable LLM client.
+
+**Validated against HELIX:**
+- **Claude Code** — used daily to build and run this pipeline; its MCP integration is confirmed against
+  all four deployed workflows.
+
+**MCP-capable, should work, not yet tested against HELIX:**
+- **GitHub Copilot** (MCP support in Copilot Chat), **Cursor**, **Continue.dev**, **Zed** — all speak MCP
+  in principle; none has been exercised against HELIX's workflows yet.
+
+**Direct MCP invocation** (a Python MCP client, the MCP Inspector) works too, but hands you raw JSON with
+no interpretation — use the [How to read a run result](#how-to-read-a-run-result) guide above to parse it.
+
+If you try HELIX from a client that isn't on the validated list and it works (or breaks), tell Dirk or the
+HELIX team lead — we'll move it up the list.
+
 ## Get Started
 
 ### Step 1: Run locally
