@@ -48,8 +48,8 @@ dark_factory_knowledge = create_knowledge("dark-factory", "dark_factory_kb")
 
 
 # ---------------------------------------------------------------------------
-# Documents (inline text — no URLs, no network fetch). Reused verbatim from
-# agents/--first-contact/level_04a_knowledge_agent.py.
+# Documents (inline text — no URLs, no network fetch). Originally lifted from a
+# local hackathon-scratch agent (not in this repo — gitignored; see CUSTOMIZATIONS.md).
 # ---------------------------------------------------------------------------
 DOCUMENTS = [
     {
