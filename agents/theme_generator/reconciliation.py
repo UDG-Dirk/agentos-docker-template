@@ -237,10 +237,14 @@ class AgentReconciler:
         from agno.agent import Agent
 
         from app.settings import default_chat_model
-        # Decision #5: temperature=0 + per-engagement seed for reproducibility within a run.
+        # Decision #5: temperature=0 for determinism. NOTE (live-run 2026-07-31): the deployed
+        # LiteLLM route (gpt-5.4 → Anthropic claude-sonnet-4-6) REJECTS `seed`
+        # (litellm.UnsupportedParamsError). So the per-engagement seed is RECORDED for provenance
+        # but NOT sent to the model; temperature=0 is the determinism lever for an Anthropic route.
+        self._seed = seed
         self._agent = Agent(
             name="3c-reconciler",
-            model=default_chat_model(temperature=0.0, seed=seed),  # OPENAI_MODEL_ID via LiteLLM (SP-9)
+            model=default_chat_model(temperature=0.0),  # OPENAI_MODEL_ID via LiteLLM (SP-9); no seed
             instructions=[_RECONCILE_INSTRUCTIONS],
             output_schema=ReconciliationResult,
         )
@@ -252,11 +256,21 @@ class AgentReconciler:
         prompt = (f"Client component: {slot}\nClient detail: {client_component}\n"
                   f"Baseline components: {baseline_names}\n"
                   f"3b scoring (if any): {scoring}\nDecide: map / passthrough / flag_review.")
-        ro = self._agent.run(input=prompt)
+        # SP-6: an agent hiccup (transport error, non-schema output) flags the component for
+        # review — it must NEVER crash the run or fabricate a mapping (Decision #4).
+        try:
+            ro = self._agent.run(input=prompt)
+        except Exception as e:  # noqa: BLE001
+            return ReconciliationResult(outcome="flag_review", confidence="unresolved",
+                                        rationale=f"agent run failed: {e!r}; flagged for human review")
         i, o = _extract_usage(ro)
         self._in += i
         self._out += o
-        return ro.content
+        res = getattr(ro, "content", None)
+        if not isinstance(res, ReconciliationResult):
+            return ReconciliationResult(outcome="flag_review", confidence="unresolved",
+                                        rationale=f"agent returned non-schema output ({type(res).__name__}); flagged")
+        return res
 
     def usage(self) -> tuple[int, int]:
         """(input_tokens, output_tokens) accumulated across this reconciler's calls (VT-8)."""
@@ -272,9 +286,11 @@ class AgentCohesionReviewer:
         from agno.agent import Agent
 
         from app.settings import default_chat_model
+        # temperature=0 only; seed dropped (Anthropic route rejects it — see AgentReconciler note).
+        self._seed = seed
         self._agent = Agent(
             name="3c-cohesion-reviewer",
-            model=default_chat_model(temperature=0.0, seed=seed),
+            model=default_chat_model(temperature=0.0),
             instructions=[_COHESION_INSTRUCTIONS],
             output_schema=CohesionVerdict,
         )
@@ -282,11 +298,21 @@ class AgentCohesionReviewer:
         self._out = 0
 
     def review(self, *, package_summary: dict) -> CohesionVerdict:
-        ro = self._agent.run(input=f"Package summary: {package_summary}. Review for cohesion.")
+        # SP-6: a failed/non-schema cohesion pass is reported as a non-coherent verdict with the
+        # reason — never a crash, never a fabricated "all good".
+        try:
+            ro = self._agent.run(input=f"Package summary: {package_summary}. Review for cohesion.")
+        except Exception as e:  # noqa: BLE001
+            return CohesionVerdict(coherent=False, issues=[f"cohesion review failed: {e!r}"],
+                                   confidence="unresolved", rationale="agent run error; needs human review")
         i, o = _extract_usage(ro)
         self._in += i
         self._out += o
-        return ro.content
+        res = getattr(ro, "content", None)
+        if not isinstance(res, CohesionVerdict):
+            return CohesionVerdict(coherent=False, issues=[f"non-schema output ({type(res).__name__})"],
+                                   confidence="unresolved", rationale="agent returned non-schema output")
+        return res
 
     def usage(self) -> tuple[int, int]:
         return self._in, self._out
