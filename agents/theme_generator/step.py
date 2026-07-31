@@ -267,15 +267,31 @@ def generate_theme(
     # anomaly fires on >2x that, or on a breaker trip. Bookkeeping, not an agent.
     expected_fg = len(deferred)
     anomaly = assess_anomaly(expected_fg, breaker.fine_grained_used, breaker.tripped)
+    # token totals (VT-8): summed from any agent exposing usage(); Mock has none → stays 0.
+    r_in, r_out = _usage_of(reconciler)
+    c_in, c_out = _usage_of(reviewer)
     return ThemeGeneratorOutput(
         status=status, package_path=package_path, provenance=prov, blocking_warnings=warnings,
         unmapped_components=unmapped,
         cost_summary=CostSummary(fine_grained_invocations=breaker.fine_grained_used,
                                  coarse_grained_invocations=breaker.coarse_used,
                                  breaker_tripped=breaker.tripped,
-                                 expected_fine_grained=expected_fg, anomaly=anomaly),
+                                 expected_fine_grained=expected_fg, anomaly=anomaly,
+                                 total_input_tokens=r_in + c_in, total_output_tokens=r_out + c_out),
         cohesion_coherent=cohesion_coherent, cohesion_issues=cohesion_issues, non_deterministic=True,
     )
+
+
+def _usage_of(obj) -> tuple[int, int]:
+    """(input, output) tokens from an agent exposing usage(); (0, 0) for the Mock (no such method)."""
+    fn = getattr(obj, "usage", None)
+    if callable(fn):
+        try:
+            u = fn()
+            return int(u[0]), int(u[1])
+        except Exception:  # noqa: BLE001 — observability must never break a run
+            return 0, 0
+    return 0, 0
 
 
 def _slot_name_local(c: Any) -> str:

@@ -17,7 +17,7 @@ Test suites: `tests/theme_generator/test_theme_generator_phase1.py` (P1),
 | VT-5 | SP-6 extension: below-threshold → blocking_warning, no fabrication | ✅ | `_route_reconciliation` unresolved→no-emit+warning (P2 `test_route_unresolved_does_not_emit`, `test_deferred_slot_unresolved_stays_partial`). |
 | VT-6 | SP-9 preserved: no hardcoded config; env-driven | ✅ | Model id from `OPENAI_MODEL_ID` via `default_chat_model`; package scope is a caller arg (`customer_package_name(scope)`); breaker caps env-overridable (`_env_int`). Explicit test: P3 `test_sp9_no_hardcoded_model_or_scope`. |
 | VT-7 | PROVENANCE.md generated for a HELIX_Modules-scale engagement | ✅ (offline) / ◐ (live) | P3 `test_end_to_end_produces_package_and_ledger` materialises `docs/PROVENANCE.md` on the HELIX_Modules fixture; a live-figma run is hardening. |
-| VT-8 | Cost-tracking hooks in place | ◐ | `CostSummary` in envelope (invocations, breaker, anomaly, expected) populated by `generate_theme` (P2/P3). Token $ totals (`total_input/output_tokens`) stay 0 until a real agent run wires usage metrics — live/hardening. |
+| VT-8 | Cost-tracking hooks in place | ✅ (wired) / ◐ (value) | `CostSummary` in envelope (invocations, breaker, anomaly, expected) populated by `generate_theme` (P2/P3). Token-$ capture now WIRED: `reconciliation._extract_usage` + `AgentReconciler/AgentCohesionReviewer.usage()` accumulate agent token metrics; `generate_theme` sums them into `total_input/output_tokens`. Value is 0 at CI (Mock exposes no usage); populates automatically on a real engagement (exact agno metrics field confirmed at live run). |
 | VT-9 | package.json + directory layout matches baseline | ✅ | P1 `test_phase1_package_tree_shape_and_content` (name `@scope/slug-elements`, provenance, `src/elements`, `src/tokens`, `docs`, `src/index.ts`). Full FE-DEV parity = VT-13. |
 | VT-10 | Cross-run reproducibility within an engagement | ✅ (deterministic surface) / ◐ (real LLM) | P3 `test_same_inputs_same_package_bytes` (byte-identical package + envelope); `engagement_seed` stable. Real-LLM temp0+seed reproducibility is live/hardening. |
 | VT-11 | `non_deterministic` always true in envelope | ✅ | Asserted across P1/P2/P3. |
@@ -25,6 +25,19 @@ Test suites: `tests/theme_generator/test_theme_generator_phase1.py` (P1),
 | VT-13 | [PENDING SASCHA] layout aligns with FE-DEV conventions | ⏳ | External input; spec §11.2 v0.2. Uses exact-helix-code-match default until then. |
 | VT-14 | [PENDING PROBE 3] cost per engagement within budget | ◐ | Probe 3 landed (`shared-results:3c-llm-cost-baseline-probe-result-2026-07-31`); anomaly + hard breaker mechanism in place. Formal $ thresholds ratified at hardening (v0.2). |
 | VT-15 | matcher.py deferred — 3c imports 3b library directly | ✅ | `reconciliation.py` imports `agents.semantic_matcher.scoring.name_similarity` directly; no `matcher.py` dependency anywhere. |
+
+## Runnable gate
+
+The offline-closable VTs are also an executable, colleague-runnable gate (the pattern the repo
+uses for `python -m evals`):
+
+```
+python -m agents.theme_generator.verify
+```
+
+Runs the full pipeline (deterministic Mock agents — no live LLM, no cost) over a self-contained
+fixture and prints a PASS/FAIL line per VT; exit 0 = all green. Kept green by
+`tests/theme_generator/test_theme_generator_verify.py`.
 
 ## Summary
 - **Closed offline: VT-1,2,3,4,5,6,9,11,12,15** and the deterministic surface of VT-7/VT-10.
