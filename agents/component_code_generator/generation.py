@@ -189,13 +189,73 @@ class MockGenerator:
                                 rationale=f"from-spec skeleton ({len(spec.variant_axes)} variant axes)")
 
 
+# Gold-standard reference (v0.2 Path-2): a representative excerpt of a REAL, complete helix-code
+# organism (feature/organisms/MediaText — 310 LOC). Teaches the conventions Phase-5 shells lacked:
+# JSDoc @element/@attr, typed @property unions with @attr mapping, @state + slotchange handlers,
+# named-slot composition, token-based responsive CSS, per-variant render helpers, tagname map.
+_GOLD_REFERENCE = '''\
+import { LitElement, html, css } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import type { MediaTextAlignment } from "./types.js";
+
+/**
+ * A full-width organism pairing a media element with a content block in
+ * responsive layouts across all four design-system breakpoints.
+ * @element hx-media-text
+ * @attr {'right'|'left'|'large'} image-alignment - Image position / layout variant.
+ * @slot heading-group - consumer projects an hx-heading-group here
+ * @slot image - consumer projects an hx-image here
+ */
+@customElement("hx-media-text")
+export class HxMediaText extends LitElement {
+    /** Controls the image position and layout variant. @attr image-alignment */
+    @property({ attribute: "image-alignment", reflect: true })
+    imageAlignment: MediaTextAlignment = "right";
+
+    @state() private _hasCaption = false;
+    private _onCaptionSlotChange(e: Event) {
+        const slot = e.target as HTMLSlotElement;
+        this._hasCaption = slot.assignedNodes({ flatten: true }).length > 0;
+    }
+
+    static styles = css`
+        :host { display: block; padding-block: calc(var(--helix-dimension-spacing-module-md, 56) * 1px); }
+        .row { display: flex; gap: calc(var(--helix-dimension-spacing-components-md, 24) * 1px); }
+    `;
+
+    render() {
+        return this.imageAlignment === "large" ? this._renderLarge() : this._renderSideBySide();
+    }
+    private _renderSideBySide() {
+        return html`
+            <div class="module-inner"><div class="row">
+                <div class="content-col">
+                    <slot name="heading-group"></slot>
+                    <slot name="copy-group"></slot>
+                    <slot name="button-group"></slot>
+                </div>
+                <div class="image-col"><slot name="image"></slot></div>
+            </div></div>`;
+    }
+    private _renderLarge() { return html`<div class="module-inner"><slot></slot></div>`; }
+}
+declare global { interface HTMLElementTagNameMap { "hx-media-text": HxMediaText; } }
+'''
+
 _FROM_SPEC_INSTRUCTIONS = (
     "You generate a single Lit + TypeScript web component from a thin spec (no baseline exists). "
     "Output ONLY the component source. It MUST: import from 'lit' and 'lit/decorators.js'; use "
     "@customElement with the EXACT tag given; export a class extending LitElement named EXACTLY as "
-    "given; declare one @property({reflect:true}) per variant axis; use ONLY var(--{customer}-*) "
-    "CSS custom properties (never --helix-); implement render(). Do not invent behaviour beyond the "
-    "spec. If the spec is too thin to build meaningfully, still emit a minimal valid skeleton."
+    "given; use ONLY var(--{customer}-*) CSS custom properties (never --helix-); implement render(). "
+    "\n\nMATCH THE CONVENTIONS in this gold-standard reference organism (adapt structure to the given "
+    "component — do NOT copy its name/tag/tokens): a JSDoc header with @element and @attr/@slot tags; "
+    "a typed @property union per variant axis with an @attr mapping; @state + slotchange handlers for "
+    "internal state; NAMED SLOTS so consumers project the design system's atoms/molecules "
+    "(heading-group, copy-group, button-group, image, etc.); token-based responsive CSS; and "
+    "per-variant private render helpers when a layout axis warrants it. Aim for a genuinely functional "
+    "component, not a bare wrapper — but do NOT fabricate behaviour the spec doesn't imply.\n\n"
+    "=== GOLD REFERENCE (convention only; different component) ===\n"
+    f"{_GOLD_REFERENCE}\n=== END REFERENCE ==="
 )
 
 
