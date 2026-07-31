@@ -207,6 +207,27 @@ _COHESION_INSTRUCTIONS = (
 )
 
 
+def _extract_usage(run_output) -> tuple[int, int]:
+    """Best-effort (input_tokens, output_tokens) from an agno RunOutput.
+
+    Defensive across agno versions — reads a ``metrics`` object/dict, summing list-valued
+    per-message token counts. Returns (0, 0) when metrics aren't exposed. The exact agno
+    metrics field is confirmed on a live run [U]; the capture path is wired now so token
+    totals populate the envelope automatically once a real engagement runs (VT-8).
+    """
+    m = getattr(run_output, "metrics", None)
+    if m is None:
+        return 0, 0
+
+    def _get(obj, key):
+        v = obj.get(key) if isinstance(obj, dict) else getattr(obj, key, None)
+        if isinstance(v, (list, tuple)):
+            v = sum(x for x in v if isinstance(x, (int, float)))
+        return int(v) if isinstance(v, (int, float)) else 0
+
+    return _get(m, "input_tokens"), _get(m, "output_tokens")
+
+
 class AgentReconciler:
     """Real fine-grained reconciler — Agno agent, structured output (live runs only)."""
 
@@ -223,13 +244,23 @@ class AgentReconciler:
             instructions=[_RECONCILE_INSTRUCTIONS],
             output_schema=ReconciliationResult,
         )
+        self._in = 0
+        self._out = 0
 
     def reconcile(self, *, slot, client_component, baseline_components, scoring) -> ReconciliationResult:
         baseline_names = [_slot_name(b) for b in (baseline_components or [])]
         prompt = (f"Client component: {slot}\nClient detail: {client_component}\n"
                   f"Baseline components: {baseline_names}\n"
                   f"3b scoring (if any): {scoring}\nDecide: map / passthrough / flag_review.")
-        return self._agent.run(input=prompt).content
+        ro = self._agent.run(input=prompt)
+        i, o = _extract_usage(ro)
+        self._in += i
+        self._out += o
+        return ro.content
+
+    def usage(self) -> tuple[int, int]:
+        """(input_tokens, output_tokens) accumulated across this reconciler's calls (VT-8)."""
+        return self._in, self._out
 
 
 class AgentCohesionReviewer:
@@ -247,6 +278,15 @@ class AgentCohesionReviewer:
             instructions=[_COHESION_INSTRUCTIONS],
             output_schema=CohesionVerdict,
         )
+        self._in = 0
+        self._out = 0
 
     def review(self, *, package_summary: dict) -> CohesionVerdict:
-        return self._agent.run(input=f"Package summary: {package_summary}. Review for cohesion.").content
+        ro = self._agent.run(input=f"Package summary: {package_summary}. Review for cohesion.")
+        i, o = _extract_usage(ro)
+        self._in += i
+        self._out += o
+        return ro.content
+
+    def usage(self) -> tuple[int, int]:
+        return self._in, self._out
