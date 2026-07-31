@@ -3,7 +3,7 @@
 Drop-in reference for any human or coding agent (Claude Code, Codex, …) touching
 deployment, Docker, CI/CD, or scaffolding in this repo. Compliance is **mandatory**
 for every deployed application at MSQ DX (multiple supply-chain incidents + one
-cryptomining RCE via an outdated dependency prompted this).
+cryptomining RCE — remote code execution — via an outdated dependency prompted this).
 
 > **Canonical source:** Confluence "Container and Hosting Security Baseline"
 > (MSQDXAI, page 288982405) and the "GitLab Security Pipeline Templates — Developer
@@ -14,10 +14,11 @@ cryptomining RCE via an outdated dependency prompted this).
 
 1. **No port exposure outside the Docker network.** Internal services talk over the
    Docker network by service name; external access only via the Traefik/Coolify
-   reverse proxy. (Docker NAT bypasses UFW — *not exposing* is the only reliable control.)
+   reverse proxy. (Docker's network address translation bypasses the UFW host firewall — *not exposing* is the only reliable control.)
 2. **Renovate bot on every repo**, covering all dependency manifests, so security
    updates never go stale. (See [`renovate.json`](renovate.json).)
-3. **Security + SBOM pipelines** — `security-scanner` (+ `sbom-generation` once
+3. **Security + SBOM pipelines** — SBOM = software bill of materials (a manifest of every
+   dependency shipped). `security-scanner` (+ `sbom-generation` once
    Dependency-Track vars exist) as GitLab CI/CD Components. A prerequisite for
    deployment. (See [`.gitlab-ci.yml`](.gitlab-ci.yml).)
 4. **rmvc01 GitLab only** for hosted projects — no personal repos, no ad-hoc hosting.
@@ -37,11 +38,11 @@ cryptomining RCE via an outdated dependency prompted this).
 `.gitlab-ci.yml` integrates `pipeline-templates/security/security-scanner` (pinned to
 an exact tag, e.g. `@v4.0.1`):
 
-- **Grype** — CVEs in packages/images. Gate: **block on `critical`**.
+- **Grype** — CVEs (publicly catalogued security vulnerabilities) in packages/images. Gate: **block on `critical`**.
 - **Gitleaks** — secret detection. Gate: **block on any finding**. False positives
   are documented and narrowly allowlisted in [`.gitleaks.toml`](.gitleaks.toml)
   (`useDefault = true`, every ignore carries a reason + review date).
-- **Checkov** (IaC/Dockerfile misconfig), **OSV** (dependency CVEs), **Socket**
+- **Checkov** (infrastructure-as-code / Dockerfile misconfig), **OSV** (dependency CVEs), **Socket**
   (supply-chain risk) — currently **report-only** (findings surface in the MR
   Security widget without blocking).
 - **SBOM** (Syft → Dependency-Track) is deferred until `DTRACK_API_URL` /

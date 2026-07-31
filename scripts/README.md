@@ -4,7 +4,7 @@ Operational helpers for the AgentOS service.
 
 | Script | Purpose |
 |---|---|
-| `mint_token.py` | Mint a signed RS256 JWT for AgentOS auth (see below). |
+| `mint_token.py` | Mint a signed RS256 JWT (JSON Web Token) for AgentOS auth (see below). |
 | `build_image.sh` | Build the prod container image. |
 | `entrypoint.sh` | Container entrypoint. |
 | `format.sh` / `validate.sh` | `ruff format` / `ruff check`. |

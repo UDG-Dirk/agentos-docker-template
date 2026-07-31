@@ -13,7 +13,7 @@ Auth is a **self-made RSA-2048 keypair**. There is no download from Agno/os.agno
 | **public** (`agno_public.pem`) | **verifies** tokens | Coolify prod env var `JWT_VERIFICATION_KEY`. Safe to expose. |
 
 They are cryptographically bound: `JWT_VERIFICATION_KEY` only verifies tokens signed by the matching
-private key. Prod enforces this whenever `RUNTIME_ENV=prd` (`app/main.py`: `authorization = runtime_env == "prd"`); local dev (`RUNTIME_ENV=dev`, via `dev-up.sh`) has auth **off**.
+private key. Prod enforces this whenever `RUNTIME_ENV=prd` (`app/main.py`: `authorization = runtime_env == "prd"`); local dev (`RUNTIME_ENV=dev` — see [`SETUP.md`](SETUP.md)) has auth **off**.
 
 ## Shared custody (the de-bottleneck)
 
