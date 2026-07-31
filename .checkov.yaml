@@ -1,0 +1,11 @@
+# Checkov configuration (read by the security-scanner@v4.0.1 pipeline template's `checkov -d .`).
+#
+# CKV_SECRET_6 ("Base64 High Entropy String") fires on TEST FIXTURES that carry snapshot data —
+# Figma node keys, token hashes, extraction snapshots — which are NOT secrets. gitleaks is this
+# pipeline's authoritative secret gate and passes clean on the same tree. Suppressing the
+# duplicative, false-positive-prone base64 check for fixture paths only (never for app/deploy code).
+#
+# Origin: shared-results:security-scanner-red-findings-investigation-result-2026-07-31
+skip-path:
+  - "tests/.*/fixtures/.*"      # tracked test fixtures (baseline snapshots, token data) — not secrets
+  - "scratchpad/.*"             # gitignored local working artifacts (baseline-reader output) — never deployed

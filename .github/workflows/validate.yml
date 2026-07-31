@@ -10,6 +10,10 @@ on:
     branches:
       - "main"
 
+# Least-privilege GITHUB_TOKEN (CKV2_GHA_1): this workflow only checks out + runs tests.
+permissions:
+  contents: read
+
 env:
   UV_SYSTEM_PYTHON: 1
 
