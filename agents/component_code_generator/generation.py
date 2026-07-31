@@ -101,10 +101,13 @@ def run_structural_gate(source: str, *, customer_slug: str, element_slug: str) -
     if not naming_ok:
         failures.append(f"naming: expected tag {exp_tag!r} + class {exp_class!r}")
 
-    token_ok = "--helix-" not in source and (
-        ("var(--" not in source) or re.search(rf"var\(--{re.escape(slug)}-", source) is not None)
+    # every var(--…) token must be in the CUSTOMER namespace. Substring-checking "--helix-" would
+    # false-positive when the slug itself contains "helix" (e.g. helix-modules-int) — so check the
+    # prefix of each token instead.
+    bad_tokens = [t for t in re.findall(r"var\(--[a-z0-9-]+", source) if not t.startswith(f"var(--{slug}-")]
+    token_ok = not bad_tokens
     if not token_ok:
-        failures.append("token_namespace: uses --helix- or a non-customer token namespace")
+        failures.append(f"token_namespace: non-customer token(s) {bad_tokens[:3]}")
 
     reg_ok = tag == exp_tag and exp_class in source  # @customElement matches file/class
     if not reg_ok:

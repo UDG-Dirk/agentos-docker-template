@@ -44,7 +44,7 @@ from agents.component_code_generator.scaffolding import (
     slugify,
     write_package,
 )
-from agents._shared.observability import CircuitBreaker, assess_anomaly
+from agents._shared.observability import CircuitBreaker, assess_anomaly, engagement_seed
 
 STEP_NAME_INPUT = "ccg-input-gathering"
 STEP_NAME_GENERATE = "ccg-generate"
@@ -155,7 +155,8 @@ def generate_component_code(
                                                     rationale=f"deterministic fork of baseline '{baseline_ref}'"))
             cem_elements.append({"element_tag": tag, "class_name": cls, "file_path": file_path})
             summary.fork_deterministic += 1
-            summary.gate_passed += 1
+            # NB: deterministic forks skip the structural gate (byte-identical by construction,
+            # applied=False) — they do NOT count toward gate_passed, which tracks GENERATED code only.
         else:  # Path B — from-spec generation (agentic; Mock in CI)
             figma_meta = (e.get("figma_meta") if isinstance(e, dict) else getattr(e, "figma_meta", None)) or {}
             spec = GenerationInput(
@@ -247,6 +248,17 @@ def input_gathering_executor(step_input: StepInput, **kwargs) -> StepOutput:
     return StepOutput(step_name=STEP_NAME_INPUT, content=bundle, success=not bundle["blocking"])
 
 
+def _select_generator(data: dict, seed: int | None):
+    """Mock (CI/default) vs real Agno generator, env-gated (mirrors 3c's split). The real generator
+    gets the per-engagement seed (recorded, not sent — Anthropic route rejects it; temp=0 is the lever).
+    Returns None → generate_component_code defaults to the deterministic Mock."""
+    flag = str(data.get("use_real_agent") or os.environ.get("COMP_CODE_GEN_USE_REAL_AGENT", "")).lower()
+    if flag in ("1", "true", "yes"):
+        from agents.component_code_generator.generation import AgentGenerator
+        return AgentGenerator(seed=seed)
+    return None
+
+
 def generate_executor(step_input: StepInput, **kwargs) -> StepOutput:
     gathered = step_input.get_step_content(STEP_NAME_INPUT) or {}
     if gathered.get("blocking"):
@@ -256,10 +268,12 @@ def generate_executor(step_input: StepInput, **kwargs) -> StepOutput:
         )
         return StepOutput(step_name=STEP_NAME_GENERATE, content=env.model_dump(), success=False)
     data = getattr(step_input, "additional_data", None) or {}
+    seed = engagement_seed(gathered["customer_slug"], data.get("engagement_timestamp") or _now_iso())
     env = generate_component_code(
         customer_slug=gathered["customer_slug"], scope=gathered["scope"],
         elements=gathered["elements"], tokens_json=gathered.get("tokens_json"),
-        helix_code_root=gathered["helix_code_root"], output_dir=data.get("output_dir"),
+        helix_code_root=gathered["helix_code_root"], generator=_select_generator(data, seed),
+        output_dir=data.get("output_dir"),
     )
     return StepOutput(step_name=STEP_NAME_GENERATE, content=env.model_dump(),
                       success=env.status != "failure")
