@@ -21,6 +21,7 @@ rather than spending silently. SP-9: the real agent's model comes from
 from __future__ import annotations
 
 import os
+import zlib
 from typing import Any, Literal, Optional, Protocol
 
 from pydantic import BaseModel
@@ -102,6 +103,40 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+# --------------------------------------------------------------------------- #
+# Deterministic observability helpers (Probe 3 / Decision #5).
+# Bookkeeping — NOT an agent. Workflow-agnostic on purpose: these lift cleanly into
+# a shared observability harness when one is scoped (per the FinOps-honest principle,
+# the aggregation/alert plane stays deterministic; an LLM "watcher" is a separate,
+# governance-gated capability).
+# --------------------------------------------------------------------------- #
+_ANOMALY_INVOCATION_MULTIPLIER = 2  # Probe 3: alert when actual > 2x expected-for-count
+
+
+def engagement_seed(customer_slug: str, timestamp: str) -> int:
+    """Deterministic non-negative seed from (customer, engagement timestamp) — Decision #5.
+
+    Same (customer, timestamp) → same seed → reproducible agent outputs within an
+    engagement. crc32 keeps it stable across processes/machines (no Python hash salt).
+    """
+    key = f"{customer_slug or ''}:{timestamp or ''}".encode("utf-8")
+    return zlib.crc32(key) & 0x7FFFFFFF
+
+
+def assess_anomaly(expected_fine_grained: int, actual_fine_grained: int,
+                   breaker_tripped: bool = False) -> Optional[str]:
+    """Return a human-readable anomaly string, or None. Probe 3's PRIMARY control:
+    invocation-ratio, not an absolute $ cap. Fires when actual runs > 2x the count
+    expected for this many deferred components, or when the circuit breaker tripped.
+    """
+    if breaker_tripped:
+        return "circuit breaker tripped — fine-grained invocation cap hit"
+    if expected_fine_grained > 0 and actual_fine_grained > _ANOMALY_INVOCATION_MULTIPLIER * expected_fine_grained:
+        return (f"fine-grained invocations {actual_fine_grained} exceeded "
+                f"{_ANOMALY_INVOCATION_MULTIPLIER}x expected ({expected_fine_grained})")
+    return None
+
+
 def _slot_name(c: Any) -> str:
     return (c.get("name") if isinstance(c, dict) else getattr(c, "name", None)) or ""
 
@@ -177,13 +212,14 @@ class AgentReconciler:
 
     name = "agent"
 
-    def __init__(self) -> None:
+    def __init__(self, seed: int | None = None) -> None:
         from agno.agent import Agent
 
         from app.settings import default_chat_model
+        # Decision #5: temperature=0 + per-engagement seed for reproducibility within a run.
         self._agent = Agent(
             name="3c-reconciler",
-            model=default_chat_model(),  # OPENAI_MODEL_ID via LiteLLM (SP-9), temp handled by caller/env
+            model=default_chat_model(temperature=0.0, seed=seed),  # OPENAI_MODEL_ID via LiteLLM (SP-9)
             instructions=[_RECONCILE_INSTRUCTIONS],
             output_schema=ReconciliationResult,
         )
@@ -201,13 +237,13 @@ class AgentCohesionReviewer:
 
     name = "agent"
 
-    def __init__(self) -> None:
+    def __init__(self, seed: int | None = None) -> None:
         from agno.agent import Agent
 
         from app.settings import default_chat_model
         self._agent = Agent(
             name="3c-cohesion-reviewer",
-            model=default_chat_model(),
+            model=default_chat_model(temperature=0.0, seed=seed),
             instructions=[_COHESION_INSTRUCTIONS],
             output_schema=CohesionVerdict,
         )

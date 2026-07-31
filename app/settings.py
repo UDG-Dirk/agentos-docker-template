@@ -27,11 +27,20 @@ def default_model() -> OpenAIResponses:
     return OpenAIResponses(id=MODEL_ID)
 
 
-def default_chat_model() -> OpenAIChat:
+def default_chat_model(*, temperature: float | None = None, seed: int | None = None) -> OpenAIChat:
     """Fresh model per agent, for agents with ``tools=[...]`` (and/or ``output_schema``).
 
     Targets /v1/chat/completions. Tool + schema agents MUST use this over
     ``default_model()``: OpenAIResponses breaks tool round-trips via LiteLLM ->
     Anthropic ("sequence item 0: expected str instance, NoneType found"). RULE 7.
+
+    Optional ``temperature`` / ``seed`` for reproducibility-sensitive callers (e.g. 3c
+    Theme Generator, Decision #5: temp=0 + per-engagement seed). Omitted → the model's
+    own defaults (unchanged for every existing caller).
     """
-    return OpenAIChat(id=MODEL_ID)
+    kwargs: dict = {"id": MODEL_ID}
+    if temperature is not None:
+        kwargs["temperature"] = temperature
+    if seed is not None:
+        kwargs["seed"] = seed
+    return OpenAIChat(**kwargs)

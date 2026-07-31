@@ -41,6 +41,8 @@ from agents.theme_generator.reconciliation import (
     MockReconciler,
     Reconciler,
     ReconciliationResult,
+    assess_anomaly,
+    engagement_seed,
 )
 from agents.theme_generator.scaffolding import (
     _element_module,
@@ -261,12 +263,17 @@ def generate_theme(
 
     status = "partial" if (flagged_remaining or breaker.tripped) else "success"
     package_path = write_package(tree, output_dir) if output_dir else None
+    # deterministic observability (Probe 3): expected = one fine-grained call per deferred slot;
+    # anomaly fires on >2x that, or on a breaker trip. Bookkeeping, not an agent.
+    expected_fg = len(deferred)
+    anomaly = assess_anomaly(expected_fg, breaker.fine_grained_used, breaker.tripped)
     return ThemeGeneratorOutput(
         status=status, package_path=package_path, provenance=prov, blocking_warnings=warnings,
         unmapped_components=unmapped,
         cost_summary=CostSummary(fine_grained_invocations=breaker.fine_grained_used,
                                  coarse_grained_invocations=breaker.coarse_used,
-                                 breaker_tripped=breaker.tripped),
+                                 breaker_tripped=breaker.tripped,
+                                 expected_fine_grained=expected_fg, anomaly=anomaly),
         cohesion_coherent=cohesion_coherent, cohesion_issues=cohesion_issues, non_deterministic=True,
     )
 
@@ -319,18 +326,19 @@ def deterministic_transform_executor(step_input: StepInput, **kwargs) -> StepOut
                       success=env.status != "failure")
 
 
-def _select_agents(data: dict):
+def _select_agents(data: dict, seed: int | None = None):
     """Choose Mock (CI/default) vs. real Agno agents for Phase 2.
 
     Real agents fire only when explicitly opted in (additional_data.use_real_agent
     or THEME_GEN_USE_REAL_AGENT env) — mirrors 3b's HELIX_TESTBENCH_USE_REAL_LLM
-    gate so CI never makes a live, billable call. Returns (reconciler, reviewer);
+    gate so CI never makes a live, billable call. The real agents get temp=0 + the
+    per-engagement ``seed`` (Decision #5). Returns (reconciler, reviewer);
     (None, None) → generate_theme defaults to the deterministic Mock.
     """
     flag = str(data.get("use_real_agent") or os.environ.get("THEME_GEN_USE_REAL_AGENT", "")).lower()
     if flag in ("1", "true", "yes"):
         from agents.theme_generator.reconciliation import AgentCohesionReviewer, AgentReconciler
-        return AgentReconciler(), AgentCohesionReviewer()
+        return AgentReconciler(seed=seed), AgentCohesionReviewer(seed=seed)
     return None, None
 
 
@@ -349,7 +357,9 @@ def full_generation_executor(step_input: StepInput, **kwargs) -> StepOutput:
         return StepOutput(step_name=STEP_NAME_GENERATE, content=env.model_dump(), success=False)
 
     data = getattr(step_input, "additional_data", None) or {}
-    reconciler, reviewer = _select_agents(data)
+    # per-engagement seed (Decision #5): deterministic from (customer, timestamp)
+    seed = engagement_seed(gathered["customer_slug"], data.get("engagement_timestamp") or _now_iso())
+    reconciler, reviewer = _select_agents(data, seed=seed)
     env = generate_theme(
         customer_slug=gathered["customer_slug"], scope=gathered["scope"],
         baseline=gathered["baseline"], client_components=gathered["client_components"],

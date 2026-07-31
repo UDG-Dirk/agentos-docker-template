@@ -127,6 +127,12 @@ class CostSummary(BaseModel):
     total_input_tokens: int = 0
     total_output_tokens: int = 0
     breaker_tripped: bool = False
+    # Anomaly observability (Probe 3): expected fine-grained calls for this component
+    # count, and a flag when the actual count runs anomalously high. Deterministic —
+    # this is a bookkeeping signal, NOT an agent. Extractable to a shared observability
+    # harness later (the pattern is workflow-agnostic).
+    expected_fine_grained: int = 0
+    anomaly: Optional[str] = None
 
 
 class ThemeGeneratorOutput(BaseModel):
