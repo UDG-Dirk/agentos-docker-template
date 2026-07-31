@@ -37,6 +37,7 @@ from agents.component_code_generator.generation import (
 from agents.component_code_generator.scaffolding import (
     find_baseline_source,
     fork_component,
+    is_valid_lit_source,
     pascal_case,
     render_ccg_provenance_md,
     render_cem,
@@ -143,16 +144,24 @@ def generate_component_code(
                                                         rationale="baseline source missing; cannot fork"))
                 summary.deferred += 1
                 continue
-            baseline_source, _relpath = src
+            baseline_source, source_ref = src  # source_ref is "branch:path" (Path 1 provenance)
+            # D-p1-4 (SP-6 honesty): if the branch source is WIP/incomplete, STILL fork it (it's
+            # Sascha's real work-in-progress, not a fabricated shell) but flag it loudly.
+            wip = not is_valid_lit_source(baseline_source)
             forked, tag, cls = fork_component(baseline_source, slug)
             file_path = f"{pkg}/src/elements/{slugify(slot)}/{cls}.ts"
             tree[file_path] = forked
             gate = StructuralGateResult(applied=False)  # deterministic fork — gate not applicable (Adjustment 1)
+            if wip:
+                warnings.append(BlockingWarning(code="baseline_source_wip", element_slot=slot,
+                                                detail=f"forked WIP branch source {source_ref} (may be incomplete)",
+                                                recommended_action="human_review"))
             results.append(ElementGenerationResult(slot=slot, element_tag=tag, class_name=cls,
                                                     file_path=file_path, path="fork_deterministic",
-                                                    baseline_ref=baseline_ref, confidence=confidence,
+                                                    baseline_ref=source_ref, confidence=confidence,
                                                     structural_gate=gate,
-                                                    rationale=f"deterministic fork of baseline '{baseline_ref}'"))
+                                                    rationale=f"deterministic fork of {source_ref}"
+                                                              + (" (WIP source)" if wip else "")))
             cem_elements.append({"element_tag": tag, "class_name": cls, "file_path": file_path})
             summary.fork_deterministic += 1
             # NB: deterministic forks skip the structural gate (byte-identical by construction,

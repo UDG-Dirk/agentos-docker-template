@@ -38,6 +38,7 @@ class BlockingWarning(BaseModel):
     code: Literal[
         "input_unavailable",              # missing/empty 3c package
         "baseline_source_unavailable",    # Path A: baseline_ref names a component not in helix-code
+        "baseline_source_wip",            # Path A: branch source forked but is WIP/incomplete (D-p1-4, SP-6)
         "structural_gate_failed",         # Phase 2: generated code failed the structural gate after retry
         "generation_below_threshold",     # Phase 2: agent confidence below threshold
         "generation_failed",              # Phase 2: agent error / non-schema output
