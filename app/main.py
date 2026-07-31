@@ -18,6 +18,7 @@ from app.workflows.helix_baseline_reader import helix_baseline_reader_workflow
 from app.workflows.helix_client_extractor import helix_client_extractor_workflow
 from app.workflows.helix_composition_only_extractor import helix_composition_only_extractor_workflow
 from app.workflows.helix_figma_extractor import helix_figma_extractor_workflow
+from app.workflows.helix_theme_generator import helix_theme_generator_workflow
 from db import get_postgres_db
 from knowledge.dark_factory_kb import ingest as ingest_dark_factory_kb
 
@@ -112,7 +113,8 @@ agent_os = AgentOS(
     db=get_postgres_db(),
     agents=[web_search, code_search, reasoning_agent, knowledge_agent],
     workflows=[helix_figma_extractor_workflow, helix_client_extractor_workflow,
-               helix_composition_only_extractor_workflow, helix_baseline_reader_workflow],
+               helix_composition_only_extractor_workflow, helix_baseline_reader_workflow,
+               helix_theme_generator_workflow],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
     enable_mcp_server=True,
