@@ -59,7 +59,8 @@ term below is spelled out where it first appears, and this table is the quick re
 > published library → `helix-figma-extractor`; uses another library's components (client work) →
 > `helix-client-extractor`; self-contained → `helix-composition-only-extractor`. Full decision tree
 > (with how to tell in Figma's Assets panel): the **"Which extractor workflow do I use?"** section of the
-> [repo README](../../README.md).
+> [repo README](../../README.md). Reading the JSON a run gives back — `status`, `failure_reports`,
+> `error_class` meanings, when to retry vs escalate: the **"How to read a run result"** section there too.
 
 | Workflow | Purpose | Invocation |
 |---|---|---|
