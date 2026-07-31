@@ -247,3 +247,76 @@ def test_run_pathway_b_enriched_tree_end_to_end():
     assert comp["auto_layout"] == {"layout_mode": "VERTICAL", "item_spacing": 24}
     assert txt["text_content"]["characters"] == "Headline"
     assert txt["text_content"]["style"] == {"font_size": 32.0, "font_weight": 700}
+
+
+# =========================================================================== #
+# Phase 2b — Rank 3 (component/variant schema + values)
+# =========================================================================== #
+
+def test_component_property_definitions_on_component_set():
+    node = {"type": "COMPONENT_SET", "componentPropertyDefinitions": {
+        "Size": {"type": "VARIANT", "defaultValue": "md", "variantOptions": ["sm", "md", "lg"]},
+        "Disabled": {"type": "BOOLEAN", "defaultValue": False},
+        "Label#1:0": {"type": "TEXT", "defaultValue": "Button"}}}
+    cpd = pb._extract_component_property_definitions(node)
+    assert cpd == {
+        "Size": {"type": "VARIANT", "default_value": "md", "variant_options": ["sm", "md", "lg"]},
+        "Disabled": {"type": "BOOLEAN", "default_value": False},
+        "Label#1:0": {"type": "TEXT", "default_value": "Button"}}
+
+
+def test_component_property_definitions_accepts_standalone_component():
+    node = {"type": "COMPONENT", "componentPropertyDefinitions": {"On": {"type": "BOOLEAN", "defaultValue": True}}}
+    assert pb._extract_component_property_definitions(node) == {"On": {"type": "BOOLEAN", "default_value": True}}
+
+
+def test_component_property_definitions_none_cases():
+    assert pb._extract_component_property_definitions({"type": "INSTANCE", "componentPropertyDefinitions": {"x": {}}}) is None
+    assert pb._extract_component_property_definitions({"type": "COMPONENT_SET"}) is None
+    assert pb._extract_component_property_definitions({"type": "COMPONENT_SET", "componentPropertyDefinitions": {}}) is None
+
+
+def test_component_properties_on_instance():
+    node = {"type": "INSTANCE", "componentProperties": {
+        "Size": {"type": "VARIANT", "value": "lg"},
+        "Disabled": {"type": "BOOLEAN", "value": False}}}
+    assert pb._extract_component_properties(node) == {
+        "Size": {"type": "VARIANT", "value": "lg"},
+        "Disabled": {"type": "BOOLEAN", "value": False}}
+
+
+def test_component_properties_none_for_non_instance():
+    assert pb._extract_component_properties({"type": "COMPONENT_SET", "componentProperties": {"x": {"value": 1}}}) is None
+    assert pb._extract_component_properties({"type": "INSTANCE"}) is None
+
+
+def test_variant_properties_on_instance():
+    assert pb._extract_variant_properties({"type": "INSTANCE", "variantProperties": {"State": "Hover"}}) == {"State": "Hover"}
+    assert pb._extract_variant_properties({"type": "INSTANCE"}) is None  # [U] TD-2 samples had none
+    assert pb._extract_variant_properties({"type": "FRAME", "variantProperties": {"x": "y"}}) is None
+
+
+def test_walk_attaches_rank3_to_component_set_and_instance():
+    doc = {"id": "p", "type": "CANVAS", "children": [
+        {"id": "cs", "name": "Button", "type": "COMPONENT_SET",
+         "componentPropertyDefinitions": {"Size": {"type": "VARIANT", "variantOptions": ["sm", "lg"]}},
+         "children": [
+             {"id": "i", "name": "Button/lg", "type": "INSTANCE",
+              "componentProperties": {"Size": {"type": "VARIANT", "value": "lg"}},
+              "variantProperties": {"Size": "lg"}, "children": []}]}]}
+    frames = _frames(doc)
+    cs = next(f for f in frames if f["type"] == "COMPONENT_SET")
+    inst = next(f for f in frames if f["type"] == "INSTANCE")
+    assert cs["component_property_definitions"]["Size"]["variant_options"] == ["sm", "lg"]
+    assert inst["component_properties"]["Size"] == {"type": "VARIANT", "value": "lg"}
+    assert inst["variant_properties"] == {"Size": "lg"}
+
+
+def test_rank3_does_not_leak_onto_plain_frames():
+    # A plain FRAME never gets Rank 3 fields even if it spuriously carries the raw keys.
+    doc = {"id": "p", "type": "CANVAS", "children": [
+        {"id": "f", "name": "F", "type": "FRAME",
+         "componentProperties": {"X": {"value": 1}}, "children": []}]}
+    frames = _frames(doc)
+    assert "component_properties" not in frames[0]
+    assert frames[0] == {"id": "f", "name": "F", "type": "FRAME", "depth": 1}
