@@ -90,10 +90,13 @@ def run_structural_gate(source: str, *, customer_slug: str, element_slug: str) -
     if not ts_ok:
         failures.append("ts_parseable: unbalanced delimiters or missing export class/render")
 
+    # Lit essentials — quote-agnostic import (real LLMs emit single quotes), and @property is
+    # OPTIONAL: a valid component can have zero reactive properties (SP-26: live-run 2026-07-31 found
+    # real claude-sonnet-4-6 output failing here on `from 'lit'` + a prop-less HeaderLogo).
     lit_ok = ('@customElement(' in source and "extends LitElement" in source
-              and 'from "lit"' in source and "@property" in source)
+              and re.search(r"from\s+['\"]lit['\"]", source) is not None)
     if not lit_ok:
-        failures.append("lit_pattern: missing @customElement/@property/LitElement/lit import")
+        failures.append("lit_pattern: missing @customElement / extends LitElement / lit import")
 
     m_tag = re.search(r'@customElement\(\s*["\']([a-z0-9-]+)["\']\s*\)', source)
     tag = m_tag.group(1) if m_tag else None
