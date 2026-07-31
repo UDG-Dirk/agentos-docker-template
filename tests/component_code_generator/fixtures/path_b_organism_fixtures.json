@@ -1,0 +1,47 @@
+{
+  "_note": "Adjustment-2 Path-B organism fixtures spanning input-quality axes. Used by the fixture probe to validate the structural gate + from-spec generation across realistic thin-to-rich inputs. Names/typos mirror the real HELIX_Modules extraction (P3 finding).",
+  "fixtures": [
+    {
+      "id": "A_minimal",
+      "slot": "HeaderLogo",
+      "figma_meta": {}
+    },
+    {
+      "id": "B_variant_typos",
+      "slot": "FlyoutNavigationElement",
+      "figma_meta": {
+        "variant_names": [
+          "State=Default, With Subnavigation=True, Size=md",
+          "State=Hover, With Subnavigation=True, Size=md",
+          "State=Activ, With Subnavigation=True, Size=md",
+          "State=Focu, With Subnavigation=False, Size=lg"
+        ]
+      }
+    },
+    {
+      "id": "C_variants_plus_tokens",
+      "slot": "L1NavigationElement",
+      "figma_meta": {
+        "variant_names": ["State=Default", "State=Hover", "State=Active", "State=Focus"],
+        "tokens_consumed": ["fill_ea054bf8", "layout_6fa2f828", "heading/xl/strong"]
+      }
+    },
+    {
+      "id": "D_full_spec",
+      "slot": "MediaText",
+      "figma_meta": {
+        "variant_names": ["Layout=ImageLeft", "Layout=ImageRight", "Layout=Stacked"],
+        "tokens_consumed": ["fill_235ba2c8", "layout_f543adb6", "body/md/regular", "heading/lg/strong"]
+      }
+    },
+    {
+      "id": "E_complex_nested",
+      "slot": "NavigationDesktop",
+      "figma_meta": {
+        "variant_names": ["State=Default, Expanded=True", "State=Default, Expanded=False", "State=Scrolled, Expanded=False"],
+        "tokens_consumed": ["fill_658ab2fa", "layout_ec8f0b9e", "fill_c3116ab0"],
+        "nested_refs": ["L1NavigationElement", "FlyoutNavigationElement", "HeaderLogo"]
+      }
+    }
+  ]
+}

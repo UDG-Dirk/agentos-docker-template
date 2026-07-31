@@ -74,6 +74,24 @@ def engagement_seed(customer_slug: str, timestamp: str) -> int:
     return zlib.crc32(key) & 0x7FFFFFFF
 
 
+def extract_usage(run_output) -> tuple[int, int]:
+    """Best-effort (input_tokens, output_tokens) from an agno RunOutput. Defensive across agno
+    versions — reads a ``metrics`` object/dict, summing list-valued per-message counts. Returns
+    (0, 0) when metrics aren't exposed. (Verified populated on the 3c hardening live run.)
+    """
+    m = getattr(run_output, "metrics", None)
+    if m is None:
+        return 0, 0
+
+    def _get(obj, key):
+        val = obj.get(key) if isinstance(obj, dict) else getattr(obj, key, None)
+        if isinstance(val, (list, tuple)):
+            val = sum(x for x in val if isinstance(x, (int, float)))
+        return int(val) if isinstance(val, (int, float)) else 0
+
+    return _get(m, "input_tokens"), _get(m, "output_tokens")
+
+
 def assess_anomaly(expected_fine_grained: int, actual_fine_grained: int,
                    breaker_tripped: bool = False) -> Optional[str]:
     """Return a human-readable anomaly string, or None. Probe 3's PRIMARY control: invocation-ratio,
