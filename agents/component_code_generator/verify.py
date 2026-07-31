@@ -61,8 +61,30 @@ def build_report() -> list[tuple[str, str, bool]]:
     chk("VT-9", "status success (fork + from-spec both resolved)", env.status == "success")
     chk("VT-11", "Mock path deterministic (non_deterministic False, zero real tokens)",
         env.non_deterministic is False and env.cost_summary.total_input_tokens == 0)
+    chk("VT-5", "variant typo normalized in generated output (Activ→Active)",
+        spec is not None and spec.file_path is not None and "Active" in _spec_src(env) and "Activ," not in _spec_src(env))
+    chk("VT-8", "cost_summary carries invocation + token fields (capture wired; value pending real run)",
+        env.cost_summary.expected_fine_grained >= 1 and env.cost_summary.fine_grained_invocations >= 1
+        and isinstance(env.cost_summary.total_input_tokens, int))
+    chk("VT-14", "anomaly clean + breaker not tripped at expected invocation count",
+        env.cost_summary.anomaly is None and env.cost_summary.breaker_tripped is False)
+    chk("VT-10", "byte-identical envelope across runs (determinism)", _deterministic())
     chk("MCP-safe", "envelope is plain-JSON serialisable", _json_ok(env))
     return checks
+
+
+def _spec_src(env) -> str:
+    """The generated from-spec source for HeroTeaser (re-run to a tmp string via the Mock)."""
+    from agents.component_code_generator.generation import GenerationInput, MockGenerator, parse_variant_axes
+    spec = GenerationInput(slot="HeroTeaser", customer_slug="acme",
+                           variant_axes=parse_variant_axes(["State=Default", "State=Activ"]))
+    return MockGenerator().generate(spec).source
+
+
+def _deterministic() -> bool:
+    a, b = _run().model_dump(), _run().model_dump()
+    a.pop("package_path"), b.pop("package_path")
+    return a == b
 
 
 def _json_ok(env) -> bool:

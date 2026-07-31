@@ -156,7 +156,9 @@ def _render_from_spec(spec: GenerationInput) -> str:
     for axis, values in spec.variant_axes.items():
         prop = re.sub(r"[^a-zA-Z0-9]", "", axis[:1].lower() + axis[1:]) or "variant"
         default = values[0] if values else ""
-        props.append(f'    @property({{ reflect: true }})\n    {prop} = "{default}";')
+        # record the full (typo-normalised) value set as a comment so the accepted variants are visible
+        values_comment = f'    // {axis}: {" | ".join(values)}\n' if values else ""
+        props.append(f'{values_comment}    @property({{ reflect: true }})\n    {prop} = "{default}";')
     props_block = "\n\n".join(props) or '    @property({ reflect: true })\n    variant = "";'
     return (
         'import { LitElement, html, css } from "lit";\n'
