@@ -207,9 +207,15 @@ _HAS_PAT = bool(os.environ.get("FIGMA_PAT") or os.environ.get("FIGMA_API_KEY"))
 def test_live_smoke_helix_core_library():
     res = asyncio.run(sl.run_semantic_layer(FILE_KEY))
     assert res["status"] == "success", f"failure_reports={res.get('failure_reports')}"
-    assert len(res["component_sets"]) == 27
-    assert len(res["components"]) == 418
-    assert len(res["styles"]) == 35
-    assert res["coverage_report"]["component_sets_with_descriptions"] == 8
+    # Shape/invariant, NOT moment-in-time counts: HELIX_Core's content drifts as the design system
+    # grows (was hardcoded 27 sets / 418 components / 35 styles). Assert presence + schema + sane
+    # relationships, which catch real regressions without false-red on drift.
+    cs, comps, styles = res["component_sets"], res["components"], res["styles"]
+    assert 0 < len(cs) <= 500                     # roster present + sanity ceiling
+    assert len(comps) >= len(cs)                  # each component set has at least one variant
+    assert len(styles) > 0
+    for c in cs:
+        assert c.get("name") and c.get("key") and c.get("node_id")
+    assert 0 <= res["coverage_report"]["component_sets_with_descriptions"] <= len(cs)
     assert res["provenance"]["lane"] == "lane-2-semantic-layer"
     assert res["failure_reports"] == []
