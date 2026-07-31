@@ -3,6 +3,13 @@
 Pure Python, zero LLM. Consumes ``FigmaExtractionResult`` (Step 1 output) and
 produces a W3C DTCG (Design Tokens Community Group format) 2025.10 compliant ``token_tree`` plus a ``NormalizationReport``.
 
+DTCG scope is finite BY DECISION (helix-poc-agno:decision:token-normalizer-dtcg-scope-2026-07-30,
+DES + FE-DEV consulted): the four handled $types are color, dimension, shadow, and typography
+(the last a composite covering fontFamily/fontWeight/number sub-values). Six types are deliberately
+out of scope — duration, cubicBezier, transition (motion), strokeStyle, border (decompose to
+primitives), and gradient (a real but currently-unused gap). Anything unhandled routes to UNRESOLVED
+(fail-loud, never guessed). See README "DTCG Scope" for the rationale and revisit conditions.
+
 Pipeline (spec §"NORMALIZATION PIPELINE"):
   1. Type Assignment      — enrichment_type (authoritative) → value/name inference
   2. Path Derivation      — enrichment slash-path → dots, else CSS-var name → dots
