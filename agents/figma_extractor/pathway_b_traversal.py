@@ -19,7 +19,7 @@ import httpx
 
 from agents.figma_extractor.http_errors import FileExportDisabledError, raise_for_figma_status
 
-# (2,5,12,30)s × 4 retries — strengthened from (1,3,8)×3 (MR !22) after DGX (36 pages) 429'd 32/36.
+# (2,5,12,30)s × 4 retries — strengthened from (1,3,8)×3 after DGX (36 pages) 429'd 32/36.
 # Only kicks in on 429/timeout/5xx, so Helix-scale (mostly first-try 200) latency is unchanged.
 _BACKOFF = (2.0, 5.0, 12.0, 30.0)
 # Adaptive inter-page pacing: spread Figma API load on LARGE files only. Files at/under the threshold

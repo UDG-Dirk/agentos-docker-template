@@ -158,9 +158,8 @@ def _infer_type_from_name(name: str, category: str) -> Optional[str]:
 
 def _assign_type(tok) -> tuple[Optional[str], str, Optional[str], Optional[str]]:
     """Return (dtcg_type, confidence, type_source, fallback_warning)."""
-    # QUARANTINE: enrichment_type is the authoritative signal, but no token carries it in the
-    # current deterministic pipeline (see module docstring) — this branch is dead today, retained
-    # for a future Code Connect / Variable-slash-path integration. Live path falls through to inference.
+    # QUARANTINE (see module docstring): no token carries enrichment_type today → this authoritative
+    # branch is dead; the live path falls through to value/name inference. Retained for a future wiring.
     et = (tok.enrichment_type or "").strip()
     if et and et in ENRICHMENT_TO_DTCG:
         return ENRICHMENT_TO_DTCG[et], "authoritative", "enrichment", None
@@ -219,8 +218,7 @@ def _dump_value(value) -> Union[dict, list]:
 
 
 def _derive_path(tok) -> tuple[str, str]:
-    # QUARANTINE: enrichment slash-path is preferred when present, but no token carries it in the
-    # current pipeline (see module docstring) — dead today, retained for future integration.
+    # QUARANTINE (see module docstring): no token carries enrichment_match today → dead path, retained.
     enrichment = (tok.enrichment_match or "").strip()
     if enrichment:
         return enrichment_path_to_dotted(enrichment), "enrichment"
@@ -392,9 +390,8 @@ def normalize_tokens(extraction) -> NormalizedTokens:
 
     report.total_output_tokens = len(report.all_entries)
 
-    # QUARANTINE tripwire: enrichment is inactive in the current pipeline (see module docstring).
-    # If any token DID arrive with enrichment, that's unexpected — surface it loudly (non-fatal;
-    # the enrichment read-paths handle it correctly, this only flags that the assumption changed).
+    # QUARANTINE tripwire (see module docstring): enrichment is inactive today, so if a token DID
+    # carry it, warn loudly — non-fatal; the read-paths handle it, this only flags the assumption changed.
     if report.tokens_with_enrichment:
         log.warning(
             "enrichment is unexpectedly ACTIVE: %d/%d tokens carried enrichment_match/type. The "

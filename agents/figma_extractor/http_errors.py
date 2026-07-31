@@ -11,7 +11,7 @@ Deterministic, zero-LLM. Two concerns share this module:
 
 Account-level 429 (the PAT throttled across ALL endpoints) is a DIFFERENT concern from per-page 429
 (a single request throttled). Every lane already recovers per-page 429s with its own bounded backoff
-(pathway_b MR !25 `(2,5,12,30)×4`; cache_versioning/semantic_layer/binding_topology `(0.5,2,8)×3`).
+(pathway_b `(2,5,12,30)×4`; cache_versioning/semantic_layer/binding_topology `(0.5,2,8)×3`).
 This guard sits ABOVE the lanes, at the workflow-orchestration level, so the ~3.5-min account-level
 wait happens ONCE per run — not once per lane. Per-lane backoff is untouched.
 """
