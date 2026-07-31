@@ -18,6 +18,15 @@ from typing import Any, Callable, Optional
 
 from agno.workflow.types import StepInput, StepOutput
 
+from agents._shared.observability import CircuitBreaker, assess_anomaly, engagement_seed
+from agents.component_code_generator.generation import (
+    GenerationInput,
+    Generator,
+    MockGenerator,
+    distill_element_context,
+    parse_variant_axes,
+    run_structural_gate,
+)
 from agents.component_code_generator.models import (
     BlockingWarning,
     ComponentCodeGeneratorOutput,
@@ -26,13 +35,6 @@ from agents.component_code_generator.models import (
     ElementGenerationResult,
     ProvenanceExtension,
     StructuralGateResult,
-)
-from agents.component_code_generator.generation import (
-    GenerationInput,
-    Generator,
-    MockGenerator,
-    parse_variant_axes,
-    run_structural_gate,
 )
 from agents.component_code_generator.scaffolding import (
     find_baseline_source,
@@ -45,7 +47,6 @@ from agents.component_code_generator.scaffolding import (
     slugify,
     write_package,
 )
-from agents._shared.observability import CircuitBreaker, assess_anomaly, engagement_seed
 
 STEP_NAME_INPUT = "ccg-input-gathering"
 STEP_NAME_GENERATE = "ccg-generate"
@@ -168,10 +169,15 @@ def generate_component_code(
             # applied=False) — they do NOT count toward gate_passed, which tracks GENERATED code only.
         else:  # Path B — from-spec generation (agentic; Mock in CI)
             figma_meta = (e.get("figma_meta") if isinstance(e, dict) else getattr(e, "figma_meta", None)) or {}
+            # Track D v0.2.5: distil the enriched composition frames for this organism into a compact
+            # from-spec context. Prefer an explicitly-supplied figma_context; else derive from frames.
+            # Absent → None → Path-B falls back to the v0.2 thin behaviour (BC-A).
+            figma_context = figma_meta.get("figma_context") or distill_element_context(figma_meta.get("frames"))
             spec = GenerationInput(
                 slot=slot, customer_slug=slug,
                 variant_axes=parse_variant_axes(figma_meta.get("variant_names") or []),
                 tokens_consumed=figma_meta.get("tokens_consumed") or [],
+                figma_context=figma_context,
             )
             element_slug = slugify(slot)
             if not breaker.allow_fine_grained():
