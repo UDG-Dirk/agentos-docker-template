@@ -13,7 +13,10 @@ from agents.component_code_generator.models import (
     StructuralGateResult,
 )
 from agents.component_code_generator.scaffolding import (
+    find_baseline_source,
     fork_component,
+    get_configured_fork_branches,
+    is_valid_lit_source,
     render_cem,
     route_element,
     slugify,

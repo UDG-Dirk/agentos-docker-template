@@ -14,9 +14,11 @@ SP-9: the customer scope/slug is a caller argument; nothing hardcoded. helix-cod
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 PackageTree = dict[str, str]
 
@@ -52,18 +54,78 @@ def route_element(*, derivation: str, baseline_ref: Optional[str]) -> str:
     return "deferred"  # customer_passthrough / agent_flagged_review / no baseline → Path B (Phase 2)
 
 
-def find_baseline_source(baseline_ref: str, helix_root: str | Path) -> Optional[tuple[str, str]]:
-    """Locate a baseline component's Lit source in helix-code (READ-ONLY). Returns (source, relpath)
-    or None. Searches packages/elements/src/{atoms,molecules}/<Name>/<Name>.ts."""
+# D-p1-3: helix-code path conventions to try per branch, in order (organism branches first).
+def _path_candidates(name: str) -> list[str]:
+    base = "packages/elements/src"
+    return [
+        f"{base}/organisms/{name}/{name}.ts",   # feature/organisms/* convention
+        f"{base}/organisms/{name}.ts",           # feature/modules flat convention
+        f"{base}/molecules/{name}/{name}.ts",
+        f"{base}/atoms/{name}/{name}.ts",
+    ]
+
+
+def get_configured_fork_branches() -> list[str]:
+    """Branch precedence list for Path-A forking (D-p1-1/D-p1-2). From HELIX_CODE_FORK_BRANCHES
+    (comma-separated), default ['master']. Master stays default → backwards-compatible with v0.1."""
+    raw = os.environ.get("HELIX_CODE_FORK_BRANCHES", "").strip()
+    if not raw:
+        return ["master"]
+    return [b.strip() for b in raw.split(",") if b.strip()]
+
+
+def is_valid_lit_source(src: str) -> bool:
+    """Namespace-AGNOSTIC Lit-validity check for WIP branch assessment (D-p1-4). NOT the customer
+    structural gate (that requires customer token namespace, which raw branch source lacks). Just:
+    is this a plausibly-complete Lit component (balanced, @customElement, extends LitElement, render)?"""
+    if not src:
+        return False
+    depth = 0
+    for ch in src:
+        if ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+            if depth < 0:
+                return False
+    return depth == 0 and "@customElement" in src and "extends LitElement" in src and "render" in src
+
+
+def _default_git_show(helix_root: str | Path, branch: str, path: str) -> Optional[str]:
+    """READ-ONLY `git show <branch>:<path>` (Q3 α — no checkout, no writes). None on any failure."""
+    try:
+        r = subprocess.run(["git", "-C", str(helix_root), "show", f"{branch}:{path}"],
+                           capture_output=True, text=True, timeout=20)
+        return r.stdout if r.returncode == 0 and r.stdout.strip() else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def find_baseline_source(baseline_ref: str, helix_root: str | Path,
+                         branches: Optional[list[str]] = None,
+                         git_show: Optional[Callable[[str | Path, str, str], Optional[str]]] = None,
+                         ) -> Optional[tuple[str, str]]:
+    """Locate a baseline component's Lit source in helix-code (READ-ONLY), branch-aware (Path 1).
+
+    Searches each configured branch (default HELIX_CODE_FORK_BRANCHES / ['master']) across the D-p1-3
+    path candidates via ``git show`` (no checkout). D-p1-5: across all (branch, path) hits, returns
+    the LARGEST-LOC source (structural-completeness proxy). Returns (source, "branch:path") or None.
+    ``git_show`` is injectable for tests. Backwards-compatible: no config → master only.
+    """
     name = _baseline_name(baseline_ref)
     if not name:
         return None
-    root = Path(helix_root)
-    for tier in ("atoms", "molecules"):
-        cand = root / "packages" / "elements" / "src" / tier / name / f"{name}.ts"
-        if cand.is_file():
-            return cand.read_text(encoding="utf-8"), str(cand.relative_to(root))
-    return None
+    branch_list = branches if branches is not None else get_configured_fork_branches()
+    show = git_show or _default_git_show
+    best: Optional[tuple[str, str, int]] = None  # (source, ref, loc)
+    for branch in branch_list:
+        for path in _path_candidates(name):
+            src = show(helix_root, branch, path)
+            if src:
+                loc = len(src.splitlines())
+                if best is None or loc > best[2]:
+                    best = (src, f"{branch}:{path}", loc)
+    return (best[0], best[1]) if best else None
 
 
 def fork_component(baseline_source: str, customer_slug: str) -> tuple[str, str, str]:
