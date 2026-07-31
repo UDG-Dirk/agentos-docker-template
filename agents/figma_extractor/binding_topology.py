@@ -2,6 +2,8 @@
 Lane 3 — REST Binding Topology (HELIX Path C)
 =============================================
 
+"Binding topology" = the map of which design tokens (Figma Variables) each layer is bound to.
+
 One node-scoped tool on the Figma Extractor agent (spec
 ``helix-poc-agno:spec:lane-3-binding-topology-v0-1-draft``):
 

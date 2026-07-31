@@ -248,7 +248,7 @@ async def _wait_with_heartbeats(
     target_key: str | None, now,
 ) -> int:
     """Sleep `total_s` in ≤`interval` chunks, emitting a `sustained_429_retry_heartbeat` (INFO) before
-    each chunk so a foreground SSE never idles out and background runs stay observable. `elapsed_wait_ms`
+    each chunk so a foreground SSE (Server-Sent Events) stream never idles out and background runs stay observable. `elapsed_wait_ms`
     is computed from PLANNED waits (deterministic); only `next_probe_at` (a timestamp) varies per run.
     Returns the number of heartbeats emitted."""
     remaining = total_s

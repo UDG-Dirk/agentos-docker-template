@@ -2,7 +2,7 @@
 HELIX Figma Extractor Workflow (parallel: client-branch + baseline-branch)
 ==========================================================================
 
-Shape (decision:cycle-2-wiring-2026-07-21 + HITL Finding-51 fix 2026-07-27):
+Shape (decision:cycle-2-wiring-2026-07-21 + human-in-the-loop (HITL) review Finding-51 fix 2026-07-27):
 
     steps = [ Parallel(extract, baseline-read),  →  normalize  →  smoke-test ]
 

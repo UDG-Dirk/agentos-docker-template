@@ -1,7 +1,8 @@
 """Lane 7 — Token Catalog (Tokens Studio) extraction (spec:lane-7-token-catalog-v0-1-draft v0.1.2).
 
 Deterministic, zero-LLM. Reads the authoritative design-token catalog from the Figma file's
-``document.sharedPluginData.tokens`` (a Tokens Studio export, DTCG-claimed / legacy-key actual),
+``document.sharedPluginData.tokens`` (a Tokens Studio export, DTCG-claimed — the W3C Design Tokens
+format — but legacy-key actual),
 LZString-UTF16-decompresses it in pure Python (no deps, no subprocess), parses the token sets,
 resolves aliases (emitting BOTH raw + resolved), normalises modes (set-per-breakpoint,
 dark-mode-ready), compares freshness, and signals catalog-vs-Variables divergence.

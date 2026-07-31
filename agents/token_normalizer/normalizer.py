@@ -1,7 +1,7 @@
 """Token Normalizer — deterministic 7-phase pipeline (HELIX UC2, Workflow Step 2).
 
 Pure Python, zero LLM. Consumes ``FigmaExtractionResult`` (Step 1 output) and
-produces a W3C DTCG 2025.10 compliant ``token_tree`` plus a ``NormalizationReport``.
+produces a W3C DTCG (Design Tokens Community Group format) 2025.10 compliant ``token_tree`` plus a ``NormalizationReport``.
 
 Pipeline (spec §"NORMALIZATION PIPELINE"):
   1. Type Assignment      — enrichment_type (authoritative) → value/name inference
