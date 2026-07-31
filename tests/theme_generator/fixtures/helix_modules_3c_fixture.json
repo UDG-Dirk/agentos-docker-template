@@ -1,0 +1,229 @@
+{
+  "baseline": {
+    "meta": {
+      "baseline_ref": "master@fixture-core-lib",
+      "cem_size_bytes": 1184798
+    },
+    "tokens": [
+      {
+        "name": "layout_bca19480/padding",
+        "value": "0px 0px 8px"
+      },
+      {
+        "name": "layout_6fa2f828/padding",
+        "value": "0px 16px"
+      },
+      {
+        "name": "fill_ea054bf8",
+        "value": "#1971C2"
+      },
+      {
+        "name": "fill_3cfa897e",
+        "value": "rgba(0, 0, 0, 0.2)"
+      },
+      {
+        "name": "fill_c3116ab0",
+        "value": "#0C528B"
+      },
+      {
+        "name": "fill_2bed7563",
+        "value": "#EAEAEA"
+      },
+      {
+        "name": "fill_bb3a972b",
+        "value": "#D5D5D5"
+      },
+      {
+        "name": "layout_f543adb6/gap",
+        "value": "8px"
+      },
+      {
+        "name": "fill_235ba2c8",
+        "value": "#E7F5FF"
+      },
+      {
+        "name": "fill_658ab2fa",
+        "value": "#FFFFFF"
+      }
+    ],
+    "components": [
+      {
+        "name": "ContentBlock"
+      },
+      {
+        "name": "Video"
+      },
+      {
+        "name": "Label"
+      },
+      {
+        "name": "Table"
+      },
+      {
+        "name": "Link"
+      },
+      {
+        "name": "Overline"
+      },
+      {
+        "name": "Input"
+      },
+      {
+        "name": "Toggle"
+      },
+      {
+        "name": "Card"
+      },
+      {
+        "name": "AccordionItem"
+      },
+      {
+        "name": "Image"
+      },
+      {
+        "name": "Button"
+      }
+    ]
+  },
+  "client_extraction": {
+    "file_key": "fixture-client-modules",
+    "components": [
+      {
+        "name": "Label"
+      },
+      {
+        "name": "TableModule"
+      },
+      {
+        "name": "AccordionWrapper"
+      },
+      {
+        "name": "CardsTeaserSection"
+      },
+      {
+        "name": "Image alignment=Left"
+      },
+      {
+        "name": "MediaText"
+      },
+      {
+        "name": "HeroTeaser"
+      },
+      {
+        "name": "FlyoutDesktop"
+      },
+      {
+        "name": "L1NavigationElement"
+      },
+      {
+        "name": "HeaderLogo"
+      }
+    ],
+    "tokens": [
+      {
+        "name": "fill_8385c51f",
+        "value": "#125E9D"
+      },
+      {
+        "name": "fill_70745384",
+        "value": "#8A38F5"
+      },
+      {
+        "name": "fill_dfe58feb",
+        "value": "#6D6D6D"
+      },
+      {
+        "name": "fill_e763ee13",
+        "value": "#C1C1C1"
+      },
+      {
+        "name": "layout_ec8f0b9e/padding",
+        "value": "0px 16px"
+      },
+      {
+        "name": "layout_4adbf468/padding",
+        "value": "0px 12px"
+      },
+      {
+        "name": "fill_a3cbc7b1",
+        "value": "#D3800B"
+      },
+      {
+        "name": "fill_50f5ec18",
+        "value": "#26923A"
+      }
+    ]
+  },
+  "scoring_by_slot": {
+    "Label": {
+      "matched_via": "deterministic",
+      "deterministic_confidence": "authoritative",
+      "top_candidates": [
+        {
+          "baseline_var": "Label"
+        }
+      ]
+    },
+    "TableModule": {
+      "matched_via": "deterministic",
+      "deterministic_confidence": "high",
+      "top_candidates": [
+        {
+          "baseline_var": "Table"
+        }
+      ]
+    },
+    "AccordionWrapper": {
+      "matched_via": "llm_required",
+      "deterministic_confidence": null,
+      "top_candidates": [
+        {
+          "baseline_var": "AccordionItem"
+        }
+      ]
+    },
+    "CardsTeaserSection": {
+      "matched_via": "llm_required",
+      "deterministic_confidence": null,
+      "top_candidates": [
+        {
+          "baseline_var": "Card"
+        }
+      ]
+    },
+    "Image alignment=Left": {
+      "matched_via": "llm_required",
+      "deterministic_confidence": null,
+      "top_candidates": [
+        {
+          "baseline_var": "Image"
+        }
+      ]
+    },
+    "MediaText": {
+      "matched_via": "no_candidates",
+      "deterministic_confidence": null,
+      "top_candidates": []
+    },
+    "HeroTeaser": {
+      "matched_via": "no_candidates",
+      "deterministic_confidence": null,
+      "top_candidates": []
+    },
+    "FlyoutDesktop": {
+      "matched_via": "no_candidates",
+      "deterministic_confidence": null,
+      "top_candidates": []
+    },
+    "L1NavigationElement": {
+      "matched_via": "no_candidates",
+      "deterministic_confidence": null,
+      "top_candidates": []
+    },
+    "HeaderLogo": {
+      "matched_via": "no_candidates",
+      "deterministic_confidence": null,
+      "top_candidates": []
+    }
+  }
+}

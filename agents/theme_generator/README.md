@@ -20,8 +20,11 @@ the baseline vs. the client vs. a 3c agent.
 | Phase | Steps | Nature | Status |
 |-------|-------|--------|--------|
 | 1 | `theme-input-gathering`, `theme-deterministic-transform` | deterministic, zero-LLM | **done** |
-| 2 | `agentic_reconciliation`, `cohesion_review` | agent (fine-grained per unmapped + one coarse pass) | pending |
-| 3 | `provenance_generation`, `output_assembly` | deterministic | partial (provenance already emitted in Phase 1) |
+| 2 | agentic reconciliation + coarse cohesion review (folded into `theme-generate`) | agent (fine-grained per deferred slot + one coarse pass), Mock/Real split | **done** |
+| 3 | determinism (temp=0 + per-engagement seed), anomaly + cost observability, end-to-end integration + MCP-safety tests | deterministic wiring + tests | **done** |
+| 4 | close all 15 VTs, live-run cost capture | verification | pending |
+
+The live pipeline runs as two Agno steps — `theme-input-gathering` → `theme-generate` — where `theme-generate` internally runs the deterministic build, then the agentic reconciliation of deferred slots, then the coarse cohesion pass (they share state, so splitting them across Agno step boundaries would only add serialization cost).
 
 The output envelope (`models.py::ThemeGeneratorOutput`) is already the full v0.1 shape, so
 Phase 2 adds behaviour without changing the contract.
@@ -85,6 +88,9 @@ tests/theme_generator/
 }
 ```
 
-Deterministic (temp/seed n/a in Phase 1 — no model calls); the envelope always carries
+Real agent runs use temperature=0 + a per-engagement seed derived from (customer, timestamp)
+(Decision #5); a circuit breaker hard-caps invocations and a deterministic anomaly flag
+(`cost_summary.anomaly`) fires at >2× the expected invocation count or on a breaker trip
+(Probe 3). The envelope always carries
 `non_deterministic: true` per Decision #5, and blocking conditions surface as
 `blocking_warnings`, never as exceptions.
