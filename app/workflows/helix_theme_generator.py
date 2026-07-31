@@ -39,28 +39,30 @@ from __future__ import annotations
 from agno.workflow import Step, Workflow
 
 from agents.theme_generator.step import (
+    STEP_NAME_GENERATE,
     STEP_NAME_INPUT,
-    STEP_NAME_TRANSFORM,
-    deterministic_transform_executor,
+    full_generation_executor,
     input_gathering_executor,
 )
 from db import get_postgres_db
 
 theme_input_step = Step(name=STEP_NAME_INPUT, executor=input_gathering_executor)
-theme_transform_step = Step(name=STEP_NAME_TRANSFORM, executor=deterministic_transform_executor)
+theme_generate_step = Step(name=STEP_NAME_GENERATE, executor=full_generation_executor)
 
 helix_theme_generator_workflow = Workflow(
     id="helix-theme-generator",
     name="HELIX Theme Generator",
     description=(
-        "Agent 3c (v0.1, Phase 1 — deterministic): forks the helix-code baseline into a "
-        "customer-specific component-library package. Step 1 gathers + validates the 3a baseline, "
-        "the client FigmaExtractionResult, and 3b per-component scoring; Step 2 deterministically "
-        "scaffolds the package, substitutes tokens, forks high-confidence components, and passes "
-        "through baseline-less client components. Agentic reconciliation + cohesion review are "
-        "Phase 2. Fail-loud blocking_warnings (SP-6); non_deterministic:true always (Decision #5); "
-        "inputs via additional_data."
+        "Agent 3c (v0.1): forks the helix-code baseline into a customer-specific component-library "
+        "package. Step 1 gathers + validates the 3a baseline, the client FigmaExtractionResult, and "
+        "3b per-component scoring; Step 2 runs the full pipeline — deterministic scaffolding + token "
+        "substitution + high-confidence forking + passthrough (Phase 1), then fine-grained agentic "
+        "reconciliation of the deferred components and a coarse cohesion review (Phase 2). Agents are "
+        "deterministic Mock by default; a live run opts in via additional_data.use_real_agent (or the "
+        "THEME_GEN_USE_REAL_AGENT env) → Agno agents on default_chat_model() (SP-9). A circuit breaker "
+        "hard-caps invocations (Probe 3). Confidence-driven output: below-threshold → blocking_warning, "
+        "never fabricated (Decision #4). Fail-loud (SP-6); non_deterministic:true always (Decision #5)."
     ),
     db=get_postgres_db(),
-    steps=[theme_input_step, theme_transform_step],
+    steps=[theme_input_step, theme_generate_step],
 )

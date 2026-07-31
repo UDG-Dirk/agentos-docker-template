@@ -18,9 +18,18 @@ from agents.theme_generator.scaffolding import (
     substitute_tokens,
     write_package,
 )
+from agents.theme_generator.reconciliation import (
+    CircuitBreaker,
+    CohesionVerdict,
+    MockCohesionReviewer,
+    MockReconciler,
+    ReconciliationResult,
+)
 from agents.theme_generator.step import (
+    STEP_NAME_GENERATE,
     STEP_NAME_INPUT,
     STEP_NAME_TRANSFORM,
+    generate_theme,
     generate_theme_phase1,
 )
 
@@ -37,6 +46,13 @@ __all__ = [
     "substitute_tokens",
     "write_package",
     "generate_theme_phase1",
+    "generate_theme",
+    "ReconciliationResult",
+    "CohesionVerdict",
+    "MockReconciler",
+    "MockCohesionReviewer",
+    "CircuitBreaker",
     "STEP_NAME_INPUT",
     "STEP_NAME_TRANSFORM",
+    "STEP_NAME_GENERATE",
 ]
