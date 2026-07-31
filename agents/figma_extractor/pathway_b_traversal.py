@@ -9,6 +9,7 @@ reachable only here.
 Anti-fabrication: every emitted frame/reference carries its source node_id + page. Fail loud:
 file_inaccessible, empty_composition_file, traversal_depth_exceeded, malformed_node_data.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -52,17 +53,106 @@ async def _get_with_backoff(client: httpx.AsyncClient, url: str, params: dict) -
         return resp
     raise RuntimeError("unreachable")  # pragma: no cover
 
+
 LANE = "pathway-b-traversal"
 _FIGMA_API_BASE = "https://api.figma.com/v1"
 _TIMEOUT_S = 30.0
 _DEFAULT_MAX_DEPTH = 20
-_PAGE_FETCH_DEPTH = 4          # how deep to pull each page's subtree in one REST call
-_MAX_FRAMES_PER_PAGE = 500     # bound against pathological pages
+_PAGE_FETCH_DEPTH = 4  # how deep to pull each page's subtree in one REST call
+_MAX_FRAMES_PER_PAGE = 500  # bound against pathological pages
 _FRAME_TYPES = {"FRAME", "SECTION", "COMPONENT", "COMPONENT_SET", "INSTANCE", "GROUP"}
+# Track D v0.2.5 — TEXT nodes are emitted too so their Rank-1 text_content surfaces (additive; no
+# existing fixture contains TEXT, so frame_count assertions are unaffected — BC-A).
+_EMIT_TYPES = _FRAME_TYPES | {"TEXT"}
+_LAYOUT_MODES = {"HORIZONTAL", "VERTICAL", "GRID"}
 
 
 def _now_iso() -> str:
     return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+
+# --------------------------------------------------------------------------- #
+# Track D v0.2.5 — Rank 1 (text) + Rank 2 (auto-layout) enrichment
+#
+# Additive optional fields (BC-A), nested per category (F2). Set ONLY when the node type + the
+# Figma response actually carry them — never hallucinate defaults; absent means the key is omitted
+# (consumers use `if node.get("text_content"):`). Totally defensive: on unexpected shapes they
+# return None rather than raise (SP-6 fail-loud is enforced per-node by the caller, which flags any
+# node that raised during enrichment as malformed_node_data).
+# --------------------------------------------------------------------------- #
+
+
+def _extract_text_content(node: dict) -> dict | None:
+    """Rank 1 — text_content for TEXT nodes. None when not a TEXT node / no characters."""
+    if node.get("type") != "TEXT":
+        return None
+    chars = node.get("characters")
+    if not chars:
+        return None
+    style = node.get("style") if isinstance(node.get("style"), dict) else {}
+    line_height = None
+    if style.get("lineHeightPx") is not None or style.get("lineHeightPercent") is not None:
+        line_height = {
+            k: v
+            for k, v in {
+                "unit": style.get("lineHeightUnit"),
+                "px": style.get("lineHeightPx"),
+                "percent": style.get("lineHeightPercent"),
+            }.items()
+            if v is not None
+        }
+    tstyle = {
+        k: v
+        for k, v in {
+            "font_family": style.get("fontFamily"),
+            "font_size": style.get("fontSize"),
+            "font_weight": style.get("fontWeight"),
+            "line_height": line_height,
+            "text_align": style.get("textAlignHorizontal"),
+        }.items()
+        if v is not None
+    }
+    out: dict = {"characters": chars}
+    if tstyle:
+        out["style"] = tstyle
+    return out
+
+
+def _extract_auto_layout(node: dict) -> dict | None:
+    """Rank 2 — auto_layout for nodes with an auto-layout mode set. None when layoutMode is NONE/absent."""
+    mode = node.get("layoutMode")
+    if mode not in _LAYOUT_MODES:
+        return None
+    return {
+        k: v
+        for k, v in {
+            "layout_mode": mode,
+            "padding_top": node.get("paddingTop"),
+            "padding_right": node.get("paddingRight"),
+            "padding_bottom": node.get("paddingBottom"),
+            "padding_left": node.get("paddingLeft"),
+            "item_spacing": node.get("itemSpacing"),
+            "primary_axis_sizing": node.get("primaryAxisSizingMode"),
+            "counter_axis_sizing": node.get("counterAxisSizingMode"),
+            "primary_axis_align": node.get("primaryAxisAlignItems"),
+            "counter_axis_align": node.get("counterAxisAlignItems"),
+        }.items()
+        if v is not None
+    }
+
+
+def _enrich_frame(node: dict, frame: dict) -> None:
+    """Attach Rank 1/2 optional fields to `frame` in place. On any parse error, flag the frame
+    (``enrichment_error``) so the caller can fail loud per-node (SP-6) without crashing the walk."""
+    try:
+        tc = _extract_text_content(node)
+        if tc:
+            frame["text_content"] = tc
+        al = _extract_auto_layout(node)
+        if al:
+            frame["auto_layout"] = al
+    except Exception as e:  # noqa: BLE001 — enrichment must never break traversal (SP-6 per-node)
+        frame["enrichment_error"] = repr(e)[:200]
 
 
 def _figma_pat() -> str:
@@ -71,13 +161,14 @@ def _figma_pat() -> str:
 
 async def _default_fetch_pages(file_key: str, client: httpx.AsyncClient) -> list[dict]:
     resp = await _get_with_backoff(client, f"{_FIGMA_API_BASE}/files/{file_key}", {"depth": 1})
-    doc = (resp.json().get("document") or {})
+    doc = resp.json().get("document") or {}
     return [{"id": c.get("id"), "name": c.get("name")} for c in (doc.get("children") or [])]
 
 
 async def _default_fetch_node(file_key: str, node_id: str, client: httpx.AsyncClient, depth: int) -> dict:
-    resp = await _get_with_backoff(client, f"{_FIGMA_API_BASE}/files/{file_key}/nodes",
-                                   {"ids": node_id, "depth": depth})
+    resp = await _get_with_backoff(
+        client, f"{_FIGMA_API_BASE}/files/{file_key}/nodes", {"ids": node_id, "depth": depth}
+    )
     return (resp.json().get("nodes") or {}).get(node_id) or {}
 
 
@@ -87,15 +178,23 @@ def _walk_frames(node: dict, page_name: str, max_depth: int, depth: int = 0):
         yield None, True
         return
     ntype = node.get("type")
-    if ntype in _FRAME_TYPES:
-        yield {"id": node.get("id"), "name": node.get("name"), "type": ntype, "depth": depth}, False
-    for child in (node.get("children") or []):
+    if ntype in _EMIT_TYPES:
+        frame = {"id": node.get("id"), "name": node.get("name"), "type": ntype, "depth": depth}
+        _enrich_frame(node, frame)  # Track D v0.2.5 — additive Rank 1/2 optional fields (BC-A)
+        yield frame, False
+    for child in node.get("children") or []:
         yield from _walk_frames(child, page_name, max_depth, depth + 1)
 
 
-async def run_pathway_b(file_key: str, *, client: httpx.AsyncClient | None = None,
-                        fetch_pages=None, fetch_node=None, max_depth: int = _DEFAULT_MAX_DEPTH,
-                        page_fetch_depth: int = _PAGE_FETCH_DEPTH) -> dict:
+async def run_pathway_b(
+    file_key: str,
+    *,
+    client: httpx.AsyncClient | None = None,
+    fetch_pages=None,
+    fetch_node=None,
+    max_depth: int = _DEFAULT_MAX_DEPTH,
+    page_fetch_depth: int = _PAGE_FETCH_DEPTH,
+) -> dict:
     """Traverse a composition file. Returns composition_tree + remote_references + status. Never raises
     past the boundary — surfaces failures as failure_reports (spec fail-loud). Injectable for tests."""
     own = client is None
@@ -111,24 +210,28 @@ async def run_pathway_b(file_key: str, *, client: httpx.AsyncClient | None = Non
     remote_references: list[dict] = []
 
     def fail(error_class, message):
-        failure_reports.append({"endpoint": "pathway-b", "error_class": error_class,
-                                "message": message[:300], "attempted_at": _now_iso()})
+        failure_reports.append(
+            {"endpoint": "pathway-b", "error_class": error_class, "message": message[:300], "attempted_at": _now_iso()}
+        )
 
     try:
         try:
             pages = await fp(file_key)
         except FileExportDisabledError as e:  # content-protection lock — distinct, actionable
             fail("file_export_disabled", f"{file_key}: {e.figma_message}")
-            return _result(file_key, "failure", pages_summary, composition_tree, remote_references,
-                           failure_reports, gaps)
+            return _result(
+                file_key, "failure", pages_summary, composition_tree, remote_references, failure_reports, gaps
+            )
         except Exception as e:  # noqa: BLE001
             fail("file_inaccessible", f"{file_key}: {e!r}")
-            return _result(file_key, "failure", pages_summary, composition_tree, remote_references,
-                           failure_reports, gaps)
+            return _result(
+                file_key, "failure", pages_summary, composition_tree, remote_references, failure_reports, gaps
+            )
         if not pages:
             fail("empty_composition_file", "no pages in document.children")
-            return _result(file_key, "partial", pages_summary, composition_tree, remote_references,
-                           failure_reports, gaps)
+            return _result(
+                file_key, "partial", pages_summary, composition_tree, remote_references, failure_reports, gaps
+            )
 
         pace = len(pages) > _PACING_PAGE_THRESHOLD  # adaptive: only large files pace between fetches
         for _i, page in enumerate(pages):  # page order (deterministic)
@@ -153,6 +256,13 @@ async def run_pathway_b(file_key: str, *, client: httpx.AsyncClient | None = Non
                 if hit:
                     depth_hit = True
                     continue
+                if "enrichment_error" in fr:  # SP-6 per-node fail-loud (Track D v0.2.5)
+                    fail(
+                        "malformed_node_data",
+                        f"page {pname} node {fr.get('id')}: enrichment parse error: {fr['enrichment_error']}",
+                    )
+                    gaps.append(f"page {pname} node {fr.get('id')} enrichment unparsed")
+                    status = "partial" if status != "failure" else status
                 frames.append(fr)
                 if len(frames) >= _MAX_FRAMES_PER_PAGE:
                     depth_hit = True
@@ -165,14 +275,21 @@ async def run_pathway_b(file_key: str, *, client: httpx.AsyncClient | None = Non
             remote = [(cid, c) for cid, c in comps.items() if c.get("remote")]
             local = [(cid, c) for cid, c in comps.items() if not c.get("remote")]
             for _cid, c in remote:
-                remote_references.append({"key": c.get("key"), "source_node_id": _cid,
-                                          "source_page_name": pname, "name": c.get("name")})
-            pages_summary.append({"page_id": pid, "page_name": pname, "frame_count": len(frames),
-                                  "remote_ref_count": len(remote), "local_component_count": len(local),
-                                  "depth_bounded": depth_hit})
+                remote_references.append(
+                    {"key": c.get("key"), "source_node_id": _cid, "source_page_name": pname, "name": c.get("name")}
+                )
+            pages_summary.append(
+                {
+                    "page_id": pid,
+                    "page_name": pname,
+                    "frame_count": len(frames),
+                    "remote_ref_count": len(remote),
+                    "local_component_count": len(local),
+                    "depth_bounded": depth_hit,
+                }
+            )
             composition_tree.append({"page_id": pid, "page_name": pname, "frames": frames})
-        return _result(file_key, status, pages_summary, composition_tree, remote_references,
-                       failure_reports, gaps)
+        return _result(file_key, status, pages_summary, composition_tree, remote_references, failure_reports, gaps)
     finally:
         if own and fetch_pages is None:
             await client.aclose()
@@ -180,14 +297,17 @@ async def run_pathway_b(file_key: str, *, client: httpx.AsyncClient | None = Non
 
 def _result(file_key, status, pages_summary, composition_tree, remote_references, failure_reports, gaps):
     return {
-        "lane": LANE, "file_key": file_key, "pathway_b_status": status,
+        "lane": LANE,
+        "file_key": file_key,
+        "pathway_b_status": status,
         "pages": pages_summary,
         "page_count": len(pages_summary),
         "frame_count_total": sum(p["frame_count"] for p in pages_summary),
         "remote_references": remote_references,
         "remote_reference_count": len(remote_references),
         "composition_tree": composition_tree,
-        "failure_reports": failure_reports, "gaps": gaps,
+        "failure_reports": failure_reports,
+        "gaps": gaps,
         "provenance": {"lane": LANE, "traversal_order": "page_then_depth_first", "llm_involvement": "none"},
         "extracted_at": _now_iso(),
     }
