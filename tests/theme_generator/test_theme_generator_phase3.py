@@ -127,3 +127,18 @@ def test_assess_anomaly_flags_over_2x_and_breaker():
     assert assess_anomaly(expected_fine_grained=3, actual_fine_grained=3) is None
     assert assess_anomaly(expected_fine_grained=3, actual_fine_grained=7) is not None  # > 2x
     assert assess_anomaly(expected_fine_grained=0, actual_fine_grained=0, breaker_tripped=True) is not None
+
+
+# --------------------------------------------------------------------------- #
+# VT-6 — SP-9: no hardcoded model id or package scope in 3c
+# --------------------------------------------------------------------------- #
+
+def test_sp9_no_hardcoded_model_or_scope():
+    from app.settings import MODEL_ID, default_chat_model
+
+    from agents.theme_generator.scaffolding import customer_package_name
+    # model id flows from settings (OPENAI_MODEL_ID), never hardcoded inside 3c
+    assert default_chat_model().id == MODEL_ID
+    # package scope is caller-supplied, not baked in
+    assert customer_package_name("acme", "custom-scope") == "@custom-scope/acme-elements"
+    assert customer_package_name("acme", "other-org") == "@other-org/acme-elements"
