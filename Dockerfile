@@ -53,5 +53,10 @@ USER app
 
 EXPOSE 8000
 
+# Container health signal (CKV_DOCKER_2). curl is installed above; /health needs no auth in any
+# RUNTIME_ENV. start-period covers app boot; Coolify/Traefik also probe externally.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD curl -fsS http://localhost:8000/health || exit 1
+
 ENTRYPOINT ["/app/scripts/entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
