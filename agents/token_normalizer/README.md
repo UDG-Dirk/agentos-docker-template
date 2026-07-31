@@ -84,6 +84,43 @@ the one calibration file.
 - **DD-8 — `enrichment_type` governs type-confidence; `enrichment_match` governs path (independent signals).** A token can be AUTHORITATIVE on type while deriving its path from the css-var name (e.g. an empty `enrichment_match` but a present `enrichment_type`). Confidence reflects *type*-assignment certainty, not path provenance. The "no enrichment at all" case (type absent → not authoritative) is the BT-14 path. Verified by mutation M7 (type removed, match kept → high, path from enrichment) and M8 (match emptied, type kept → authoritative, path from css-var).
 - **DD-9 — fontFamily keyword-guard.** `parse_font_family` rejects CSS-wide keywords (`normal/inherit/initial/unset/none/revert`) → UNRESOLVED, so a keyword never masquerades as a font family even when the token name infers fontFamily (addendum-parser-scope check #4; tests BT-22, M5).
 
+## DTCG Scope (finite, by decision)
+
+The normalizer handles a **deliberately finite** set of DTCG token types. This is a ratified
+decision (`helix-poc-agno:decision:token-normalizer-dtcg-scope-2026-07-30`, DES + FE-DEV
+consulted), not an accident of implementation — the four handled types cover current and
+near-term design-system needs, and anything outside them fails loud into the UNRESOLVED bucket
+(it is never silently dropped or guessed).
+
+**Handled (4 types):**
+
+| `$type` | Notes |
+|---|---|
+| `color` | hex + `rgba()`; alpha policy per DD-4. |
+| `dimension` | `px`/`rem` per spec, widened to `em`/`%` for source fidelity. |
+| `shadow` | box-shadow, parenthesis-aware layer split (DD-5). |
+| `typography` | composite — `fontFamily`, `fontWeight`, and numeric sub-values are parsed inline. |
+
+**Out of scope (6 types), by design:**
+
+| `$type` | Why excluded |
+|---|---|
+| `duration` | Motion / prototype-behavior domain — not a Figma-native token surface. |
+| `cubicBezier` | Motion, prototype-only. |
+| `transition` | Motion composite. |
+| `strokeStyle` | Real design systems decompose this into primitives. |
+| `border` | Decomposes into `dimension` + `color`, which **are** handled. |
+| `gradient` | A genuine coverage gap, but not in current DES usage. |
+
+**Revisit** the scope decision if: a client engagement introduces real `gradient` tokens; motion
+design comes into scope for HELIX; the Figma-native token surface grows to include motion types; or
+DES adds a proprietary type. Tokens of any unhandled type route to UNRESOLVED (SP-6 fail-loud), so
+the pipeline surfaces the gap at the HITL gate rather than producing a wrong tree.
+
+> **Note on dispatch shape.** Type dispatch is a hardcoded if/elif ladder in `normalizer.py`, not a
+> registry — adding a `$type` touches 3–4 central sites. A registry refactor is deliberately
+> deferred (YAGNI given the confirmed-finite scope); revisit it alongside the next scope change.
+
 ## Limitations / known gaps
 
 - Parser rules are tuned to the evidence in `run_sequential_003`. Unseen naming conventions or composite formats land in the UNRESOLVED bucket (the safety net) and surface at the HITL gate — they do not crash. Add new parser patterns as new client Figmas appear (GAP-11 Semantic Matcher handles non-DTCG-compliant client files downstream).
