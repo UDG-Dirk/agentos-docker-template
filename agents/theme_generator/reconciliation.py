@@ -20,8 +20,6 @@ rather than spending silently. SP-9: the real agent's model comes from
 """
 from __future__ import annotations
 
-import os
-import zlib
 from typing import Any, Literal, Optional, Protocol
 
 from pydantic import BaseModel
@@ -29,9 +27,9 @@ from pydantic import BaseModel
 from agents.semantic_matcher.scoring import name_similarity
 from agents.theme_generator.models import Confidence
 
-# --- circuit-breaker defaults (Probe 3 rec; env-overridable, SP-9) -----------
-_DEFAULT_MAX_FINE_GRAINED = 200
-_DEFAULT_MAX_COARSE_CHUNKS = 6
+# Observability helpers moved to the shared module (SP-22); re-exported so existing 3c
+# imports (step.py, tests) keep working unchanged.
+from agents._shared.observability import CircuitBreaker, assess_anomaly, engagement_seed  # noqa: F401
 
 
 class ReconciliationResult(BaseModel):
@@ -63,78 +61,6 @@ class Reconciler(Protocol):
 
 class CohesionReviewer(Protocol):
     def review(self, *, package_summary: dict) -> CohesionVerdict: ...
-
-
-class CircuitBreaker:
-    """Hard invocation cap (Probe 3). Trips fail-loud instead of spending silently.
-
-    ``allow_fine_grained`` / ``allow_coarse`` record a slot and return False once
-    the cap is hit; callers then flag remaining work for human review.
-    """
-
-    def __init__(self, max_fine_grained: int | None = None, max_coarse_chunks: int | None = None) -> None:
-        self.max_fine_grained = max_fine_grained if max_fine_grained is not None else _env_int(
-            "THEME_GEN_MAX_FINE_GRAINED", _DEFAULT_MAX_FINE_GRAINED)
-        self.max_coarse_chunks = max_coarse_chunks if max_coarse_chunks is not None else _env_int(
-            "THEME_GEN_MAX_COARSE_CHUNKS", _DEFAULT_MAX_COARSE_CHUNKS)
-        self.fine_grained_used = 0
-        self.coarse_used = 0
-        self.tripped = False
-
-    def allow_fine_grained(self) -> bool:
-        if self.fine_grained_used >= self.max_fine_grained:
-            self.tripped = True
-            return False
-        self.fine_grained_used += 1
-        return True
-
-    def allow_coarse(self) -> bool:
-        if self.coarse_used >= self.max_coarse_chunks:
-            self.tripped = True
-            return False
-        self.coarse_used += 1
-        return True
-
-
-def _env_int(name: str, default: int) -> int:
-    try:
-        return int(os.environ.get(name, default))
-    except (TypeError, ValueError):
-        return default
-
-
-# --------------------------------------------------------------------------- #
-# Deterministic observability helpers (Probe 3 / Decision #5).
-# Bookkeeping — NOT an agent. Workflow-agnostic on purpose: these lift cleanly into
-# a shared observability harness when one is scoped (per the FinOps-honest principle,
-# the aggregation/alert plane stays deterministic; an LLM "watcher" is a separate,
-# governance-gated capability).
-# --------------------------------------------------------------------------- #
-_ANOMALY_INVOCATION_MULTIPLIER = 2  # Probe 3: alert when actual > 2x expected-for-count
-
-
-def engagement_seed(customer_slug: str, timestamp: str) -> int:
-    """Deterministic non-negative seed from (customer, engagement timestamp) — Decision #5.
-
-    Same (customer, timestamp) → same seed → reproducible agent outputs within an
-    engagement. crc32 keeps it stable across processes/machines (no Python hash salt).
-    """
-    key = f"{customer_slug or ''}:{timestamp or ''}".encode("utf-8")
-    return zlib.crc32(key) & 0x7FFFFFFF
-
-
-def assess_anomaly(expected_fine_grained: int, actual_fine_grained: int,
-                   breaker_tripped: bool = False) -> Optional[str]:
-    """Return a human-readable anomaly string, or None. Probe 3's PRIMARY control:
-    invocation-ratio, not an absolute $ cap. Fires when actual runs > 2x the count
-    expected for this many deferred components, or when the circuit breaker tripped.
-    """
-    if breaker_tripped:
-        return "circuit breaker tripped — fine-grained invocation cap hit"
-    if expected_fine_grained > 0 and actual_fine_grained > _ANOMALY_INVOCATION_MULTIPLIER * expected_fine_grained:
-        return (f"fine-grained invocations {actual_fine_grained} exceeded "
-                f"{_ANOMALY_INVOCATION_MULTIPLIER}x expected ({expected_fine_grained})")
-    return None
 
 
 def _slot_name(c: Any) -> str:
