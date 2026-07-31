@@ -55,6 +55,12 @@ term below is spelled out where it first appears, and this table is the quick re
 
 ## Deployed workflows
 
+> **Not sure which of the three extractors to use?** Pick by how the Figma file uses components —
+> published library → `helix-figma-extractor`; uses another library's components (client work) →
+> `helix-client-extractor`; self-contained → `helix-composition-only-extractor`. Full decision tree
+> (with how to tell in Figma's Assets panel): the **"Which extractor workflow do I use?"** section of the
+> [repo README](../../README.md).
+
 | Workflow | Purpose | Invocation |
 |---|---|---|
 | `helix-figma-extractor` | Library-mode single-file extraction (Core substrate) | `POST /workflows/helix-figma-extractor/runs` |

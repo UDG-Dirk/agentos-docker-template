@@ -87,6 +87,29 @@ Each live step is an Agno **workflow** you can call over HTTP; the deep-dive for
 README under [`agents/`](agents/) (each opens with a plain-language glossary). Architecture overview:
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
+### Which extractor workflow do I use?
+
+There are three extractor workflows because a Figma design file can be one of three shapes. Pick by how
+the file uses components:
+
+- **A published library** — this file *publishes* components (they show up in other files' Assets panel
+  for reuse; our own **Core** foundation is this). → **`helix-figma-extractor`** (message = just the file
+  key).
+- **A file that *uses* components from another published library** — typical client work: the file
+  borrows components from a shared library, so you need that library's key too. → **`helix-client-extractor`**
+  (message = `core=<source-library-key> client=<this-file-key>`).
+- **A self-contained file** — no publishing, no borrowed/remote components; everything is local, and the
+  components live as frames on pages. → **`helix-composition-only-extractor`** (message = just the file key).
+
+**How to tell which, in Figma:** open the file and look at the right-hand **Assets** panel.
+- Components with a small **library/link icon** = borrowed from a remote library → *client extractor*.
+- Only **local** components (no link icon), nothing published = *composition-only*.
+- The file **publishes** its own components to a library = *published library* → *figma-extractor*.
+
+Picking the wrong one usually returns an empty/`failure` result rather than an error — e.g. running the
+published-library extractor on a client composition finds no published component sets and comes back with
+nothing. If a run is unexpectedly empty, re-check this list first.
+
 ## Get Started
 
 ### Step 1: Run locally
