@@ -141,8 +141,56 @@ def _extract_auto_layout(node: dict) -> dict | None:
     }
 
 
+def _extract_component_property_definitions(node: dict) -> dict | None:
+    """Rank 3 — componentPropertyDefinitions (the variant/prop SCHEMA), on COMPONENT_SET / COMPONENT.
+
+    TD-2: present on COMPONENT_SET nodes (1/file). Standalone COMPONENTs may also carry definitions
+    (boolean/text props), so both types are accepted. None when the node type is irrelevant / empty.
+    """
+    if node.get("type") not in ("COMPONENT_SET", "COMPONENT"):
+        return None
+    defs = node.get("componentPropertyDefinitions")
+    if not isinstance(defs, dict) or not defs:
+        return None
+    out: dict = {}
+    for name, d in defs.items():
+        if not isinstance(d, dict):
+            continue
+        entry = {k: v for k, v in {
+            "type": d.get("type"),
+            "default_value": d.get("defaultValue"),
+            "variant_options": d.get("variantOptions") or None,  # VARIANT type only
+        }.items() if v is not None}
+        out[name] = entry
+    return out or None
+
+
+def _extract_component_properties(node: dict) -> dict | None:
+    """Rank 3 — componentProperties (the prop VALUES applied on an INSTANCE). None when absent."""
+    if node.get("type") != "INSTANCE":
+        return None
+    props = node.get("componentProperties")
+    if not isinstance(props, dict) or not props:
+        return None
+    out: dict = {}
+    for name, d in props.items():
+        if isinstance(d, dict):
+            out[name] = {k: v for k, v in {"type": d.get("type"), "value": d.get("value")}.items()
+                         if v is not None}
+    return out or None
+
+
+def _extract_variant_properties(node: dict) -> dict | None:
+    """Rank 3 — variantProperties (variant-axis → value on a VARIANT INSTANCE). [U] TD-2 samples had
+    0; newer Figma folds variants into componentProperties. Retained when present. None otherwise."""
+    if node.get("type") != "INSTANCE":
+        return None
+    vp = node.get("variantProperties")
+    return dict(vp) if isinstance(vp, dict) and vp else None
+
+
 def _enrich_frame(node: dict, frame: dict) -> None:
-    """Attach Rank 1/2 optional fields to `frame` in place. On any parse error, flag the frame
+    """Attach Rank 1/2/3 optional fields to `frame` in place. On any parse error, flag the frame
     (``enrichment_error``) so the caller can fail loud per-node (SP-6) without crashing the walk."""
     try:
         tc = _extract_text_content(node)
@@ -151,6 +199,15 @@ def _enrich_frame(node: dict, frame: dict) -> None:
         al = _extract_auto_layout(node)
         if al:
             frame["auto_layout"] = al
+        cpd = _extract_component_property_definitions(node)  # Rank 3 — schema (COMPONENT_SET/COMPONENT)
+        if cpd:
+            frame["component_property_definitions"] = cpd
+        cp = _extract_component_properties(node)             # Rank 3 — values (INSTANCE)
+        if cp:
+            frame["component_properties"] = cp
+        vp = _extract_variant_properties(node)               # Rank 3 — variant axes (INSTANCE)
+        if vp:
+            frame["variant_properties"] = vp
     except Exception as e:  # noqa: BLE001 — enrichment must never break traversal (SP-6 per-node)
         frame["enrichment_error"] = repr(e)[:200]
 
