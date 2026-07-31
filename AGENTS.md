@@ -11,8 +11,9 @@ repo. `CLAUDE.md` is a symlink to this file — edit one, both update.
 ## Project Overview
 
 A unified agent platform built on [Agno](https://docs.agno.com) / AgentOS. Agents
-persist sessions, memory, and knowledge in Postgres (pgvector). Runs **bare metal**
-in local dev (venv + uvicorn, no containers) and on **Coolify** in production.
+persist sessions, memory, and knowledge in Postgres (with the pgvector vector-search
+extension). Runs **bare metal** in local dev (venv + uvicorn, no containers) and on
+**Coolify** in production.
 
 ## Architecture
 
@@ -21,7 +22,7 @@ AgentOS  (app/main.py)
 ├── web-search       (agents/web_search.py)      — direct tools (Parallel SDK / keyless MCP)
 ├── code-search      (agents/code_search.py)     — context provider (WorkspaceContextProvider)
 ├── reasoning-agent  (agents/reasoning_agent.py) — ReasoningTools (think/analyze) · OpenAIChat
-└── knowledge-agent  (agents/knowledge_agent.py) — Dark Factory KB · context-injection RAG
+└── knowledge-agent  (agents/knowledge_agent.py) — Dark Factory KB · context-injection RAG (retrieval-augmented generation)
 ```
 
 Agents may also be created at runtime via the **Components API** (config-only:
@@ -75,7 +76,8 @@ recipes, and gotchas are in the `agno-dev` skill.**
 
 Deployed on **Coolify** at `poc-agno-api.services.plygrnd.tech`. Deploy = `git push`
 to `main` (Coolify auto-builds the prod image). `RUNTIME_ENV=prd` turns on JWT
-(RS256) auth; the public verification key goes in `JWT_VERIFICATION_KEY`. Git: `dev`
+(JSON Web Token, RS256-signed) auth; the public verification key goes in
+`JWT_VERIFICATION_KEY`. Git: `dev`
 for local work, `main` for prod — never push to `main` without review.
 
 ## Environment Variables
