@@ -27,15 +27,24 @@ from agents.component_code_generator.models import (
     ProvenanceExtension,
     StructuralGateResult,
 )
+from agents.component_code_generator.generation import (
+    GenerationInput,
+    Generator,
+    MockGenerator,
+    parse_variant_axes,
+    run_structural_gate,
+)
 from agents.component_code_generator.scaffolding import (
     find_baseline_source,
     fork_component,
+    pascal_case,
     render_ccg_provenance_md,
     render_cem,
     route_element,
     slugify,
     write_package,
 )
+from agents._shared.observability import CircuitBreaker, assess_anomaly
 
 STEP_NAME_INPUT = "ccg-input-gathering"
 STEP_NAME_GENERATE = "ccg-generate"
@@ -82,15 +91,22 @@ def generate_component_code(
     tokens_json: Optional[str] = None,
     helix_code_root: str = DEFAULT_HELIX_CODE_ROOT,
     source_reader: Optional[Callable[[str, str], Optional[tuple[str, str]]]] = None,
+    generator: Optional[Generator] = None,
+    breaker: Optional[CircuitBreaker] = None,
     timestamp: Optional[str] = None,
     output_dir: Optional[str] = None,
 ) -> ComponentCodeGeneratorOutput:
-    """Phase-1 core (deterministic, no LLM). Directly testable.
+    """Full pipeline (Phase 1 deterministic fork + Phase 2 agentic from-spec).
 
-    ``source_reader(baseline_ref, helix_root) -> (source, relpath) | None`` is injectable so tests
-    provide baseline source without a helix-code checkout; defaults to the real READ-ONLY lookup.
+    ``source_reader`` is injectable (Path A baseline lookup). ``generator`` is the injected Path-B
+    from-spec generator (default deterministic Mock — CI-safe, no LLM); a live run passes AgentGenerator.
+    Every generated element passes the structural gate (Adjustment 1); a failure retries once then
+    SP-6-flags (never fabricate). ``breaker`` hard-caps generation calls (Probe-3 pattern).
     """
     reader = source_reader or find_baseline_source
+    gen = generator or MockGenerator()
+    breaker = breaker or CircuitBreaker(fine_env="COMP_CODE_GEN_MAX_FINE_GRAINED",
+                                        coarse_env="COMP_CODE_GEN_MAX_COARSE_CHUNKS")
     slug = slugify(customer_slug)
     pkg = f"packages/{slug}-elements"
 
@@ -140,18 +156,58 @@ def generate_component_code(
             cem_elements.append({"element_tag": tag, "class_name": cls, "file_path": file_path})
             summary.fork_deterministic += 1
             summary.gate_passed += 1
-        else:  # deferred → Path B (Phase 2)
-            warnings.append(BlockingWarning(code="deferred_to_phase_2", element_slot=slot,
-                                            detail="no baseline match; from-spec generation is Phase 2",
-                                            recommended_action="await_phase_2"))
-            results.append(ElementGenerationResult(slot=slot, path="deferred", baseline_ref=baseline_ref,
-                                                    confidence="unresolved",
-                                                    rationale="Path B (from-spec) deferred to Phase 2"))
-            summary.deferred += 1
+        else:  # Path B — from-spec generation (agentic; Mock in CI)
+            figma_meta = (e.get("figma_meta") if isinstance(e, dict) else getattr(e, "figma_meta", None)) or {}
+            spec = GenerationInput(
+                slot=slot, customer_slug=slug,
+                variant_axes=parse_variant_axes(figma_meta.get("variant_names") or []),
+                tokens_consumed=figma_meta.get("tokens_consumed") or [],
+            )
+            element_slug = slugify(slot)
+            if not breaker.allow_fine_grained():
+                warnings.append(BlockingWarning(code="deferred_to_phase_2", element_slot=slot,
+                                                detail="circuit breaker tripped; not generated",
+                                                recommended_action="human_review"))
+                results.append(ElementGenerationResult(slot=slot, path="deferred", confidence="unresolved",
+                                                        rationale="circuit breaker tripped"))
+                summary.deferred += 1
+                continue
+            # generate → gate → one retry → SP-6 flag
+            gen_res = gen.generate(spec)
+            gate = run_structural_gate(gen_res.source, customer_slug=slug, element_slug=element_slug)
+            if not (gate.passed and gen_res.confidence != "unresolved") and breaker.allow_fine_grained():
+                gen_res = gen.generate(spec)  # one retry (Adjustment 1)
+                gate = run_structural_gate(gen_res.source, customer_slug=slug, element_slug=element_slug)
+            tag = f"{slug}-{element_slug}"
+            cls = pascal_case(tag) + "Element"
+            if gate.passed and gen_res.confidence != "unresolved":
+                file_path = f"{pkg}/src/elements/{element_slug}/{cls}.ts"
+                tree[file_path] = gen_res.source
+                results.append(ElementGenerationResult(slot=slot, element_tag=tag, class_name=cls,
+                                                        file_path=file_path, path="from_spec",
+                                                        confidence=gen_res.confidence, structural_gate=gate,
+                                                        rationale=gen_res.rationale))
+                cem_elements.append({"element_tag": tag, "class_name": cls, "file_path": file_path})
+                summary.from_spec += 1
+                summary.gate_passed += 1
+                if gen_res.confidence == "medium":  # proceed-with-warning (Decision #4)
+                    warnings.append(BlockingWarning(code="generation_below_threshold", element_slot=slot,
+                                                    detail=gen_res.rationale, recommended_action="human_review"))
+            else:  # gate failed after retry, or agent abstained → SP-6 flag, no fabrication
+                code = "structural_gate_failed" if not gate.passed else "generation_below_threshold"
+                warnings.append(BlockingWarning(code=code, element_slot=slot,
+                                                detail="; ".join(gate.failures) or gen_res.rationale,
+                                                recommended_action="human_review"))
+                results.append(ElementGenerationResult(slot=slot, path="from_spec", confidence="unresolved",
+                                                        structural_gate=gate,
+                                                        rationale="gate failed after retry / abstained"))
+                summary.from_spec += 1
+                summary.gate_failed += 1
 
+    gen_name = getattr(gen, "name", "mock")
     prov = ProvenanceExtension(
         baseline_source_ref=(elements and helix_code_root) or None,
-        model_routing=None,  # deterministic-only Phase-1 run
+        model_routing=(f"{gen_name} from-spec generator" if summary.from_spec else None),
         elements=results,
     )
     # static package scaffolding + docs (deterministic)
@@ -161,13 +217,27 @@ def generate_component_code(
     tree[f"{pkg}/custom-elements.json"] = render_cem(cem_elements)
     tree[f"{pkg}/docs/PROVENANCE.md"] = render_ccg_provenance_md(customer_slug, prov.model_dump())
 
-    status = "success" if summary.deferred == 0 else "partial"
+    status = "success" if (summary.deferred == 0 and summary.gate_failed == 0) else "partial"
     package_path = write_package(tree, output_dir) if output_dir else None
+    # observability: expected = one generation call per from-spec element; token totals from a real
+    # generator's usage() (Mock exposes none → 0). Deterministic bookkeeping (Probe-3 pattern).
+    expected = summary.from_spec
+    fine_used = breaker.fine_grained_used
+    tin = tout = 0
+    usage_fn = getattr(gen, "usage", None)
+    if callable(usage_fn):
+        try:
+            tin, tout = usage_fn()
+        except Exception:  # noqa: BLE001
+            tin = tout = 0
     return ComponentCodeGeneratorOutput(
         status=status, package_path=package_path, summary=summary, provenance=prov,
         blocking_warnings=warnings,
-        cost_summary=CostSummary(),  # Phase 1 = zero LLM calls
-        non_deterministic=False,     # deterministic-only until Phase 2 agentic paths run
+        cost_summary=CostSummary(fine_grained_invocations=fine_used, expected_fine_grained=expected,
+                                 total_input_tokens=tin, total_output_tokens=tout,
+                                 breaker_tripped=breaker.tripped,
+                                 anomaly=assess_anomaly(expected, fine_used, breaker.tripped)),
+        non_deterministic=(summary.from_spec > 0 and gen_name != "mock"),
     )
 
 

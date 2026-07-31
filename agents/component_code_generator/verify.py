@@ -33,7 +33,9 @@ def _reader(baseline_ref, helix_root):  # injected — returns the fake baseline
 def _run():
     elements = [
         {"slot": "Label", "baseline_ref": "Label", "derivation": "forked_from_baseline", "confidence": "authoritative"},
-        {"slot": "HeroTeaser", "baseline_ref": None, "derivation": "customer_passthrough", "confidence": "high"},
+        # no baseline → Path B from-spec; thin Figma meta with a typo'd variant ("Activ") to exercise normalization
+        {"slot": "HeroTeaser", "baseline_ref": None, "derivation": "customer_passthrough", "confidence": "high",
+         "figma_meta": {"variant_names": ["State=Default", "State=Activ"]}},
     ]
     return generate_component_code(customer_slug="acme", scope="msq-dx", elements=elements,
                                    tokens_json='{"--color": "#000"}', source_reader=_reader,
@@ -43,7 +45,7 @@ def _run():
 def build_report() -> list[tuple[str, str, bool]]:
     env = _run()
     forked = next((r for r in env.provenance.elements if r.slot == "Label"), None)
-    src = env  # convenience
+    spec = next((r for r in env.provenance.elements if r.slot == "HeroTeaser"), None)
     checks: list[tuple[str, str, bool]] = []
 
     def chk(vt, desc, ok):
@@ -52,12 +54,13 @@ def build_report() -> list[tuple[str, str, bool]]:
     chk("VT-1", "Path-A element forked deterministically", forked is not None and forked.path == "fork_deterministic")
     chk("VT-2", "tag re-namespaced to customer (acme-label)", forked and forked.element_tag == "acme-label")
     chk("VT-3", "class PascalCase+Element (AcmeLabelElement)", forked and forked.class_name == "AcmeLabelElement")
-    chk("VT-6", "no-baseline element DEFERRED, not fabricated (SP-6)",
-        any(r.slot == "HeroTeaser" and r.path == "deferred" for r in env.provenance.elements)
-        and any(w.code == "deferred_to_phase_2" for w in env.blocking_warnings))
-    chk("VT-9", "status partial (a deferral exists)", env.status == "partial")
-    chk("VT-11", "Phase 1 is deterministic (non_deterministic False, zero LLM)",
-        env.non_deterministic is False and env.cost_summary.fine_grained_invocations == 0)
+    chk("VT-6", "no-baseline element GENERATED from-spec (not fabricated blindly)",
+        spec is not None and spec.path == "from_spec" and spec.element_tag == "acme-heroteaser")
+    chk("VT-17", "structural validation gate applied + passed on generated code",
+        spec is not None and spec.structural_gate.applied and spec.structural_gate.passed)
+    chk("VT-9", "status success (fork + from-spec both resolved)", env.status == "success")
+    chk("VT-11", "Mock path deterministic (non_deterministic False, zero real tokens)",
+        env.non_deterministic is False and env.cost_summary.total_input_tokens == 0)
     chk("MCP-safe", "envelope is plain-JSON serialisable", _json_ok(env))
     return checks
 

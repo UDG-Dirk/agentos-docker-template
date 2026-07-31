@@ -107,17 +107,21 @@ def _els():
     ]
 
 
-def test_generate_forks_path_a_and_defers_path_b(tmp_path):
+def test_generate_forks_path_a_and_generates_path_b(tmp_path):
+    # Phase 2: Path B (HeroTeaser, no baseline) is GENERATED from-spec via the Mock, not deferred.
     env = generate_component_code(customer_slug="acme", scope="msq-dx", elements=_els(),
                                   tokens_json='{"--x":"1"}', source_reader=_reader_ok, timestamp=TS,
                                   output_dir=str(tmp_path / "pkg"))
-    assert env.status == "partial"                          # HeroTeaser deferred
-    assert env.summary.fork_deterministic == 1 and env.summary.deferred == 1
-    assert env.non_deterministic is False and env.cost_summary.fine_grained_invocations == 0
-    # forked file materialised at the customer-namespaced path
+    assert env.status == "success"                          # both resolved (1 fork + 1 from-spec)
+    assert env.summary.fork_deterministic == 1 and env.summary.from_spec == 1 and env.summary.deferred == 0
+    assert env.non_deterministic is False                   # Mock generator → deterministic
+    assert env.cost_summary.total_input_tokens == 0         # no real LLM (Mock)
+    # forked Path-A file materialised at the customer-namespaced path
     f = tmp_path / "pkg" / "packages" / "acme-elements" / "src" / "elements" / "iconbutton" / "AcmeIconButtonElement.ts"
     assert f.is_file() and "acme-icon-button" in f.read_text()
-    # CEM + provenance emitted
+    # from-spec Path-B file materialised + gate passed
+    g = tmp_path / "pkg" / "packages" / "acme-elements" / "src" / "elements" / "heroteaser" / "AcmeHeroteaserElement.ts"
+    assert g.is_file() and "acme-heroteaser" in g.read_text()
     assert (tmp_path / "pkg" / "packages" / "acme-elements" / "custom-elements.json").is_file()
     assert (tmp_path / "pkg" / "packages" / "acme-elements" / "docs" / "PROVENANCE.md").is_file()
 
@@ -147,7 +151,7 @@ def test_envelope_is_mcp_json_serialisable():
     env = generate_component_code(customer_slug="acme", scope="msq-dx", elements=_els(),
                                   source_reader=_reader_ok, timestamp=TS)
     d = json.dumps(env.model_dump())
-    assert ComponentCodeGeneratorOutput(**json.loads(d)).status == "partial"
+    assert ComponentCodeGeneratorOutput(**json.loads(d)).status == "success"
 
 
 def test_cem_lists_elements():
