@@ -26,12 +26,16 @@ Code can read, update, and improve the platform end-to-end.
 This codebase is designed primarily for coding agents. It comes with five prompts that cover the full agent development lifecycle:
 
 1. **Create.** Claude asks a few questions, scaffolds the agent file, registers it in `app/main.py`, adds quick prompts to `app/config.yaml`, restarts the container, and smoke-tests via cURL. Usually 5-10 minutes for a simple agent.
-2. **Improve.** Hardens and fine-tunes your agent based on its existing spec. Claude derives probes from the agent's `INSTRUCTIONS`, runs them against the live container, judges the responses, and edits until they pass. No input from you.
+2. **Improve.** Hardens and fine-tunes your agent based on its existing spec. You name the agent; Claude then derives probes from its `INSTRUCTIONS`, runs them against the live container, judges the responses, and edits until they pass — no further steering.
 3. **Extend.** Add a new feature to an agent. You direct, Claude executes. Add tools, refine prompts, fix bugs. The Agno docs MCP is loaded so toolkit research is grounded in the real API.
 4. **Hill Climb.** Claude runs the eval suite, diagnoses failures, and fixes what's in scope. Stops when all cases pass.
 5. **Review.** Claude sweeps the repo for drift between docs, code, and config. Auto-fixes mechanical drift like stale paths and missing env vars; flags anything bigger.
 
-3 of 5 run autonomously with no input needed from you.
+You start each the same way — paste `Run docs/<name>.md` into Claude Code, with the platform
+running locally. Three of the five — **Improve**, **Hill Climb**, and **Review** — then run to
+completion without stopping to ask you anything (Improve just needs to be told which agent to
+harden). **Create** and **Extend** are interactive by design: Create asks a few setup questions,
+Extend puts you in the driver's seat.
 
 ## What's Included
 
