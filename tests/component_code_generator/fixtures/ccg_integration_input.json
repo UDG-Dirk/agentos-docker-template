@@ -1,0 +1,16 @@
+{
+  "_note": "3c-style element descriptors mirroring a HELIX_Modules 3c ThemeGeneratorOutput: a mix of Path-A (baseline_ref → deterministic fork) and Path-B (no baseline → from-spec organism generation). Feeds the 3d Phase-3 end-to-end integration test (Mock generator + injected baseline source; the REAL helix-code fork is exercised at Phase-5 hardening).",
+  "customer_slug": "helix-modules-int",
+  "scope": "msq-dx",
+  "tokens_json": "{\"--helix-modules-int-colors-text-primary\": \"#111\"}",
+  "elements": [
+    {"slot": "Button", "baseline_ref": "Button", "derivation": "forked_from_baseline", "confidence": "authoritative"},
+    {"slot": "Label", "baseline_ref": "core.Label", "derivation": "agent_reconciled", "confidence": "high"},
+    {"slot": "HeaderLogo", "baseline_ref": null, "derivation": "customer_passthrough", "confidence": "high",
+     "figma_meta": {}},
+    {"slot": "HeroTeaser", "baseline_ref": null, "derivation": "customer_passthrough", "confidence": "high",
+     "figma_meta": {"variant_names": ["Layout=ImageLeft", "Layout=ImageRight"]}},
+    {"slot": "FlyoutNavigationElement", "baseline_ref": null, "derivation": "agent_flagged_review", "confidence": "unresolved",
+     "figma_meta": {"variant_names": ["State=Default, Size=md", "State=Activ, Size=md", "State=Focu, Size=lg"]}}
+  ]
+}
