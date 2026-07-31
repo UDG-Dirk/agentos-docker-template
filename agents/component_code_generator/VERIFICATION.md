@@ -51,6 +51,25 @@ run FLAGGED all 5 (structural_gate_failed) and emitted ZERO broken files (no fab
 **3d v0.1 FORMALLY CLOSED** at this hardening milestone (SP-25 technical hardening; customer-fit
 validation on a real external engagement remains a separate future milestone).
 
+## Path 1 (v0.2) — branch-aware Path-A (CLOSED, live 2026-07-31)
+
+Branch-aware `find_baseline_source` forks helix-code FEATURE-branch organisms. Live-run
+(customer helix-modules-path1-hardening, 6 elements): 3 real branch forks + 3 real Path-B.
+
+| VT | Requirement | Status | Evidence |
+|----|-------------|--------|----------|
+| VT-p1-1/2/7 | branch content returned, in configured order; master-only backwards-compat | ✅ | test_ccg_path1 (injected git_show) |
+| VT-p1-3 | Lit-validity (WIP) check | ✅ | is_valid_lit_source tests |
+| VT-p1-4 | branch fork customer-namespaced | ✅ **live** | MediaText fork: 310 LOC, tag helix-modules-path1-hardening-media-text, 0 residual hx-/--helix-, class …MediaTextElement, JSDoc preserved |
+| VT-p1-5 | WIP source → warning + still fork (SP-6) | ✅ | test_wip_branch_source_still_forked_and_flagged |
+| VT-p1-6 | largest-LOC multi-candidate | ✅ | test_largest_loc_wins_across_branches |
+| VT-p1-9 | MediaText forks real feature/organisms/MediaText | ✅ **live** | forked 310 LOC from origin/feature/organisms/MediaText (HeroTeaser←HeroTeaserSlide 606, AccordionWrapper←238) |
+| VT-p1-10 | cost delta vs all-Path-B | ✅ **live** | 3 branch forks = $0 LLM at FULL fidelity (310/606/238 LOC vs ~58-LOC shells); run total $0.097 (only 3 Path-B calls) |
+| VT-p1-11 | PROVENANCE.md documents branch source | ✅ **live** | each Path-A row: "← origin/feature/…:packages/elements/src/organisms/…" |
+| VT-p1-12 | determinism (fork byte-identical) | ✅ | fork_component pure; test_byte_identical_across_runs; real-LLM Path-B model-bounded |
+
+**Path 1 v0.2 CLOSED (technical hardening, SP-25).** Combined pipeline now: atoms/molecules → master fork; organisms WITH branch equivalents → branch fork (real 238-606 LOC, $0 LLM); organisms WITHOUT → Path-B from-spec + Path-2 gold-reference tuning. No SP-26 bug this run (Path-B pre-hardened). VT-13 (Sascha customer-fit) still the only external deferral.
+
 ## Summary — 3d v0.1 CLOSED
 - **Closed offline:** VT-1,2,3,4,5,6,9,11,17.
 - **Closed live (Phase-5 hardening):** VT-7 (real PROVENANCE.md), VT-8 (real tokens 2671/6405),
