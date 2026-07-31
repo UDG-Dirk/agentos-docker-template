@@ -143,4 +143,7 @@ class ThemeGeneratorOutput(BaseModel):
     blocking_warnings: list[BlockingWarning] = Field(default_factory=list)
     unmapped_components: list[UnmappedComponent] = Field(default_factory=list)
     cost_summary: CostSummary = Field(default_factory=CostSummary)
+    # Coarse cohesion-review result (Phase 2, spec §5.2.3). None on a Phase-1-only run.
+    cohesion_coherent: Optional[bool] = None
+    cohesion_issues: list[str] = Field(default_factory=list)
     non_deterministic: bool = True
