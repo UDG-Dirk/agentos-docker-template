@@ -93,6 +93,20 @@ def test_gate_fails_on_unbalanced_or_missing_lit():
     assert not g.passed
 
 
+def test_gate_accepts_single_quote_import_and_no_properties():
+    # SP-26 regression (Phase-5 live-run): real claude-sonnet-4-6 emits single-quote imports and a
+    # prop-less component (e.g. HeaderLogo) — both are valid Lit and MUST pass the gate.
+    src = ("import { LitElement, html, css } from 'lit';\n"
+           "import { customElement } from 'lit/decorators.js';\n"
+           "@customElement('acme-logo')\n"
+           "export class AcmeLogoElement extends LitElement {\n"
+           "  static styles = css`:host{ color: var(--acme-colors-text-primary); }`;\n"
+           "  render() { return html`<slot></slot>`; }\n"
+           "}\n")
+    g = run_structural_gate(src, customer_slug="acme", element_slug="logo")
+    assert g.passed, g.failures
+
+
 # --------------------------------------------------------------------------- #
 # MockGenerator → gate-passing from-spec skeleton
 # --------------------------------------------------------------------------- #
