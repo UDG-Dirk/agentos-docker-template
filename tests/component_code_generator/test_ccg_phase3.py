@@ -55,11 +55,12 @@ def test_end_to_end_forks_and_generates(tmp_path):
     assert env.summary.from_spec == 3
     assert env.summary.deferred == 0
     assert env.status == "success"
-    # Path-A forked source is re-namespaced (no hx-/--helix- leakage)
+    # Path-A forked source PRESERVES HELIX identity verbatim (Correction #18): hx- tags + --helix-*
+    # refs kept, customer slug never leaks into component source (branding = fork token value-swap).
     root = tmp_path / "pkg" / "packages" / "helix-modules-int-elements" / "src" / "elements"
     btn = next(root.glob("button/*.ts"))
     txt = btn.read_text()
-    assert "helix-modules-int-button" in txt and "hx-" not in txt and "--helix-" not in txt.replace("--helix-modules-int-", "")
+    assert "hx-button" in txt and "var(--helix-colors-text-primary)" in txt and "helix-modules-int-" not in txt
     # Path-B from-spec source exists + is customer-namespaced
     fly = next(root.glob("flyoutnavigationelement/*.ts"))
     assert "helix-modules-int-flyoutnavigationelement" in fly.read_text()
