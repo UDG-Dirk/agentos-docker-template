@@ -38,6 +38,7 @@ from agents.component_code_generator.models import (
 )
 from agents.component_code_generator.scaffolding import (
     find_baseline_source,
+    find_sibling_sources,
     fork_component,
     is_valid_lit_source,
     pascal_case,
@@ -93,6 +94,7 @@ def generate_component_code(
     tokens_json: Optional[str] = None,
     helix_code_root: str = DEFAULT_HELIX_CODE_ROOT,
     source_reader: Optional[Callable[[str, str], Optional[tuple[str, str]]]] = None,
+    sibling_reader: Optional[Callable[[str, str], dict[str, str]]] = None,
     generator: Optional[Generator] = None,
     breaker: Optional[CircuitBreaker] = None,
     timestamp: Optional[str] = None,
@@ -106,6 +108,7 @@ def generate_component_code(
     SP-6-flags (never fabricate). ``breaker`` hard-caps generation calls (Probe-3 pattern).
     """
     reader = source_reader or find_baseline_source
+    sib_reader = sibling_reader or find_sibling_sources
     gen = generator or MockGenerator()
     breaker = breaker or CircuitBreaker(fine_env="COMP_CODE_GEN_MAX_FINE_GRAINED",
                                         coarse_env="COMP_CODE_GEN_MAX_COARSE_CHUNKS")
@@ -150,8 +153,14 @@ def generate_component_code(
             # Sascha's real work-in-progress, not a fabricated shell) but flag it loudly.
             wip = not is_valid_lit_source(baseline_source)
             forked, tag, cls = fork_component(baseline_source, slug)
-            file_path = f"{pkg}/src/elements/{slugify(slot)}/{cls}.ts"
+            element_dir = f"{pkg}/src/elements/{slugify(slot)}"
+            file_path = f"{element_dir}/{cls}.ts"
             tree[file_path] = forked
+            # Correction #18 / Ratification 1: fork the component's sibling ``types.ts`` + barrel
+            # ``index.ts`` verbatim alongside it, so the drop-in matches helix-code's own-directory
+            # convention and the fork is complete (present only in that convention → {} otherwise).
+            for _sib_name, _sib_src in (sib_reader(source_ref, helix_code_root) or {}).items():
+                tree[f"{element_dir}/{_sib_name}"] = _sib_src
             gate = StructuralGateResult(applied=False)  # deterministic fork — gate not applicable (Adjustment 1)
             if wip:
                 warnings.append(BlockingWarning(code="baseline_source_wip", element_slot=slot,

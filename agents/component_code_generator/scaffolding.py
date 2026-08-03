@@ -129,31 +129,69 @@ def find_baseline_source(baseline_ref: str, helix_root: str | Path,
 
 
 def fork_component(baseline_source: str, customer_slug: str) -> tuple[str, str, str]:
-    """Deterministically fork a baseline Lit component into the customer namespace.
+    """Fork a baseline Lit component into a client-fork of helix-code — VERBATIM (Correction #18).
 
-    Returns (forked_source, element_tag, class_name). Transforms:
-      1. tag:   every ``hx-`` custom-element prefix → ``{slug}-`` (@customElement + template tags)
-      2. class: the exported ``class Hx… extends LitElement`` → PascalCase(customer tag)+"Element"
-      3. token: ``var(--helix-…)`` / ``--helix-`` → ``--{slug}-`` (the customer token namespace)
-    Deterministic: identical inputs → byte-identical output (no gate needed, Adjustment 1).
+    Returns ``(forked_source, element_tag, class_name)``. Under the ratified **Architecture B**
+    (fork-then-overlay, rev.8.5 Ratification 1), customer branding is applied by swapping token
+    *values* in the fork's Style Dictionary — NOT by renaming refs. The component is therefore
+    copied byte-for-byte and its HELIX identity is PRESERVED:
+      * tag   ``hx-…``           — kept (the fork's custom elements stay ``hx-``)
+      * class ``Hx… extends LitElement`` — kept (exported class name unchanged)
+      * token ``var(--helix-…)`` — kept (the fork's Style Dictionary emits ``--helix-*``; renamed
+                                    ``--{slug}-*`` refs would DANGLE — the empirical failure Sascha
+                                    caught in the 2026-08-03 FE-DEV review)
+
+    ``customer_slug`` is retained in the signature (callers pass it) but no longer rewrites source:
+    it namespaces the *package location*, resolved by the packager (Phase 3), not the component
+    internals. Deterministic: identical input → byte-identical output.
     """
-    slug = slugify(customer_slug)
     m_tag = _CUSTOM_ELEMENT_RE.search(baseline_source)
     m_cls = _CLASS_RE.search(baseline_source)
-    old_tag = m_tag.group(1) if m_tag else "hx-component"
-    element_core = old_tag[3:] if old_tag.startswith("hx-") else old_tag
-    new_tag = f"{slug}-{element_core}"
-    new_class = pascal_case(new_tag) + "Element"
+    tag = m_tag.group(1) if m_tag else "hx-component"
+    cls = m_cls.group(1) if m_cls else pascal_case(tag) + "Element"
+    return baseline_source, tag, cls
 
-    src = baseline_source
-    # 3. tokens first (independent namespace)
-    src = src.replace("--helix-", f"--{slug}-")
-    # 1. tag prefix everywhere it denotes a custom element
-    src = src.replace("hx-", f"{slug}-")
-    # 2. exported class rename (only if we found one)
-    if m_cls:
-        src = re.sub(rf"\b{re.escape(m_cls.group(1))}\b", new_class, src)
-    return src, new_tag, new_class
+
+# Sibling files that live alongside a component in helix-code's own-directory convention and must
+# be forked verbatim with it (Correction #18 / Ratification 1): the component's ``types.ts`` and the
+# barrel ``index.ts``. Never applied to the flat ``organisms/Name.ts`` convention (whose directory
+# holds unrelated shared files, not the component's own siblings).
+_SIBLING_FILES = ("types.ts", "index.ts")
+
+
+def find_sibling_sources(source_ref: str, helix_root: str | Path,
+                         git_show: Optional[Callable[[str | Path, str, str], Optional[str]]] = None,
+                         branches: Optional[list[str]] = None,
+                         ) -> dict[str, str]:
+    """Locate a forked component's sibling ``types.ts`` / ``index.ts`` in helix-code (READ-ONLY).
+
+    ``source_ref`` is the provenance ref from ``find_baseline_source`` — either ``"branch:path"``
+    or a bare ``path``. Returns ``{filename: source}`` for whichever siblings exist in the SAME
+    directory, but only when the component lives in its OWN directory (``Foo/Foo.ts``); the flat
+    convention yields no siblings. ``git_show`` is injectable for tests (defaults to READ-ONLY
+    ``git show``). Never writes; never raises past ``git_show`` (which swallows failures → None).
+    """
+    if not source_ref:
+        return {}
+    if ":" in source_ref:
+        branch, path = source_ref.split(":", 1)
+        branch_list = [branch]
+    else:
+        path = source_ref
+        branch_list = branches if branches is not None else get_configured_fork_branches()
+    p = Path(path)
+    if p.stem != p.parent.name:   # own-directory convention only (e.g. MediaText/MediaText.ts)
+        return {}
+    show = git_show or _default_git_show
+    out: dict[str, str] = {}
+    for fname in _SIBLING_FILES:
+        sib_path = p.parent.joinpath(fname).as_posix()
+        for branch in branch_list:
+            s = show(helix_root, branch, sib_path)
+            if s:
+                out[fname] = s
+                break
+    return out
 
 
 def render_cem(elements: list[dict]) -> str:

@@ -5,6 +5,7 @@ import json
 
 from agents.component_code_generator import (
     ComponentCodeGeneratorOutput,
+    find_sibling_sources,
     fork_component,
     generate_component_code,
     render_cem,
@@ -41,25 +42,34 @@ def _reader_missing(ref, root):
 # fork_component — deterministic transforms
 # --------------------------------------------------------------------------- #
 
-def test_fork_retags_to_customer_namespace():
-    src, tag, cls = fork_component(_BASELINE, "acme")
-    assert tag == "acme-icon-button"
-    assert '@customElement("acme-icon-button")' in src
-    assert "hx-" not in src            # every hx- prefix rewritten (incl. nested <hx-icon>)
-    assert "</acme-icon>" in src       # nested custom-element tag rewritten (closing tag is bare)
+# Correction #18 (Architecture B fork-then-overlay): Path-A preserves HELIX identity verbatim —
+# tags, classes, and --helix-* token refs are KEPT (branding = value-swap in the fork's Style
+# Dictionary, not ref renaming). Renamed --{slug}-* refs would dangle in the fork.
+
+def test_fork_preserves_helix_tag():
+    src, tag, _cls = fork_component(_BASELINE, "acme")
+    assert tag == "hx-icon-button"                       # original tag preserved
+    assert '@customElement("hx-icon-button")' in src
+    assert "<hx-icon " in src and "</hx-icon>" in src    # nested custom-element tags untouched
+    assert "acme-" not in src                            # slug never rewrites component source
 
 
-def test_fork_renames_class_pascal_plus_element():
-    src, tag, cls = fork_component(_BASELINE, "acme")
-    assert cls == "AcmeIconButtonElement"
-    assert "export class AcmeIconButtonElement extends LitElement" in src
-    assert "HxIconButton" not in src
+def test_fork_preserves_helix_class():
+    src, _tag, cls = fork_component(_BASELINE, "acme")
+    assert cls == "HxIconButton"                         # exported class name preserved
+    assert "export class HxIconButton extends LitElement" in src
 
 
-def test_fork_retokenizes_to_customer_token_namespace():
+def test_fork_preserves_helix_token_namespace():
     src, _, _ = fork_component(_BASELINE, "acme")
-    assert "var(--acme-colors-text-primary)" in src
-    assert "--helix-" not in src
+    assert "var(--helix-colors-text-primary)" in src     # --helix-* refs kept (resolve in the fork)
+    assert "--acme-" not in src
+
+
+def test_fork_is_verbatim_copy():
+    # Sascha's "looks like a copy of the original" is now the CORRECT behaviour, not a bug.
+    src, _, _ = fork_component(_BASELINE, "acme")
+    assert src == _BASELINE
 
 
 def test_fork_is_byte_deterministic():
@@ -70,6 +80,73 @@ def test_fork_is_byte_deterministic():
 
 def test_slugify_multiword_customer():
     assert slugify("Acme Corp GmbH") == "acme-corp-gmbh"
+
+
+# --------------------------------------------------------------------------- #
+# Correction #18 — organism fork preserves identity + forks siblings
+# --------------------------------------------------------------------------- #
+
+_MEDIATEXT = '''\
+import { LitElement, html, css } from "lit";
+import { customElement } from "lit/decorators.js";
+import type { MediaTextVariant } from "./types.js";
+
+@customElement("hx-media-text")
+export class HxMediaText extends LitElement {
+    static styles = css`:host{ color: var(--helix-colors-text-primary); }`;
+    render() { return html`<section><slot></slot></section>`; }
+}
+'''
+
+
+def test_fork_mediatext_preserves_identity():
+    src, tag, cls = fork_component(_MEDIATEXT, "acme")
+    assert tag == "hx-media-text"                        # tag preserved
+    assert cls == "HxMediaText"                          # class preserved
+    assert "var(--helix-colors-text-primary)" in src     # --helix-* ref preserved
+    assert src == _MEDIATEXT                             # verbatim
+
+
+def test_find_sibling_sources_own_dir_convention():
+    # own-directory convention (MediaText/MediaText.ts) → fork types.ts + index.ts siblings
+    served = {
+        "packages/elements/src/organisms/MediaText/types.ts": "export type MediaTextVariant = 'a' | 'b';\n",
+        "packages/elements/src/organisms/MediaText/index.ts": "export * from './MediaText.js';\n",
+    }
+    out = find_sibling_sources("master:packages/elements/src/organisms/MediaText/MediaText.ts",
+                               "/root", git_show=lambda root, branch, path: served.get(path))
+    assert set(out) == {"types.ts", "index.ts"}
+    assert out["types.ts"].startswith("export type MediaTextVariant")
+
+
+def test_find_sibling_sources_flat_convention_yields_none():
+    # flat convention (organisms/MediaText.ts): stem != parent dir → no siblings
+    out = find_sibling_sources("master:packages/elements/src/organisms/MediaText.ts",
+                               "/root", git_show=lambda *a: "SHOULD-NOT-BE-USED")
+    assert out == {}
+
+
+def test_generate_forks_sibling_types_and_index(tmp_path):
+    els = [{"slot": "MediaText", "baseline_ref": "MediaText",
+            "derivation": "forked_from_baseline", "confidence": "authoritative"}]
+    ref = "master:packages/elements/src/organisms/MediaText/MediaText.ts"
+
+    def _reader(r, root):
+        return (_MEDIATEXT, ref) if r else None
+
+    def _siblings(source_ref, root):
+        assert source_ref == ref
+        return {"types.ts": "export type MediaTextVariant = 'a' | 'b';\n",
+                "index.ts": "export * from './MediaText.js';\n"}
+
+    env = generate_component_code(customer_slug="acme", scope="msq-dx", elements=els,
+                                  source_reader=_reader, sibling_reader=_siblings, timestamp=TS,
+                                  output_dir=str(tmp_path / "pkg"))
+    assert env.status == "success" and env.summary.fork_deterministic == 1
+    d = tmp_path / "pkg" / "packages" / "acme-elements" / "src" / "elements" / "mediatext"
+    assert (d / "HxMediaText.ts").is_file()
+    assert (d / "types.ts").read_text().startswith("export type MediaTextVariant")
+    assert (d / "index.ts").read_text().startswith("export * from './MediaText.js'")
 
 
 # --------------------------------------------------------------------------- #
@@ -116,10 +193,12 @@ def test_generate_forks_path_a_and_generates_path_b(tmp_path):
     assert env.summary.fork_deterministic == 1 and env.summary.from_spec == 1 and env.summary.deferred == 0
     assert env.non_deterministic is False                   # Mock generator → deterministic
     assert env.cost_summary.total_input_tokens == 0         # no real LLM (Mock)
-    # forked Path-A file materialised at the customer-namespaced path
-    f = tmp_path / "pkg" / "packages" / "acme-elements" / "src" / "elements" / "iconbutton" / "AcmeIconButtonElement.ts"
-    assert f.is_file() and "acme-icon-button" in f.read_text()
-    # from-spec Path-B file materialised + gate passed
+    # forked Path-A file materialised with PRESERVED HELIX identity (Correction #18): the file is
+    # named for the original class, and the source keeps hx- tags + --helix-* refs verbatim.
+    f = tmp_path / "pkg" / "packages" / "acme-elements" / "src" / "elements" / "iconbutton" / "HxIconButton.ts"
+    body = f.read_text()
+    assert f.is_file() and "hx-icon-button" in body and "var(--helix-" in body and "acme-" not in body
+    # from-spec Path-B (no baseline → generated) is NOT covered by Correction #18 → stays customer-namespaced
     g = tmp_path / "pkg" / "packages" / "acme-elements" / "src" / "elements" / "heroteaser" / "AcmeHeroteaserElement.ts"
     assert g.is_file() and "acme-heroteaser" in g.read_text()
     assert (tmp_path / "pkg" / "packages" / "acme-elements" / "custom-elements.json").is_file()

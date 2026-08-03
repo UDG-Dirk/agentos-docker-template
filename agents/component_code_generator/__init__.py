@@ -14,6 +14,7 @@ from agents.component_code_generator.models import (
 )
 from agents.component_code_generator.scaffolding import (
     find_baseline_source,
+    find_sibling_sources,
     fork_component,
     get_configured_fork_branches,
     is_valid_lit_source,
@@ -36,6 +37,7 @@ __all__ = [
     "CostSummary",
     "BlockingWarning",
     "fork_component",
+    "find_sibling_sources",
     "route_element",
     "render_cem",
     "slugify",

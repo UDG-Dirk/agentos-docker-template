@@ -52,8 +52,8 @@ def build_report() -> list[tuple[str, str, bool]]:
         checks.append((vt, desc, bool(ok)))
 
     chk("VT-1", "Path-A element forked deterministically", forked is not None and forked.path == "fork_deterministic")
-    chk("VT-2", "tag re-namespaced to customer (acme-label)", forked and forked.element_tag == "acme-label")
-    chk("VT-3", "class PascalCase+Element (AcmeLabelElement)", forked and forked.class_name == "AcmeLabelElement")
+    chk("VT-2", "HELIX tag preserved verbatim (hx-label) — Correction #18", forked and forked.element_tag == "hx-label")
+    chk("VT-3", "HELIX class preserved verbatim (HxLabel) — Correction #18", forked and forked.class_name == "HxLabel")
     chk("VT-6", "no-baseline element GENERATED from-spec (not fabricated blindly)",
         spec is not None and spec.path == "from_spec" and spec.element_tag == "acme-heroteaser")
     chk("VT-17", "structural validation gate applied + passed on generated code",
