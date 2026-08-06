@@ -49,7 +49,10 @@ mandatory `@property` (regression test in P2). Run 2: 5/5 pass. SP-6 held throug
 run FLAGGED all 5 (structural_gate_failed) and emitted ZERO broken files (no fabrication).
 
 **3d v0.1 FORMALLY CLOSED** at this hardening milestone (SP-25 technical hardening; customer-fit
-validation on a real external engagement remains a separate future milestone).
+validation on a real external engagement remains a separate future milestone). Both Path A and
+Path B are built and have run live. Path B's output quality has since **plateaued**: further
+improvement attempts were tried and didn't move the needle, so this is the accepted ceiling, not
+a milestone still pending — VT-13 (customer-fit validation) is the one open item.
 
 ## Path 1 (v0.2) — branch-aware Path-A (CLOSED, live 2026-07-31)
 

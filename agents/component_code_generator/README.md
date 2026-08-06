@@ -11,8 +11,13 @@ Given step 3c's output, it produces a customer package of real Lit (a web-compon
 TypeScript source: existing baseline components are copied over unchanged, and components that
 don't exist in the baseline yet are generated from the Figma design.
 
-**Status:** v0.1 Phase 1 (deterministic path only) built and deployed. Workflow id
-`helix-component-code-generator`, registered in `app/main.py`.
+**Status:** workflow id `helix-component-code-generator`, registered in `app/main.py` and live.
+Path A (fork) is production-ready. Path B (from-spec generation) has already run end-to-end with a
+real LLM — it is not "coming later" — but its output quality has **plateaued**: two rounds of
+improvement were tried and didn't move the needle further, so the current ceiling is accepted as-is
+rather than actively worked on. Whether Path B's output actually matches what a real front-end
+reviewer would accept is still unvalidated against a real client engagement (tracked as VT-13 in
+[`VERIFICATION.md`](VERIFICATION.md)).
 
 ## The two generation paths
 
@@ -27,7 +32,7 @@ Every component is handled one of two ways, decided automatically per component:
   a set of structural rules ("the structural gate") before accepting it. If a component fails the
   gate twice, it is flagged for human review rather than shipped broken.
 
-Phase 1 (what's built today) implements Path A. Path B lands in Phase 2.
+Both paths are built. Path B is plateaued (see Status above), not still-pending work.
 
 ## How Path A branding actually works ("Architecture B")
 
@@ -44,9 +49,10 @@ The current approach ("Architecture B", the ratified design):
    (`hx-button`), its class name (`HxButton`), and its CSS variable references
    (`var(--helix-color-primary)`) all stay exactly as they were.
 2. Customer branding happens separately, later: only the **value** each CSS variable resolves to
-   changes, set in the customer fork's copy of Style Dictionary (the tool that turns design-token
-   JSON into CSS). The variable name stays `--helix-color-primary`; what colour it points to differs
-   per customer.
+   changes, set in the customer fork's copy of Style Dictionary. The variable name stays
+   `--helix-color-primary`; what colour it points to differs per customer. **This step is the
+   design target, not yet wired end-to-end** — it's filed as Phase 2 of the overlay-packager work
+   and hasn't run yet.
 
 So "forking a component" in this pipeline means an unmodified copy, not a renamed one. Branding is
 applied at the token layer, not by rewriting component source.

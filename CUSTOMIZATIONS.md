@@ -84,10 +84,14 @@ run `git log 113864d..HEAD --oneline` for the authoritative list.
 
 - **`Dockerfile`** — `CMD` runs uvicorn (`uvicorn app.main:app --host 0.0.0.0 --port 8000`); upstream shipped `["chill"]`. `EXPOSE 8000`, entrypoint `scripts/entrypoint.sh` (waits for DB, then execs). **Build Pack = Dockerfile; container port = 8000** (Coolify "Ports Exposes" must be 8000, not the 3000 default, or Traefik 502s).
 - **`requirements.txt` / `pyproject.toml`** — added `fastmcp` (+ `agno[os,slack]`); pinned `agno==2.6.7`.
-- **`example.env`** — added a `# --- MCP Tool Secrets ---` section (`CONTEXT7_API_KEY`).
+- **`.env.example`** (the canonical template — see [`docs/SETUP.md`](docs/SETUP.md)) — added a
+  `# --- MCP Tool Secrets ---` section (`CONTEXT7_API_KEY`). A second, no-dot-prefix `example.env`
+  predated this rename, had drifted (its JWT-setup comment contradicted
+  [`docs/AUTH_KEYS.md`](docs/AUTH_KEYS.md)), and was removed 2026-08-06 — `.env.example` is the
+  only template now.
 - **`.gitignore`** — excludes local scratch **not** part of the deployable template: `.omc/`, `agents/--first-contact/`, `standalone/`; plus **signing material / live credentials** (`*.pem`, `*.key`, `*_token`, `*.jwt`, `.agno-keys/`) so a keypair or minted token can never be committed.
 - **Untracked/gitignored scratch (ours, never deployed):** `agents/--first-contact/` (hackathon scripts + generated `output/`), `standalone/` (`hello_agent.py`, helix experiments), `.omc/`.
-- **Project additions:** `scripts/mint_token.py` + `scripts/README.md` — mint AgentOS RS256 JWTs (BYO-keypair auth) and wire the `agno-prod` HTTP MCP into Claude Code; `docs/SETUP.md` §8 gained the token/MCP subsection.
+- **Project additions:** `scripts/mint_token.py` + `scripts/README.md` — mint AgentOS RS256 JWTs (BYO-keypair auth) and wire the `agno-prod` HTTP MCP into Claude Code; `docs/SETUP.md` §9 gained the token/MCP subsection.
 - **Also customized:** `README.md` (HELIX header + pipeline overview), `AGENTS.md`/`CLAUDE.md` (HELIX pipeline note), and the primary CI is now **`.gitlab-ci.yml`** (security scanning + the `build-cem` and `mint-token` jobs), not the upstream `.github/` workflows. `docs/` + `scripts/` carry the additions above.
 - **Upstream, unchanged:** `evals/`, `compose.yaml`, `.mcp.json`, `LICENSE`.
 

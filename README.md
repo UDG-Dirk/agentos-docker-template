@@ -71,8 +71,8 @@ Two kinds of step, and the difference matters:
 | **Token Normalizer** | Cleans the extracted tokens into a standards-compliant token tree (W3C Design Tokens), then **pauses for a person to review** before moving on. | Deterministic step (no AI) + human review | **Live** |
 | **Baseline Reader** | Reads the team's existing baseline design system into an inventory, so later steps can compare a client against it. | Deterministic workflow (no AI) | **Live** |
 | **Semantic Matcher** | Matches each client token/component to its closest counterpart in the baseline, with a confidence score — and asks a human when it isn't sure. | AI-assisted (the one LLM step) | Tested library; live endpoint planned |
-| **Theme Generator** | Forks the baseline into a customer-specific package and works out which components map to it. | Deterministic workflow (no AI) | **Live** |
-| **Component Code Generator** | Produces the actual component source: copies matched baseline components unchanged, generates genuinely new ones from the Figma spec. | Deterministic fork + AI-assisted generation for new components | **Live** |
+| **Theme Generator** | Forks the baseline into a customer-specific package and works out which components map to it; for uncertain matches, a review pass uses an LLM. | Mostly deterministic + one AI-assisted review pass | **Live**, but no longer a planned station on the roadmap — see note below |
+| **Component Code Generator** | Produces the actual component source: copies matched baseline components unchanged (Path A), or generates genuinely new ones from the Figma spec with an LLM (Path B). | Deterministic fork + AI-assisted generation | **Live** — Path A production-ready; Path B has run live but output quality has plateaued (see [`agents/component_code_generator/README.md`](agents/component_code_generator/README.md)) |
 
 ```mermaid
 flowchart TD
@@ -89,6 +89,12 @@ flowchart TD
 Each live step is an Agno **workflow** you can call over HTTP; the deep-dive for each lives in its own
 README under [`agents/`](agents/) (each opens with a plain-language glossary). Architecture overview:
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+> **Note on Theme Generator:** its code is deployed and still runs. But the roadmap no longer treats
+> it as a separate pipeline station — the customer-branding work it did is being folded into the
+> not-yet-built overlay packager instead (see `docs/ARCHITECTURE.md`'s Architecture B section).
+> Don't build on top of this step; treat it as a historical stopgap, still callable but not the
+> long-term design.
 
 ### Which extractor workflow do I use?
 

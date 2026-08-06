@@ -6,7 +6,8 @@ machine-readable **JSON inventory** of its tokens, components, Storybook
 conventions, and known constraints.
 
 The inventory is the **baseline-comparison input** for the rest of the pipeline —
-it answers **GAP-10 ("no baseline comparison input")**. Downstream it feeds the
+it answers **GAP-10 ("no baseline comparison input")** — tracked internally, no public gap
+register exists in this repo to link to. Downstream it feeds the
 Semantic Matcher (3b), Theme Generator (3c), and New Component Scaffolder (3d),
 which reason about how a client's design system diverges from the helix baseline.
 
