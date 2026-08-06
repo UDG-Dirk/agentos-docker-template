@@ -1,11 +1,7 @@
 # Improve an Agent
 
-> **Dev-loop note (updated 2026-07):** this guide predates the switch to bare-metal local dev, so some
-> commands below are stale. Where it says `docker compose … agentos-api` or `docker compose up -d --build`,
-> instead restart the local **`uvicorn`** process (run with `--reload`, saving a file reloads it
-> automatically). Where it says `docker logs agentos-api`, read the `uvicorn` console. The only container
-> in local dev is Postgres — `docker compose -f docker-compose.dev.yml up -d` (container `helix-agents-db`).
-> Full current setup: [`SETUP.md`](SETUP.md). The step-by-step *method* below is still correct.
+> The app runs bare metal locally (venv + `uvicorn`). The only container in local dev is Postgres,
+> and even that's optional — see [`SETUP.md`](SETUP.md).
 
 > Claude Code prompt. Open Claude Code in this repo and paste:
 > `Run docs/improve-agent.md`
@@ -20,14 +16,8 @@ This is a **single-pass** loop. One pass usually takes 15-30 minutes depending o
 
 ## 0. Preconditions
 
-- Live container reachable: `curl -sSf http://localhost:8000/health` returns 200. If not, ask the user to `docker compose up -d --build` first. (`docker compose ps` is unreliable from worktrees or alternate clones — trust the health probe.)
-- Live container is bound to *this* checkout — otherwise hot-reload won't see your edits:
-
-  ```bash
-  docker inspect agentos-api --format '{{range .Mounts}}{{.Source}}{{"\n"}}{{end}}' | grep -F "$(pwd)"
-  ```
-
-  Empty result = the container's `/app` is bound to a different repo path. Either `cd` to that repo or restart the container from this directory (`docker compose down && docker compose up -d --build`).
+- Server reachable: `curl -sSf http://localhost:8000/health` returns 200. If not, ask the user to start it from the repo root with the venv active: `dotenv run -- uvicorn app.main:app --reload --port 8000`.
+- The running `uvicorn` process is *this* checkout — otherwise hot-reload won't see your edits. Confirm `pwd` matches this repo and the active venv (`echo $VIRTUAL_ENV`) points at this repo's `.venv`. A second clone or an old process started from another directory is the usual mismatch.
 - Ask the user for the target agent **slug** (e.g. `web-search`).
 - Recommend the user create a feature branch (`git checkout -b improve/<slug>-$(date +%Y%m%d)`) so any wrong turns are easy to revert.
 
@@ -67,13 +57,10 @@ curl -sS -X POST http://localhost:8000/agents/<slug>/runs \
 jq -r '.content // .' < /tmp/probe-<n>.json
 ```
 
-Read the tool calls from the container (`Running: <tool>(` is the line shape agno emits per tool call when `AGNO_DEBUG=True`, which compose sets for dev):
-
-```bash
-docker logs agentos-api --since 30s 2>&1 | grep -E "Running: \w+\(" | head -40
-```
-
-Logs are container-global. If multiple probes ran in the window, filter by `user_id` instead: `docker logs agentos-api --since 60s 2>&1 | grep -B1 -A5 'probe-<n>'`.
+Read the tool calls from the `uvicorn` terminal (`Running: <tool>(` is the line shape agno emits per
+tool call when `AGNO_DEBUG=True` is set in `.env`). If you're logging to a file
+(`... > uvicorn.log 2>&1 &`) instead of watching the terminal live, `grep -E "Running: \w+\(" uvicorn.log`
+works the same way; filter by `user_id` if multiple probes ran in the same window.
 
 Save each response so you can compare before vs. after.
 
@@ -106,13 +93,9 @@ If failures span multiple levers, fix the simplest `INSTRUCTIONS`-shaped failure
 
 ## 6. Hot-reload, re-probe failing cases
 
-Save the file. Wait ~2 seconds for uvicorn's reloader. Before re-probing, confirm the edit reached the container:
-
-```bash
-docker exec agentos-api grep -c "<unique substring from your edit>" /app/agents/<slug>.py
-```
-
-`0` means the file in the container hasn't changed — almost always a bind-mount mismatch (Step 0 catches this earlier; if you skipped that check, run `docker exec agentos-api ls -la /app/agents/<slug>.py` and compare mtime to your save). Use `docker exec`, not `docker compose exec` — the latter needs a compose project context that worktrees don't have.
+Save the file. Wait ~2 seconds for uvicorn's reloader — watch the terminal for its reload message.
+There's no bind-mount step to confirm bare-metal (uvicorn reads the file straight from disk); if the
+reload message doesn't appear, re-check Step 0's checkout mismatch.
 
 Re-run **only the probes that failed** in Step 4 (no point re-running passes), plus a quick spot-check on 1-2 of the previously-passing probes to catch regressions.
 

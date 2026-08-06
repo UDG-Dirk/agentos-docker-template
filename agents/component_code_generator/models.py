@@ -5,8 +5,10 @@ component-library package of real Lit + TypeScript code. Two generation paths (D
 
   * **Path A — deterministic fork** (Phase 1): the 3c slot maps to a baseline component
     (``forked_from_baseline`` / ``agent_reconciled`` with a baseline_ref). 3d reads the baseline
-    Lit source from helix-code (READ-ONLY) and deterministically re-tags / re-classes / re-tokenises
-    it into the customer namespace. Byte-identical by construction → no structural gate, no LLM.
+    Lit source from helix-code (READ-ONLY) and forks it VERBATIM into the customer package
+    (Architecture B — tag/class/``--helix-*`` refs preserved; branding is a token value swap in
+    the fork's Style Dictionary, not a ref rename). Byte-identical by construction → no structural
+    gate, no LLM.
   * **Path B — from-spec** (Phase 2): no baseline (``customer_passthrough`` /
     ``agent_flagged_review``) → LLM generation from thin Figma metadata, gated by the structural
     validation gate (Adjustment 1). Phase 1 routes these to DEFERRED and never fabricates.

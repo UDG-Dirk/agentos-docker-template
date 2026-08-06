@@ -1,11 +1,7 @@
 # Create a New Agent
 
-> **Dev-loop note (updated 2026-07):** this guide predates the switch to bare-metal local dev, so some
-> commands below are stale. Where it says `docker compose … agentos-api` or `docker compose up -d --build`,
-> instead restart the local **`uvicorn`** process (run with `--reload`, saving a file reloads it
-> automatically). Where it says `docker logs agentos-api`, read the `uvicorn` console. The only container
-> in local dev is Postgres — `docker compose -f docker-compose.dev.yml up -d` (container `helix-agents-db`).
-> Full current setup: [`SETUP.md`](SETUP.md). The step-by-step *method* below is still correct.
+> The app runs bare metal locally (venv + `uvicorn`). The only container in local dev is Postgres,
+> and even that's optional — see [`SETUP.md`](SETUP.md).
 
 > Claude Code prompt. Open Claude Code in this repo and paste:
 > `Run docs/create-new-agent.md`
@@ -14,9 +10,10 @@ You are creating a new agent in this AgentOS template. The user already has the 
 
 ## 0. Preconditions
 
-- Live container reachable: `curl -sSf http://localhost:8000/health` returns 200. (`docker compose ps` is unreliable from worktrees or alternate clones — trust the health probe.)
+- Server reachable: `curl -sSf http://localhost:8000/health` returns 200.
 
-If it isn't reachable, ask the user to run `docker compose up -d --build` and wait for it to come up.
+If it isn't reachable, ask the user to start it from the repo root with the venv active:
+`dotenv run -- uvicorn app.main:app --reload --port 8000`, and wait for `/health` to return 200.
 
 ## 1. Ask the user
 
@@ -150,21 +147,23 @@ chat:
       - "Third example prompt"
 ```
 
-## 6. Reload the container
+## 6. Restart the server
 
-After Step 4, **always restart the container** — uvicorn's hot-reload doesn't reliably pick up newly registered modules.
+After Step 4, **always restart the `uvicorn` process** — hot-reload doesn't reliably pick up newly
+registered modules. Stop it (`Ctrl-C` in its terminal) and start it again:
 
 - **No new pip deps** (the common case):
 
   ```bash
-  docker compose restart agentos-api
+  dotenv run -- uvicorn app.main:app --reload --port 8000
   ```
 
-- **New pip deps added in Step 2** — update the lockfile and rebuild:
+- **New pip deps added in Step 2** — update the lockfile, reinstall, then restart:
 
   ```bash
   ./scripts/generate_requirements.sh
-  docker compose up -d --build
+  pip install -r requirements.txt
+  dotenv run -- uvicorn app.main:app --reload --port 8000
   ```
 
 Then verify the agent shows up in the registry before smoke-testing:
@@ -194,18 +193,14 @@ jq -r '.content // .' < /tmp/agent-out.json
 
 Pass = `HTTP 200` and a non-empty `.content` field.
 
-Check the container logs to see which tools fired:
-
-```bash
-docker logs agentos-api --since 30s 2>&1 | grep -E "Running: \w+\(" | head -40
-```
-
-(`Running: <tool>(` is the line shape agno emits per tool call when `AGNO_DEBUG=True`, which compose sets for dev. Without `AGNO_DEBUG`, expect no matches — `HTTP 200` and a non-empty body are then your only signal.)
+Read the `uvicorn` terminal to see which tools fired — with `AGNO_DEBUG=True` set in `.env`, agno
+prints one `Running: <tool>(` line per tool call directly to that console. Without `AGNO_DEBUG`,
+expect no such lines; `HTTP 200` and a non-empty body are then your only signal.
 
 ## 8. If the smoke test fails
 
-- **HTTP 404** — the agent isn't registered, the container wasn't restarted, or your edits aren't reaching the bind-mount. Re-check Step 4 and Step 6. If both look right, run `docker inspect agentos-api --format '{{ range .Mounts }}{{ .Source }} → {{ .Destination }}{{ "\n" }}{{ end }}'` to confirm `/app` is bound to *this* repo's path (a stale clone or a different worktree is a common cause).
-- **HTTP 5xx** — read `docker logs agentos-api --tail 50` for the traceback. Most failures are import errors, missing env vars, or a typo in the agent's `tools=` list.
+- **HTTP 404** — the agent isn't registered, or the server wasn't restarted. Re-check Step 4 and Step 6. If both look right, confirm you're running `uvicorn` from *this* checkout (`pwd` and the active venv both point at this repo) — a second clone or a stale process from another directory is the usual cause.
+- **HTTP 5xx** — read the traceback in the `uvicorn` terminal. Most failures are import errors, missing env vars, or a typo in the agent's `tools=` list.
 - **Empty response** — check the logs for tool call errors (rate limits, missing API keys, MCP server unreachable). Surface the issue to the user; don't paper over it.
 - **Tool not firing when expected** — the instruction prompt isn't strong enough. Tell the user; suggest tightening or running [`docs/improve-agent.md`](improve-agent.md) once the agent is loaded.
 

@@ -29,11 +29,16 @@ Agents may also be created at runtime via the **Components API** (config-only:
 model + instructions + memory + history + db, no redeploy). Those are REST-only and
 do **not** carry tools/knowledge — see the skill's GOTCHAS.
 
-The repo also hosts the **HELIX design-token pipeline** — deterministic, zero-LLM
-Agno workflows registered in `app/main.py` and defined in `app/workflows/`:
-`helix-figma-extractor`, `helix-client-extractor`, `helix-composition-only-extractor`,
-and `helix-baseline-reader`. Their per-stage logic lives in the `agents/figma_extractor/`,
-`agents/token_normalizer/`, and `agents/baseline_reader/` subpackages.
+The repo also hosts the **HELIX design-token pipeline** — Agno workflows registered in
+`app/main.py` and defined in `app/workflows/`: `helix-figma-extractor`, `helix-client-extractor`,
+`helix-composition-only-extractor`, `helix-baseline-reader`, `helix-theme-generator` (forks the
+baseline into a customer package), and `helix-component-code-generator` (produces the customer
+Lit + TypeScript component source; see [`agents/component_code_generator/README.md`](agents/component_code_generator/README.md)
+for how customer branding is applied). The first four are deterministic, zero-LLM; the last two
+combine a deterministic fork path with an AI-assisted path for genuinely new components. Their
+per-stage logic lives in the `agents/figma_extractor/`, `agents/token_normalizer/`,
+`agents/baseline_reader/`, `agents/theme_generator/`, and `agents/component_code_generator/`
+subpackages.
 
 Shared:
 - PostgreSQL + pgvector for sessions, memory, knowledge.
@@ -48,10 +53,10 @@ Shared:
 
 | File | Purpose |
 |------|---------|
-| [`app/main.py`](app/main.py) | AgentOS entrypoint — agent + workflow registry (the four HELIX workflows in `app/workflows/`), lifespan (KB ingest), Slack, MCP server, auth gate. |
+| [`app/main.py`](app/main.py) | AgentOS entrypoint — agent + workflow registry (the six HELIX workflows in `app/workflows/`), lifespan (KB ingest), Slack, MCP server, auth gate. |
 | [`app/settings.py`](app/settings.py) | `default_model()` factory. |
 | [`app/config.yaml`](app/config.yaml) | Quick prompts per agent (keyed by agent `id`). |
-| [`agents/`](agents/) | Single-file for the generic agents (see Architecture); multi-file subpackages for the HELIX pipeline (`figma_extractor/`, `token_normalizer/`, `baseline_reader/`, `semantic_matcher/`). |
+| [`agents/`](agents/) | Single-file for the generic agents (see Architecture); multi-file subpackages for the HELIX pipeline (`figma_extractor/`, `token_normalizer/`, `baseline_reader/`, `semantic_matcher/`, `theme_generator/`, `component_code_generator/`). |
 | [`tools/`](tools/) | Shared tool factories (e.g. `parallel_search.py`, `context7.py`). |
 | [`knowledge/`](knowledge/) | Knowledge-base definitions + ingestion (e.g. `dark_factory_kb.py`). |
 | [`db/session.py`](db/session.py) | `get_postgres_db()` (id `agentos-db`), `create_knowledge()`, embedder id. |
