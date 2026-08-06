@@ -155,7 +155,7 @@ Target: `web-search`. The user wants the agent to also be able to read PDFs from
 
 **Step 4** — propose: *"Add `FirecrawlTools` so `web-search` can fetch and parse PDFs. Needs `FIRECRAWL_API_KEY` in `.env` and `firecrawl-py` in `pyproject.toml`. Add a quick prompt that exercises a PDF URL."* User says yes.
 
-Edit `agents/web_search.py` to import `FirecrawlTools` and add it to `tools=[web_tools, FirecrawlTools()]`. Add `FIRECRAWL_API_KEY=` to [`example.env`](../example.env). Add `firecrawl-py` to `pyproject.toml`. Add a quick prompt to `app/config.yaml`:
+Edit `agents/web_search.py` to import `FirecrawlTools` and add it to `tools=[web_tools, FirecrawlTools()]`. Add `FIRECRAWL_API_KEY=` to [`.env.example`](../.env.example). Add `firecrawl-py` to `pyproject.toml`. Add a quick prompt to `app/config.yaml`:
 
 ```yaml
 web-search:

@@ -15,7 +15,7 @@ Agno Workflow (headless: reads Figma with the Framelink community MCP + a Person
                                   pauses for a human review
   Step 3a Baseline Reader      → baseline inventory             [BUILT + DEPLOYED]
   Step 3b Semantic Matcher     → client→baseline match          [LIBRARY ONLY — no endpoint yet]
-  Step 3c Theme Generator      → forked, customer-branded package [BUILT + DEPLOYED]
+  Step 3c Theme Generator      → forked, customer-branded package [DEPLOYED, HISTORICAL — see note]
   Step 3d Component Code Generator → Lit + TypeScript components [BUILT + DEPLOYED]
   Overlay Packager             → opens the delivery MR          [PLANNED]
   Step 5  Quality Gate         → validation (no LLM)            [PLANNED]
@@ -80,16 +80,17 @@ stages of maturity:
 |---|---|---|---|
 | 3a | **Baseline Reader** | read the existing baseline design-system repo into an inventory (tokens, components, conventions) | **Built + deployed** — runs alongside Step 1 and as the standalone `helix-baseline-reader` workflow |
 | 3b | **Semantic Matcher** | match each client token/component to its baseline counterpart, with a confidence score and a human-review flag when unsure | **Library only** — the scoring logic is built and tested (`agents/semantic_matcher/`); no running endpoint/workflow yet |
-| 3c | **Theme Generator** | fork the baseline into a customer package and substitute token values (see **Architecture B** below) | **Built + deployed** — `helix-theme-generator` |
+| 3c | **Theme Generator** | fork the baseline into a customer package and substitute token values (see **Architecture B** below) | **Deployed, historical** — `helix-theme-generator` still runs, but is no longer a planned station; its job is being folded into the overlay packager (not yet built) |
 | 3d | **Component Code Generator** | fork existing baseline components verbatim (Path A), or generate new ones from the Figma spec (Path B) | **Built + deployed** — `helix-component-code-generator`; generates Lit + TypeScript, not Vue — see [`agents/component_code_generator/README.md`](../agents/component_code_generator/README.md) |
 
 Step 3b's matching quality still benefits from more real client Figma files (Bausch und Ströbel, GEMÜ,
 Bosch) to widen its tested pattern space before it's wired as a live endpoint. Steps 1–2 (Extractor,
-Normalizer) and 3a are independent of that. (Source: FE-DEV gap register, gap GAP-09.)
+Normalizer) and 3a are independent of that. (Tracked internally as gap GAP-09; no public gap
+register exists in this repo to link to.)
 
 ---
 
-## Architecture B — how customer branding actually works today
+## Architecture B — how customer branding is designed to work
 
 Earlier design (**Architecture A**, superseded) planned a thin customer package that only held the
 diff from baseline. The pipeline instead ships **Architecture B**: a **full fork of helix-code**, with
@@ -99,9 +100,11 @@ Concretely, when Step 3d forks an existing baseline component (**Path A**):
 
 - The component's tag (e.g. `hx-button`), class name (e.g. `HxButton`), and CSS variable references
   (e.g. `var(--helix-color-primary)`) are copied **byte-for-byte, unchanged**.
-- Only the **value** behind each CSS variable changes — done later, in the fork's Style Dictionary
-  (the tool that turns design-token JSON into CSS). The variable *name* stays `--helix-*`; only what
-  it resolves to differs per customer.
+- Only the **value** behind each CSS variable is meant to change later, in the fork's Style
+  Dictionary (the tool that turns design-token JSON into CSS) — the variable *name* stays
+  `--helix-*`. **This value-swap step itself is not built yet** — it's filed as Phase 2 of the
+  overlay-packager work (see below) and hasn't run end-to-end. What's confirmed live today is the
+  fork step's *preservation* of the unchanged names (Path A, next paragraph).
 - This replaced an earlier approach that renamed those references (e.g. `--helix-*` →
   `--acme-*`). That broke components whose styling depends on the unrenamed `--helix-*` variables
   defined elsewhere in the fork — the renamed references pointed at nothing. Fixed 2026-08-03.

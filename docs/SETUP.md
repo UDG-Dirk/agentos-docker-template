@@ -35,7 +35,8 @@ can confirm the server boots before you have a proxy key.
 > no local Postgres at all and just want something running fast, `docker-compose.dev.yml` (§5
 > Option B) is available as a fallback — it is not the supported path here.
 
-- **Python 3.12** (3.11+ works; the pipeline targets 3.12).
+- **Python 3.12 required** (`pyproject.toml`'s `requires-python = ">=3.12,<4"` enforces this — a
+  3.11 interpreter fails `pip install -e .[dev]` on the manual venv path in §3).
 - **[uv](https://docs.astral.sh/uv/)** — required by `./scripts/venv_setup.sh` (the recommended venv
   setup path in §3). Install it before running the script, or set up the venv by hand instead.
 - **Node.js** — only if you run the Figma-extraction workflows (`npx` fetches the Framelink Figma
@@ -73,7 +74,8 @@ it isn't). It removes any existing `.venv`, creates a fresh Python 3.12 venv wit
 `requirements.txt`, and installs the project itself in editable mode with dev dependencies
 (`uv pip install -e .[dev]`).
 
-Prefer to do it by hand, without `uv`?
+Prefer to do it by hand, without `uv`? Make sure `python3 --version` is 3.12 first — the metadata
+check below will fail on 3.11:
 
 ```bash
 python3 -m venv .venv

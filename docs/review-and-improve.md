@@ -6,7 +6,7 @@
 > Claude Code prompt. Open Claude Code in this repo and paste:
 > `Run docs/review-and-improve.md`
 
-You are sweeping the whole repo for public-consumption readiness — docs accuracy, every agent reachable, scripts that actually do what the docs claim, no stale env vars, format + validate clean. Most drift is mechanical (renamed file, missing entry in `example.env`, new agent not in the architecture diagram) and you fix it in place. The rest is a punch list you surface to the user.
+You are sweeping the whole repo for public-consumption readiness — docs accuracy, every agent reachable, scripts that actually do what the docs claim, no stale env vars, format + validate clean. Most drift is mechanical (renamed file, missing entry in `.env.example`, new agent not in the architecture diagram) and you fix it in place. The rest is a punch list you surface to the user.
 
 This is a **recurring sweep** — meant to be re-run regularly. On a clean repo it ends with "no diffs"; on a dirty one it brings everything back to coherent.
 
@@ -17,8 +17,8 @@ This is a **recurring sweep** — meant to be re-run regularly. On a clean repo 
 **Auto-fix in place** (no asking):
 
 - Stale file paths in any doc.
-- Missing entries in [`example.env`](../example.env) for env vars the code actually reads.
-- Stale entries in `example.env` for vars nothing reads — delete unless the surrounding comment block describes them as optional/future ("alternate model providers", "future feature"). Flag instead of fixing if intent is unclear.
+- Missing entries in [`.env.example`](../.env.example) for env vars the code actually reads.
+- Stale entries in `.env.example` for vars nothing reads — delete unless the surrounding comment block describes them as optional/future ("alternate model providers", "future feature"). Flag instead of fixing if intent is unclear.
 - Architecture diagram in `AGENTS.md` / `README.md` missing a registered agent.
 - New agent file on disk not yet imported in [`app/main.py`](../app/main.py) (add the import + append to `agents=[...]`).
 - Missing `quick_prompts` block for a registered agent (draft three from the agent's `INSTRUCTIONS`; flag the new entries so the user can refine).
@@ -43,7 +43,7 @@ This is a **recurring sweep** — meant to be re-run regularly. On a clean repo 
 
 Restate the surface area in 4-5 lines so the user can redirect before you read everything:
 
-- Top-level docs: [`README.md`](../README.md), [`AGENTS.md`](../AGENTS.md), [`docs/*.md`](../docs/), [`example.env`](../example.env).
+- Top-level docs: [`README.md`](../README.md), [`AGENTS.md`](../AGENTS.md), [`docs/*.md`](../docs/), [`.env.example`](../.env.example).
 - Code: [`app/`](../app/), [`agents/`](../agents/), [`db/`](../db/), [`evals/`](../evals/), [`scripts/`](../scripts/).
 - Configs: [`compose.yaml`](../compose.yaml), [`Dockerfile`](../Dockerfile), [`pyproject.toml`](../pyproject.toml).
 
@@ -72,8 +72,8 @@ The bulk of the work. Diff each pair below; auto-fix per the rules at the top.
 |---|---|---|
 | Every agent file is registered | [`agents/`](../agents/) ↔ `app/main.py` | New agent file not imported |
 | Every registered agent has quick prompts | `app/main.py` ↔ `app/config.yaml` | Agent added without prompts |
-| Every env var in code is documented | code grep ↔ `AGENTS.md` env table + `example.env` | New var added without entries |
-| Every var in `example.env` is read somewhere | `example.env` ↔ code grep | Stale var nobody reads |
+| Every env var in code is documented | code grep ↔ `AGENTS.md` env table + `.env.example` | New var added without entries |
+| Every var in `.env.example` is read somewhere | `.env.example` ↔ code grep | Stale var nobody reads |
 | Every path mentioned in docs exists | `README.md`, `AGENTS.md`, `docs/*.md` ↔ filesystem | Renamed or deleted file |
 | Every script mentioned in docs is real + does what's claimed | docs ↔ `scripts/` | Renamed or behavior drifted |
 | Architecture diagrams match registered agents | `README.md`, `AGENTS.md` Architecture sections | New agent missing from the tree |
