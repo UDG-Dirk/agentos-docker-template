@@ -3,10 +3,9 @@
 Source of truth for any coding agent (Claude Code, Codex, others) working in this
 repo. `CLAUDE.md` is a symlink to this file — edit one, both update.
 
-> **Agno development patterns, stack constraints, and the agent lifecycle prompts
-> (create / improve / extend / eval / review) live in the global `agno-dev`
-> skill:** `~/.claude/skills/agno-dev/`. Claude Code loads it on demand for any
-> Agno task — this file stays a lean registry so it never bloats context.
+> Stack constraints, gotchas, and MCP usage patterns are documented in `docs/AGNO_DEV_GUIDE.md`.
+> Read that before extending this repo. (The `~/.claude/skills/agno-dev/` directory exists only
+> on one developer's machine and is not part of this repo.)
 
 ## Project Overview
 
@@ -48,6 +47,21 @@ Shared:
 - Scheduler on by default (`scheduler=True`); Slack interface auto-enables when
   `SLACK_BOT_TOKEN` + `SLACK_SIGNING_SECRET` are set.
 - Auth is **production-only**: enabled when `RUNTIME_ENV == "prd"`. Local dev has none.
+
+### MCP tool surface
+
+The `agno-prod` MCP server (mounted at `https://poc-agno-api.services.plygrnd.tech/mcp`) exposes:
+
+| Tool | Signature | Description |
+|------|-----------|--------------|
+| `get_agentos_config` | `get_agentos_config()` | Full AgentOS config — registered agents/teams/workflows, interfaces, DB ids. Connectivity smoke test. |
+| `run_agent` | `run_agent(agent_id, message)` | Run an agent with a message. |
+| `run_team` | `run_team(team_id, message)` | Run a team with a message. |
+| `run_workflow` | `run_workflow(workflow_id, message)` | Run a workflow. No `additional_data`, no `background` param — REST-only for those. |
+| `get_sessions` / `get_session` / `create_session` / `get_session_runs` / `get_session_run` / `rename_session` / `update_session` / `delete_session` / `delete_sessions` | session CRUD | Manage agent/team/workflow sessions. |
+| `create_memory` / `get_memory` / `get_memories` / `update_memory` / `delete_memory` / `delete_memories` | memory CRUD | Manage user memories. |
+
+Full auth/wiring instructions: `scripts/README.md`. Full usage guide: `docs/AGNO_DEV_GUIDE.md`.
 
 ## Key Files
 
@@ -103,6 +117,6 @@ for local work, `main` for prod — never push to `main` without review.
 
 ## More
 
-- **Agno dev (everything):** `~/.claude/skills/agno-dev/` — stack, gotchas, and the
-  5 lifecycle prompts in `references/`.
+- **Agno dev (everything):** `docs/AGNO_DEV_GUIDE.md` — stack, gotchas, MCP usage patterns,
+  and the agent lifecycle (`~/.claude/skills/agno-dev/` no longer exists in this repo).
 - **Live Agno API docs:** `agno-docs` MCP (`.mcp.json`) · <https://docs.agno.com/llms-full.txt>.
