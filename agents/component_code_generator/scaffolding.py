@@ -3,8 +3,10 @@
 Pure, zero-LLM functions:
   * ``route_element`` — decide Path A (deterministic fork) vs Path B (from-spec, deferred in P1)
     from a 3c element descriptor.
-  * ``fork_component`` — the Path-A transform: re-tag, re-class, re-tokenise a baseline Lit
-    component's source into the customer namespace. Byte-identical for identical inputs.
+  * ``fork_component`` — the Path-A transform: fork a baseline Lit component's source verbatim
+    (Architecture B — tag, class, and ``--helix-*`` token refs are preserved, not renamed; branding
+    is a token *value* swap applied later in the fork's Style Dictionary). Byte-identical for
+    identical inputs.
   * ``find_baseline_source`` — locate a baseline component's ``.ts`` in the helix-code checkout
     (READ-ONLY) by its ref/name.
   * package scaffolding, minimal CEM, and the 3d PROVENANCE.md extension.

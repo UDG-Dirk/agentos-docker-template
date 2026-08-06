@@ -71,8 +71,8 @@ Two kinds of step, and the difference matters:
 | **Token Normalizer** | Cleans the extracted tokens into a standards-compliant token tree (W3C Design Tokens), then **pauses for a person to review** before moving on. | Deterministic step (no AI) + human review | **Live** |
 | **Baseline Reader** | Reads the team's existing baseline design system into an inventory, so later steps can compare a client against it. | Deterministic workflow (no AI) | **Live** |
 | **Semantic Matcher** | Matches each client token/component to its closest counterpart in the baseline, with a confidence score — and asks a human when it isn't sure. | AI-assisted (the one LLM step) | Tested library; live endpoint planned |
-| **Theme Generator** | Turns the matches into the CSS theme overrides for that client. | Deterministic workflow (no AI) | Planned |
-| **New-Component Builder** | Scaffolds only the genuinely new components a client needs, following the baseline's conventions. | Deterministic workflow (no AI) | Planned |
+| **Theme Generator** | Forks the baseline into a customer-specific package and works out which components map to it. | Deterministic workflow (no AI) | **Live** |
+| **Component Code Generator** | Produces the actual component source: copies matched baseline components unchanged, generates genuinely new ones from the Figma spec. | Deterministic fork + AI-assisted generation for new components | **Live** |
 
 ```mermaid
 flowchart TD
@@ -81,10 +81,9 @@ flowchart TD
     B["Baseline design system"] --> BR["Baseline Reader<br/>(deterministic)"]
     TN --> SM["Semantic Matcher<br/>(AI-assisted · endpoint planned)"]
     BR --> SM
-    SM --> TG["Theme Generator<br/>(planned)"]
-    SM --> NC["New-Component Builder<br/>(planned)"]
-    TG --> OUT["Themed design system<br/>(CSS + components)"]
-    NC --> OUT
+    SM --> TG["Theme Generator<br/>(live)"]
+    TG --> CCG["Component Code Generator<br/>(live)"]
+    CCG --> OUT["Customer component package<br/>(Lit + TypeScript)"]
 ```
 
 Each live step is an Agno **workflow** you can call over HTTP; the deep-dive for each lives in its own
@@ -173,7 +172,7 @@ MCP-capable LLM client.
 
 **Validated against HELIX:**
 - **Claude Code** — used daily to build and run this pipeline; its MCP integration is confirmed against
-  all four deployed workflows.
+  the deployed workflows.
 
 **MCP-capable, should work, not yet tested against HELIX:**
 - **GitHub Copilot** (MCP support in Copilot Chat), **Cursor**, **Continue.dev**, **Zed** — all speak MCP
@@ -190,18 +189,23 @@ HELIX team lead — we'll move it up the list.
 ### Step 1: Run locally
 
 The full, verified walkthrough (prerequisites, database, model access, troubleshooting) is in
-[`docs/SETUP.md`](docs/SETUP.md) — it takes a clean clone to a running server. The short version:
+[`docs/SETUP.md`](docs/SETUP.md) — it takes a clean clone to a running server. The short version,
+against a **bare-metal Postgres** (this team's setup, [`docs/SETUP.md` §5 Option A](docs/SETUP.md)):
 
 ```sh
 # Clone via GitLab → Clone (the project has been transferred before — don't trust a hardcoded path)
 cd helix-agents
 
-./scripts/venv_setup.sh && source .venv/bin/activate   # Python venv + deps
+./scripts/venv_setup.sh && source .venv/bin/activate   # Python venv + deps (needs uv)
 cp .env.example .env                                    # then fill in the placeholders
 
-docker compose -f docker-compose.dev.yml up -d          # Postgres + pgvector (the only container)
+# create the ai/ai database + pgvector extension on your local Postgres — see docs/SETUP.md §5
 dotenv run -- uvicorn app.main:app --reload --port 8000 # the app, bare-metal
 ```
+
+No local Postgres at all? `docker compose -f docker-compose.dev.yml up -d` starts one (the only
+container this repo uses in local dev) — see [`docs/SETUP.md` §5 Option B](docs/SETUP.md) — but it's
+a fallback, not the supported path here.
 
 Confirm it's up: `curl -sf http://localhost:8000/health` returns `200` (no auth in local dev). The API
 docs are at [http://localhost:8000/docs](http://localhost:8000/docs).

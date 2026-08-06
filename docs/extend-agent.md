@@ -1,11 +1,7 @@
 # Extend an Agent
 
-> **Dev-loop note (updated 2026-07):** this guide predates the switch to bare-metal local dev, so some
-> commands below are stale. Where it says `docker compose … agentos-api` or `docker compose up -d --build`,
-> instead restart the local **`uvicorn`** process (run with `--reload`, saving a file reloads it
-> automatically). Where it says `docker logs agentos-api`, read the `uvicorn` console. The only container
-> in local dev is Postgres — `docker compose -f docker-compose.dev.yml up -d` (container `helix-agents-db`).
-> Full current setup: [`SETUP.md`](SETUP.md). The step-by-step *method* below is still correct.
+> The app runs bare metal locally (venv + `uvicorn`). The only container in local dev is Postgres,
+> and even that's optional — see [`SETUP.md`](SETUP.md).
 
 > Claude Code prompt. Open Claude Code in this repo and paste:
 > `Run docs/extend-agent.md`
@@ -18,14 +14,8 @@ The platform is on `http://localhost:8000` with hot-reload enabled (`RUNTIME_ENV
 
 ## 0. Preconditions
 
-- Live container reachable: `curl -sSf http://localhost:8000/health` returns 200. If not, ask the user to `docker compose up -d --build` first. (`docker compose ps` is unreliable from worktrees or alternate clones — trust the health probe.)
-- Live container is bound to *this* checkout — otherwise hot-reload won't see your edits:
-
-  ```bash
-  docker inspect agentos-api --format '{{range .Mounts}}{{.Source}}{{"\n"}}{{end}}' | grep -F "$(pwd)"
-  ```
-
-  Empty result = the container's `/app` is bound to a different repo path. Either `cd` to that repo or restart the container from this directory (`docker compose down && docker compose up -d --build`).
+- Server reachable: `curl -sSf http://localhost:8000/health` returns 200. If not, ask the user to start it from the repo root with the venv active: `dotenv run -- uvicorn app.main:app --reload --port 8000`.
+- The running `uvicorn` process is *this* checkout — otherwise hot-reload won't see your edits. Confirm `pwd` matches this repo and the active venv (`echo $VIRTUAL_ENV`) points at this repo's `.venv`. A second clone or an old process started from another directory is the usual mismatch — if you suspect that, ask the user to stop it and restart it from here.
 - Ask the user for the target agent **slug** (e.g. `web-search`).
 - Recommend the user create a feature branch (`git checkout -b extend/<slug>-$(date +%Y%m%d)`) so any wrong turns are easy to revert.
 
@@ -85,32 +75,29 @@ Keep edits surgical. One change per iteration of this loop — if the user asked
 ## 5. Reload
 
 - **Edited only `agents/<slug>.py`, `app/config.yaml`, or other files inside `agents/` / `app/`** — uvicorn picks it up in ~1s. No restart.
-- **Edited `app/main.py`** (registered a sub-agent, changed interfaces) — restart:
+- **Edited `app/main.py`** (registered a sub-agent, changed interfaces) — stop the `uvicorn` process (`Ctrl-C`) and start it again:
 
   ```bash
-  docker compose restart agentos-api
+  dotenv run -- uvicorn app.main:app --reload --port 8000
   ```
 
-- **Added pip deps in `pyproject.toml`** — regenerate the lockfile and rebuild:
+- **Added pip deps in `pyproject.toml`** — regenerate the lockfile, reinstall, then restart:
 
   ```bash
   ./scripts/generate_requirements.sh
-  docker compose up -d --build
+  pip install -r requirements.txt
+  dotenv run -- uvicorn app.main:app --reload --port 8000
   ```
 
-After a restart or rebuild, poll `/health` until the API is back:
+After a restart, poll `/health` until the API is back:
 
 ```bash
 until curl -sSf http://localhost:8000/health > /dev/null; do sleep 0.5; done
 ```
 
-For hot-reload, confirm the edit reached the container before smoke-testing:
-
-```bash
-docker exec agentos-api grep -c "<unique substring from your edit>" /app/agents/<slug>.py
-```
-
-`0` means the file in the container hasn't changed — almost always a bind-mount mismatch. Step 0 catches this earlier.
+For hot-reload edits, uvicorn reads the file straight from disk — there's no bind-mount step to
+confirm. If the change doesn't seem to have landed, check the `uvicorn` terminal for a reload
+message, or re-check Step 0's checkout mismatch.
 
 ## 6. Smoke test the change
 
@@ -127,13 +114,8 @@ curl -sS -X POST http://localhost:8000/agents/<slug>/runs \
 jq -r '.content // .' < /tmp/improve-out.json
 ```
 
-Read tool calls from the container logs to confirm the right tool fired:
-
-```bash
-docker logs agentos-api --since 30s 2>&1 | grep -E "Running: \w+\(" | head -40
-```
-
-(`Running: <tool>(` is the line shape agno emits per tool call when `AGNO_DEBUG=True`, which compose sets for dev.)
+Read tool calls from the `uvicorn` terminal to confirm the right tool fired — with `AGNO_DEBUG=True`
+set in `.env`, agno prints one `Running: <tool>(` line per tool call directly to that console.
 
 Show the user the response and the tool calls. Did the change land?
 
@@ -180,7 +162,7 @@ web-search:
   - "Summarize the abstract of https://arxiv.org/pdf/2501.12948"
 ```
 
-**Step 5** — pip deps changed: `./scripts/generate_requirements.sh && docker compose up -d --build`. Poll `/health`.
+**Step 5** — pip deps changed: `./scripts/generate_requirements.sh && pip install -r requirements.txt`, restart `uvicorn`. Poll `/health`.
 
 **Step 6** — cURL the agent with the quick prompt. Logs show `Running: scrape_website(` against the arxiv URL. Response is grounded in the PDF content.
 

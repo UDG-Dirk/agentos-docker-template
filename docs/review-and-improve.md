@@ -1,12 +1,7 @@
 # Review and Improve
 
-> **Dev-loop note (updated 2026-07):** this guide predates the switch to bare-metal local dev, so some
-> commands below are stale. Where it says `docker compose … agentos-api` or `docker compose up -d --build`,
-> instead restart the local **`uvicorn`** process (run with `--reload`, saving a file reloads it
-> automatically). Where it says `docker logs agentos-api`, read the `uvicorn` console. The only container
-> in local dev is Postgres — `docker compose -f docker-compose.dev.yml up -d` (container `helix-agents-db`).
-> Also: the env template is now `.env.example` (`example.env` still exists but is being retired).
-> Full current setup: [`SETUP.md`](SETUP.md). The checklist *method* below is still correct.
+> The app runs bare metal locally (venv + `uvicorn`). The only container in local dev is Postgres,
+> and even that's optional — see [`SETUP.md`](SETUP.md). The env template is `.env.example`.
 
 > Claude Code prompt. Open Claude Code in this repo and paste:
 > `Run docs/review-and-improve.md`
@@ -40,8 +35,8 @@ This is a **recurring sweep** — meant to be re-run regularly. On a clean repo 
 
 ## 0. Preconditions
 
-- Live container reachable: `curl -sSf http://localhost:8000/health` returns 200. If not, ask the user to `docker compose up -d --build` first — Step 4 needs a live container. (`docker compose ps` is unreliable from worktrees or alternate clones — trust the health probe.)
-- If multiple worktrees of this repo exist on disk, only one container can bind to localhost:8000 — Step 4 will reflect whichever repo last brought the container up, not necessarily this worktree's `app/main.py`. Step 4 has a cross-check for this.
+- Server reachable: `curl -sSf http://localhost:8000/health` returns 200. If not, ask the user to start it from the repo root with the venv active: `dotenv run -- uvicorn app.main:app --reload --port 8000` — Step 4 needs a running server.
+- If multiple worktrees of this repo exist on disk, only one `uvicorn` process can bind to `localhost:8000` — Step 4 will reflect whichever checkout last started that process, not necessarily this worktree's `app/main.py`. Step 4 has a cross-check for this.
 - Recommend a feature branch so auto-fixes are easy to revert: `git checkout -b review/$(date +%Y%m%d)`.
 
 ## 1. Scope check
@@ -95,7 +90,7 @@ First, confirm the live container is serving *this* repo's agents — not a stal
 curl -s http://localhost:8000/agents | jq -r '.[].id' | sort
 ```
 
-If the list doesn't match the slugs in `agents=[...]`, flag it — Step 4 will be testing the wrong code. Common causes: the container is bound to a different repo path, or `docker compose restart` is needed. Stop and surface to the user.
+If the list doesn't match the slugs in `agents=[...]`, flag it — Step 4 will be testing the wrong code. Common causes: the running `uvicorn` process is from a different checkout, or it needs a restart to pick up `app/main.py` changes. Stop and surface to the user.
 
 For each agent registered in `app/main.py`, hit it with one of its `quick_prompts`:
 
@@ -110,13 +105,9 @@ curl -sS -X POST http://localhost:8000/agents/<slug>/runs \
 jq -r '.content // .' < /tmp/review-<slug>.json | head -20
 ```
 
-Pass = HTTP 200, non-empty content, no errors in the container logs:
-
-```bash
-docker logs agentos-api --since 30s 2>&1 | grep -E "Running: \w+\(" | head -40
-```
-
-(`Running: <tool>(` is the tool-call line shape agno emits when `AGNO_DEBUG=True`, which compose sets for dev. Without `AGNO_DEBUG` expect no matches — `HTTP 200` and a non-empty body are then your only signal.)
+Pass = HTTP 200, non-empty content, no errors in the `uvicorn` terminal. With `AGNO_DEBUG=True` set
+in `.env`, agno prints one `Running: <tool>(` line per tool call directly to that console; without
+it, expect no such lines — `HTTP 200` and a non-empty body are then your only signal.
 
 Quality issues (response is plausible but wrong, missing citations, wrong tool fired) are out of scope — note them and recommend [`docs/improve-agent.md`](improve-agent.md) (autonomous) or [`docs/extend-agent.md`](extend-agent.md) (user-driven) depending on whether the user has a specific fix in mind.
 

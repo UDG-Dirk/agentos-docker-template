@@ -4,8 +4,9 @@ Generates a customer Lit + TypeScript component-library package from 3c's ThemeG
 (source-agnostic; UC1/UC2 today). Two steps:
   1. ``ccg-input-gathering`` — gather + validate the 3c element descriptors + token layer (SP-6).
   2. ``ccg-generate`` — Phase-1 DETERMINISTIC generation: route each element, and for baseline-matched
-     ones fork the baseline Lit source from helix-code (READ-ONLY) into the customer namespace
-     (re-tag / re-class / re-tokenise). No-baseline elements are recorded DEFERRED (Path B = Phase 2).
+     ones fork the baseline Lit source from helix-code (READ-ONLY) verbatim into the customer package
+     (Architecture B — tag/class/``--helix-*`` refs preserved; branding is a later token-value swap,
+     not a rename). No-baseline elements are recorded DEFERRED (Path B = Phase 2).
 
 Phase 2+ add the agentic from-spec path + structural validation gate. The envelope
 (agents/component_code_generator/models.py) is the full v0.1 shape already. helix-code is READ-ONLY
@@ -37,9 +38,10 @@ helix_component_code_generator_workflow = Workflow(
         "Agent 3d (v0.1, Phase 1 — deterministic): generates a customer Lit + TypeScript component "
         "library from 3c's output. Step 1 gathers the 3c element descriptors + token layer; Step 2 "
         "routes each element and forks the matched baseline Lit source from helix-code (READ-ONLY) "
-        "into the customer namespace (re-tag/re-class/re-tokenise) — byte-identical, no LLM. "
-        "No-baseline elements are DEFERRED to the Phase-2 agentic from-spec path (with a structural "
-        "validation gate). Fail-loud (SP-6); helix-code READ-ONLY; inputs via additional_data."
+        "verbatim — tag/class/--helix-* refs preserved, byte-identical, no LLM. Customer branding is "
+        "a token-value swap applied later, not a rename (Architecture B). No-baseline elements are "
+        "DEFERRED to the Phase-2 agentic from-spec path (with a structural validation gate). "
+        "Fails loudly rather than guessing; helix-code stays READ-ONLY; inputs via additional_data."
     ),
     db=get_postgres_db(),
     steps=[ccg_input_step, ccg_generate_step],

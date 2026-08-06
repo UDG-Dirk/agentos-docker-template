@@ -10,8 +10,8 @@ Test suites: `tests/component_code_generator/` (P1/P2/P3 + verify) — all green
 | VT | Requirement | Status | Evidence |
 |----|-------------|--------|----------|
 | VT-1 | Path routing deterministic (Path A fork vs Path B from-spec) | ✅ | `route_element` (P1 `test_route_*`): forked/reconciled+baseline → fork; else deferred→Path B. |
-| VT-2 | Path-A fork re-namespaces tag (hx- → customer) | ✅ | `fork_component` (P1 `test_fork_retags_*`); nested `<hx-icon>` rewritten too. |
-| VT-3 | Path-A fork re-classes (PascalCase + Element) + re-tokenises (--helix- → --customer-) | ✅ | P1 `test_fork_renames_class_*`, `test_fork_retokenizes_*`; byte-deterministic. |
+| VT-2 | Path-A fork preserves the baseline tag verbatim (no rename) | ✅ | `fork_component` (P1 `test_fork_preserves_helix_tag`, `test_fork_is_verbatim_copy`). Superseded 2026-08-03 (Correction #18) — Path-A no longer renames `hx-*` tags; see Architecture B in `docs/ARCHITECTURE.md`. |
+| VT-3 | Path-A fork preserves class name + `--helix-*` token references verbatim (no rename) | ✅ | P1 `test_fork_preserves_helix_class`, `test_fork_preserves_helix_token_namespace`; byte-deterministic (`test_fork_is_byte_deterministic`). Superseded 2026-08-03 (Correction #18) — customer branding is a token *value* swap in the fork's Style Dictionary, not a ref rename. |
 | VT-4 | Path-B from-spec generation (Mock/Real split, SP-20) | ✅ | `MockGenerator`/`AgentGenerator` (P2 `test_mock_generator_output_passes_gate`, `test_real_generator_*`). |
 | VT-5 | Variant name-string typos normalised ("Activ"→Active) before render | ✅ | `parse_variant_axes`/`normalize_variant_value` (P2 `test_parse_variant_axes_*`; P3 output check). |
 | VT-6 | No-baseline element generated-or-flagged, NEVER fabricated (SP-6) | ✅ | gate-fail-after-retry → `structural_gate_failed`, unresolved, not emitted (P2 `test_gate_failure_after_retry_flags_sp6_*`). |
@@ -60,7 +60,7 @@ Branch-aware `find_baseline_source` forks helix-code FEATURE-branch organisms. L
 |----|-------------|--------|----------|
 | VT-p1-1/2/7 | branch content returned, in configured order; master-only backwards-compat | ✅ | test_ccg_path1 (injected git_show) |
 | VT-p1-3 | Lit-validity (WIP) check | ✅ | is_valid_lit_source tests |
-| VT-p1-4 | branch fork customer-namespaced | ✅ **live** | MediaText fork: 310 LOC, tag helix-modules-path1-hardening-media-text, 0 residual hx-/--helix-, class …MediaTextElement, JSDoc preserved |
+| VT-p1-4 | branch fork preserves tag/class/`--helix-*` refs verbatim (no rename) | ✅ **live** | MediaText fork: 310 LOC, tag `hx-media-text` preserved, class `HxMediaText` preserved, `var(--helix-*)` refs preserved, JSDoc preserved. Superseded 2026-08-03 (Correction #18); offline: `test_fork_mediatext_preserves_identity`. |
 | VT-p1-5 | WIP source → warning + still fork (SP-6) | ✅ | test_wip_branch_source_still_forked_and_flagged |
 | VT-p1-6 | largest-LOC multi-candidate | ✅ | test_largest_loc_wins_across_branches |
 | VT-p1-9 | MediaText forks real feature/organisms/MediaText | ✅ **live** | forked 310 LOC from origin/feature/organisms/MediaText (HeroTeaser←HeroTeaserSlide 606, AccordionWrapper←238) |

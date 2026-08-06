@@ -30,18 +30,19 @@ can confirm the server boots before you have a proxy key.
 ## 1. Prerequisites
 
 > **Platforms:** Linux, **macOS** (incl. Apple Silicon), or **Windows via WSL2** — the setup scripts
-> assume a POSIX shell, so on Windows run everything inside WSL2, not native PowerShell/CMD. On macOS
-> and Windows, use **Docker Desktop** for the database (§5 Option A) — the `pgvector/pgvector` image is
-> multi-arch (amd64 + arm64), and `psycopg-binary` ships wheels for all three platforms, so no
-> compiler is needed.
+> assume a POSIX shell, so on Windows run everything inside WSL2, not native PowerShell/CMD.
+> **This team runs bare-metal Postgres, no Docker, in local dev** (§5 Option A below). If you have
+> no local Postgres at all and just want something running fast, `docker-compose.dev.yml` (§5
+> Option B) is available as a fallback — it is not the supported path here.
 
 - **Python 3.12** (3.11+ works; the pipeline targets 3.12).
+- **[uv](https://docs.astral.sh/uv/)** — required by `./scripts/venv_setup.sh` (the recommended venv
+  setup path in §3). Install it before running the script, or set up the venv by hand instead.
 - **Node.js** — only if you run the Figma-extraction workflows (`npx` fetches the Framelink Figma
   MCP at runtime). Not needed just to boot the server.
 - **Git**.
-- **A database**, one of:
-  - **Docker** (easiest — use the provided `docker-compose.dev.yml`), or
-  - a **bare-metal Postgres 14+** with `pgvector` installable.
+- **A bare-metal Postgres 14+** with `pgvector` installable (§5 Option A). Docker (§5 Option B) is a
+  fallback only, not used by this team.
 - **LiteLLM proxy** — your proxy URL + API token, set as `OPENAI_BASE_URL` + `OPENAI_API_KEY`. (You
   can boot the server and hit `/health` without it; you only need it for anything that calls a model.)
 
@@ -67,12 +68,18 @@ Create the venv and install dependencies (the helper script does both):
 source .venv/bin/activate
 ```
 
-Prefer to do it by hand? That's all the script does:
+This needs [`uv`](https://docs.astral.sh/uv/) installed (the script exits with an install link if
+it isn't). It removes any existing `.venv`, creates a fresh Python 3.12 venv with `uv`, installs
+`requirements.txt`, and installs the project itself in editable mode with dev dependencies
+(`uv pip install -e .[dev]`).
+
+Prefer to do it by hand, without `uv`?
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+pip install -e .[dev]
 ```
 
 ---
@@ -90,8 +97,8 @@ Then edit `.env`:
 - **Models (LiteLLM proxy):** set `OPENAI_BASE_URL` + `OPENAI_API_KEY` to your LiteLLM proxy URL and
   token. `OPENAI_MODEL_ID` and `OPENAI_EMBEDDER_ID` are pre-filled with working defaults. Keep the
   `openai/` prefix on `OPENAI_EMBEDDER_ID` — a bare id is rejected by the proxy.
-- **Database:** the defaults (`ai` / `ai` / `ai` on `localhost:5432`) match the Docker option in the
-  next step. Change them only if you use a different Postgres.
+- **Database:** the defaults (`ai` / `ai` / `ai` on `localhost:5432`) match §5's setup below.
+  Change them only if you use a different Postgres.
 - **Figma:** set `FIGMA_PAT` only if you'll run the Figma-extraction workflows. Get one at
   **figma.com → your avatar → Settings → Security tab → Personal access tokens → "Generate new
   token"**. A name + **read** access to *file content* is enough (the extractor only reads). Copy the
@@ -103,22 +110,11 @@ Then edit `.env`:
 
 ## 5. Database — Postgres + pgvector
 
-### Option A — Docker (recommended, one command)
-
-```bash
-docker compose -f docker-compose.dev.yml up -d
-```
-
-This starts Postgres 16 with `pgvector` preinstalled, database/user/password all `ai`, on
-`localhost:5432`. Stop it with `docker compose -f docker-compose.dev.yml down` (add `-v` to wipe the
-data). The app enables the `vector` extension itself on first connect.
-
-### Option B — Bare-metal Postgres (Linux; adapt for macOS/Windows)
+### Option A — Bare-metal Postgres (this team's setup; Linux commands, adapt for macOS/Windows)
 
 If you already run Postgres locally, create the database + user and enable pgvector. The commands
 below are Linux-flavored (`sudo -u postgres psql`); on macOS use your Homebrew Postgres (`psql
-postgres`), and on Windows/WSL adjust to your install. **If in doubt, use Option A (Docker)** — it's
-identical on every platform:
+postgres`), and on Windows/WSL adjust to your install:
 
 ```bash
 # as a Postgres superuser (e.g. `sudo -u postgres psql`):
@@ -129,7 +125,23 @@ CREATE EXTENSION IF NOT EXISTS vector;   -- requires the pgvector package instal
 ```
 
 `pgvector` install varies by platform (e.g. `apt install postgresql-16-pgvector`, or `brew install
-pgvector`). See <https://github.com/pgvector/pgvector#installation>.
+pgvector`). See <https://github.com/pgvector/pgvector#installation>. On a Postgres version/package
+mismatch (the most common friction point on a fresh WSL Ubuntu box), match the `postgresql-<ver>-pgvector`
+package to the Postgres major version you installed.
+
+### Option B — Docker (fallback only, not used by this team)
+
+If you have no local Postgres at all and just want something running fast for a one-off check:
+
+```bash
+docker compose -f docker-compose.dev.yml up -d
+```
+
+This starts Postgres 16 with `pgvector` preinstalled, database/user/password all `ai`, on
+`localhost:5432`. Stop it with `docker compose -f docker-compose.dev.yml down` (add `-v` to wipe the
+data). The app enables the `vector` extension itself on first connect. This is the **only** container
+this repo uses in local dev — there is no app container, and this option is not the supported path
+on this team's machines.
 
 ---
 

@@ -15,9 +15,9 @@ Agno Workflow (headless: reads Figma with the Framelink community MCP + a Person
                                   pauses for a human review
   Step 3a Baseline Reader      → baseline inventory             [BUILT + DEPLOYED]
   Step 3b Semantic Matcher     → client→baseline match          [LIBRARY ONLY — no endpoint yet]
-  Step 3c Theme Generator      → CSS theme overrides            [PLANNED]
-  Step 3d New-Component Scaffolder → new Vue components         [PLANNED]
-  Step 4  CMS Model Generator  → Storyblok content models       [PLANNED]
+  Step 3c Theme Generator      → forked, customer-branded package [BUILT + DEPLOYED]
+  Step 3d Component Code Generator → Lit + TypeScript components [BUILT + DEPLOYED]
+  Overlay Packager             → opens the delivery MR          [PLANNED]
   Step 5  Quality Gate         → validation (no LLM)            [PLANNED]
   Step 6  Git Push             → GitLab REST API commit          [PLANNED]
 ```
@@ -29,8 +29,10 @@ invented component names that weren't in the file. Details: [`../agents/figma_ex
 
 > **Deployed workflows** (all on Coolify): `helix-figma-extractor` (single published-library file),
 > `helix-client-extractor` (a client file resolved against its libraries), `helix-composition-only-extractor`
-> (a standalone/unpublished file), and `helix-baseline-reader` (Step 3a on its own). Steps 3c–6 are planned;
-> Step 3b (Semantic Matcher) exists as a tested library, not yet a running endpoint — see **Output Model** below.
+> (a standalone/unpublished file), `helix-baseline-reader` (Step 3a on its own), `helix-theme-generator`
+> (Step 3c) and `helix-component-code-generator` (Step 3d) — six workflows registered in `app/main.py`.
+> Step 3b (Semantic Matcher) exists as a tested library, not yet a running endpoint — see **Output Model**
+> below. The overlay packager (assembling everything into a delivery MR) is the one remaining planned step.
 
 ---
 
@@ -78,12 +80,38 @@ stages of maturity:
 |---|---|---|---|
 | 3a | **Baseline Reader** | read the existing baseline design-system repo into an inventory (tokens, components, conventions) | **Built + deployed** — runs alongside Step 1 and as the standalone `helix-baseline-reader` workflow |
 | 3b | **Semantic Matcher** | match each client token/component to its baseline counterpart, with a confidence score and a human-review flag when unsure | **Library only** — the scoring logic is built and tested (`agents/semantic_matcher/`); no running endpoint/workflow yet |
-| 3c | **Theme Generator** | produce CSS overrides for `themes/<client>/` | Planned |
-| 3d | **New-Component Scaffolder** | scaffold only genuinely new components, following the baseline's conventions | Planned |
+| 3c | **Theme Generator** | fork the baseline into a customer package and substitute token values (see **Architecture B** below) | **Built + deployed** — `helix-theme-generator` |
+| 3d | **Component Code Generator** | fork existing baseline components verbatim (Path A), or generate new ones from the Figma spec (Path B) | **Built + deployed** — `helix-component-code-generator`; generates Lit + TypeScript, not Vue — see [`agents/component_code_generator/README.md`](../agents/component_code_generator/README.md) |
 
 Step 3b's matching quality still benefits from more real client Figma files (Bausch und Ströbel, GEMÜ,
 Bosch) to widen its tested pattern space before it's wired as a live endpoint. Steps 1–2 (Extractor,
 Normalizer) and 3a are independent of that. (Source: FE-DEV gap register, gap GAP-09.)
+
+---
+
+## Architecture B — how customer branding actually works today
+
+Earlier design (**Architecture A**, superseded) planned a thin customer package that only held the
+diff from baseline. The pipeline instead ships **Architecture B**: a **full fork of helix-code**, with
+customer branding applied as a **token value swap**, not a rename.
+
+Concretely, when Step 3d forks an existing baseline component (**Path A**):
+
+- The component's tag (e.g. `hx-button`), class name (e.g. `HxButton`), and CSS variable references
+  (e.g. `var(--helix-color-primary)`) are copied **byte-for-byte, unchanged**.
+- Only the **value** behind each CSS variable changes — done later, in the fork's Style Dictionary
+  (the tool that turns design-token JSON into CSS). The variable *name* stays `--helix-*`; only what
+  it resolves to differs per customer.
+- This replaced an earlier approach that renamed those references (e.g. `--helix-*` →
+  `--acme-*`). That broke components whose styling depends on the unrenamed `--helix-*` variables
+  defined elsewhere in the fork — the renamed references pointed at nothing. Fixed 2026-08-03.
+
+For components that don't exist in the baseline yet, **Path B** generates new Lit + TypeScript source
+from the Figma spec directly (LLM-assisted, validated against a structural gate before it's accepted).
+
+The **overlay packager** (not yet built) is the step that will assemble every generated file — forked
+components, generated components, the customer token values — into one client fork of helix-code and
+open the delivery merge request for the front-end team to review.
 
 ---
 
