@@ -70,7 +70,7 @@ Two kinds of step, and the difference matters:
 | **Composition-Only Extractor** | Extractor for a standalone / unpublished file whose components live as page frames rather than a published library. | Deterministic workflow (no AI) | **Live** |
 | **Token Normalizer** | Cleans the extracted tokens into a standards-compliant token tree (W3C Design Tokens), then **pauses for a person to review** before moving on. | Deterministic step (no AI) + human review | **Live** |
 | **Baseline Reader** | Reads the team's existing baseline design system into an inventory, so later steps can compare a client against it. | Deterministic workflow (no AI) | **Live** |
-| **Semantic Matcher** | Matches each client token/component to its closest counterpart in the baseline, with a confidence score — and asks a human when it isn't sure. | AI-assisted (the one LLM step) | Tested library; live endpoint planned |
+| **Semantic Matcher** | Matches each client token/component to its closest counterpart in the baseline, with a confidence score — and asks a human when it isn't sure. | AI-assisted (the one LLM step) | Future enhancement — not part of the current pipeline |
 | **Theme Generator** | Forks the baseline into a customer-specific package and works out which components map to it; for uncertain matches, a review pass uses an LLM. | Mostly deterministic + one AI-assisted review pass | **Live**, but no longer a planned station on the roadmap — see note below |
 | **Component Code Generator** | Produces the actual component source: copies matched baseline components unchanged (Path A), or generates genuinely new ones from the Figma spec with an LLM (Path B). | Deterministic fork + AI-assisted generation | **Live** — Path A production-ready; Path B has run live but output quality has plateaued (see [`agents/component_code_generator/README.md`](agents/component_code_generator/README.md)) |
 
@@ -79,12 +79,42 @@ flowchart TD
     F["Client Figma file"] --> EX["Figma Extractor<br/>(deterministic)"]
     EX --> TN["Token Normalizer<br/>(deterministic + human review)"]
     B["Baseline design system"] --> BR["Baseline Reader<br/>(deterministic)"]
-    TN --> SM["Semantic Matcher<br/>(AI-assisted · endpoint planned)"]
-    BR --> SM
-    SM --> TG["Theme Generator<br/>(live)"]
+    TN -.->|"not wired in"| SM["Semantic Matcher<br/>(future enhancement)"]
+    BR -.->|"not wired in"| SM
+    SM -.-> TG["Theme Generator<br/>(live)"]
+    TN --> TG
+    BR --> TG
     TG --> CCG["Component Code Generator<br/>(live)"]
-    CCG --> OUT["Customer component package<br/>(Lit + TypeScript)"]
+    CCG --> PKG["Overlay Packager<br/>(planned — not yet built)"]
+    PKG -.-> OUT["Customer component package<br/>+ MR opened against client fork<br/>(Lit + TypeScript)"]
+    style PKG stroke-dasharray: 5 5
 ```
+
+The **Overlay Packager** — the step that forks helix-code into a client package, applies token
+values, and opens a GitLab MR — is planned but not yet built. The pipeline today produces component
+code; delivery to a client repo is a future step.
+
+> **Note on Semantic Matcher:** it's a tested library (`agents/semantic_matcher/`), not a registered
+> workflow — there's no `app/main.py` entry, no Agno `step.py`, nothing callable over MCP/REST today.
+> The pipeline runs fully today without it. It's a planned quality enhancement (automated matching to
+> replace what's currently done another way), not a missing dependency — your runs will not fail
+> because of it.
+
+> **Note on Path-A vs Path-B selection (Component Code Generator):** this is a deterministic,
+> caller-supplied choice, not something the pipeline infers for you. Each element you pass in
+> `additional_data.elements` carries a `derivation` field; `route_element()`
+> ([`agents/component_code_generator/scaffolding.py:48`](agents/component_code_generator/scaffolding.py))
+> routes `derivation in ("forked_from_baseline", "agent_reconciled")` + a resolvable `baseline_ref` to
+> **Path A** (fork the matched baseline component verbatim), anything else to **Path B** (generate
+> from spec). `derivation` is normally set by the Theme Generator's own classification
+> (`agents/theme_generator/scaffolding.py:185`), which in turn reads `scoring_by_slot` — the Semantic
+> Matcher's output. **Since Semantic Matcher isn't wired (above), nothing populates `scoring_by_slot`
+> today**, so every element defaults to Path B unless you explicitly supply `derivation` yourself.
+> Example, to force Path A for a component you know matches an existing baseline element:
+> ```json
+> {"elements": [{"slot": "hero-teaser", "derivation": "forked_from_baseline", "baseline_ref": "HeroTeaser"}]}
+> ```
+> Tested: [`tests/component_code_generator/test_ccg_phase1.py:157-173`](tests/component_code_generator/test_ccg_phase1.py).
 
 Each live step is an Agno **workflow** you can call over HTTP; the deep-dive for each lives in its own
 README under [`agents/`](agents/) (each opens with a plain-language glossary). Architecture overview:
@@ -95,6 +125,13 @@ README under [`agents/`](agents/) (each opens with a plain-language glossary). A
 > not-yet-built overlay packager instead (see `docs/ARCHITECTURE.md`'s Architecture B section).
 > Don't build on top of this step; treat it as a historical stopgap, still callable but not the
 > long-term design.
+
+> **Input scope:** HELIX accepts **Figma files** as input, and only Figma files — a client's
+> Storybook is not a supported pipeline input. The three extractor workflows above are the only
+> entry points. (Storybook does appear later, but only on the *output* side, and it isn't built yet:
+> per the architecture, the design system — tokens → components → CSS — is the single source of
+> truth, and Storybook is a presentation layer over it, not an input. Story generation is planned
+> as part of the not-yet-built overlay packager, Phase 3+.)
 
 ### Which extractor workflow do I use?
 
@@ -126,7 +163,10 @@ You call a workflow and get back a run object (JSON). Here's how to read it with
 **Where the result lives.** The MCP `run_workflow` call returns the whole run object. The actual
 extraction sits under `step_results → the "extract" step → content`; that content carries the
 `deterministic_extraction` block described below. (Over REST it's the same object:
-`GET /workflows/<id>/runs/<run_id>?session_id=<sid>`.)
+`GET /workflows/<id>/runs/<run_id>?session_id=<sid>`.) Underneath, that object is stored as part of
+the workflow's session row in Postgres (table `agno_sessions`, `agentos-db`) — there's no separate
+"runs" table and no result file written to disk; the REST/MCP call above is the supported way to
+read it, not a direct DB query.
 
 **Top-level `status`:**
 - **`success`** — everything the file offered was extracted. Consume it.
@@ -192,11 +232,29 @@ HELIX team lead — we'll move it up the list.
 
 ## Get Started
 
-### Step 1: Run locally
+Two different starting points, depending on what you're here to do:
 
-The full, verified walkthrough (prerequisites, database, model access, troubleshooting) is in
-[`docs/SETUP.md`](docs/SETUP.md) — it takes a clean clone to a running server. The short version,
-against a **bare-metal Postgres** (this team's setup, [`docs/SETUP.md` §5 Option A](docs/SETUP.md)):
+### I want to USE the HELIX pipeline
+
+You don't need to run anything locally. HELIX is already deployed — connect an MCP-capable client
+(Claude Code, etc.) to `poc-agno-api.services.plygrnd.tech` and call the workflows directly.
+
+- **Get a token + wire up Claude Code:** [`scripts/README.md`](scripts/README.md).
+- **Full usage guide** (MCP tool catalog, per-workflow invocation, worked examples):
+  [`docs/AGNO_DEV_GUIDE.md`](docs/AGNO_DEV_GUIDE.md).
+- **Which workflow to call, and how to read what it returns:** see
+  [Which extractor workflow do I use?](#which-extractor-workflow-do-i-use) and
+  [How to read a run result](#how-to-read-a-run-result) above.
+
+That's the whole setup. Everything below this point is for people changing the platform itself.
+
+### I want to DEVELOP or CONTRIBUTE agents
+
+For that you need the platform running locally.
+
+**Run it.** The full, verified walkthrough (prerequisites, database, model access, troubleshooting)
+is in [`docs/SETUP.md`](docs/SETUP.md) — it takes a clean clone to a running server. The short
+version, against a **bare-metal Postgres** (this team's setup, [`docs/SETUP.md` §5 Option A](docs/SETUP.md)):
 
 ```sh
 # Clone via GitLab → Clone (the project has been transferred before — don't trust a hardcoded path)
@@ -214,17 +272,13 @@ container this repo uses in local dev) — see [`docs/SETUP.md` §5 Option B](do
 a fallback, not the supported path here.
 
 Confirm it's up: `curl -sf http://localhost:8000/health` returns `200` (no auth in local dev). The API
-docs are at [http://localhost:8000/docs](http://localhost:8000/docs).
+docs are at [http://localhost:8000/docs](http://localhost:8000/docs). To point Claude Code at your
+local server: `claude mcp add --transport http --scope user agno-local --url http://localhost:8000/mcp`
+— no `Authorization` header needed here, unlike the prod wiring in
+[`scripts/README.md`](scripts/README.md) (local dev has no auth at all; prod requires the Bearer JWT
+that script mints).
 
-### Step 2: Connect to the Web UI
-
-1. Open [os.agno.com](https://os.agno.com) and login
-2. Add OS → Local → `http://localhost:8000`
-3. Click "Connect"
-
-### Step 3: Stop the application
-
-Stop the server with `Ctrl-C` in its terminal. To stop the database too:
+**Stop it.** `Ctrl-C` in the server's terminal. To stop the database too:
 
 ```sh
 docker compose -f docker-compose.dev.yml down     # add -v to also wipe the data
