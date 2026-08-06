@@ -1,3 +1,7 @@
+> **This document is a prompt template for AI coding agents (Claude Code, GitHub Copilot, etc.)**
+> Paste it into your AI agent to automate this workflow. It is not a human-readable guide.
+> If you are looking for documentation, start with `README.md` and `docs/ARCHITECTURE.md`.
+
 # Review and Improve
 
 > The app runs bare metal locally (venv + `uvicorn`). The only container in local dev is Postgres,
