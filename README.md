@@ -85,8 +85,14 @@ flowchart TD
     TN --> TG
     BR --> TG
     TG --> CCG["Component Code Generator<br/>(live)"]
-    CCG --> OUT["Customer component package<br/>(Lit + TypeScript)"]
+    CCG --> PKG["Overlay Packager<br/>(planned — not yet built)"]
+    PKG -.-> OUT["Customer component package<br/>+ MR opened against client fork<br/>(Lit + TypeScript)"]
+    style PKG stroke-dasharray: 5 5
 ```
+
+The **Overlay Packager** — the step that forks helix-code into a client package, applies token
+values, and opens a GitLab MR — is planned but not yet built. The pipeline today produces component
+code; delivery to a client repo is a future step.
 
 > **Note on Semantic Matcher:** it's a tested library (`agents/semantic_matcher/`), not a registered
 > workflow — there's no `app/main.py` entry, no Agno `step.py`, nothing callable over MCP/REST today.
