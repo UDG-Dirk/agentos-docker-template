@@ -20,14 +20,20 @@ Step 2 mechanism:
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import tempfile
 import time
+import uuid
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
+from agno.workflow.types import StepInput, StepOutput
+
+from agents.overlay_packager import fork_ops, mr_ops, packaging
+from agents.overlay_packager import lock as lock_mod
 from agents.overlay_packager.token_substitution import (
     CoverageGateError,
     CoverageReport,
@@ -37,6 +43,7 @@ from agents.overlay_packager.token_substitution import (
 )
 
 STEP_NAME_TOKEN_SUB = "overlay-packager-token-substitution"
+STEP_NAME_PACKAGER = "overlay-packager"
 
 DEFAULT_TOKEN_GLOB = "packages/tokens/tokens/semantic-*/*.tokens.json"
 _BUILD_TIMEOUT_SECONDS = 180
@@ -57,15 +64,15 @@ class TokenSubstitutionResult:
     fork_path: str
     files_written: list[str] = field(default_factory=list)
     coverage: dict[str, CoverageReport] = field(default_factory=dict)
-    build_gate: Optional[BuildGateResult] = None
-    error: Optional[str] = None
+    build_gate: BuildGateResult | None = None
+    error: str | None = None
 
 
 def _tail(text: str, n: int = 4000) -> str:
     return text[-n:] if text else ""
 
 
-def make_scratch_fork(helix_code_root: str, dest_dir: Optional[str] = None) -> str:
+def make_scratch_fork(helix_code_root: str, dest_dir: str | None = None) -> str:
     """Copy helix-code into a scratch temp dir — Phase 2's local stand-in for
     a live GitLab client-fork. Read-only on ``helix_code_root``: source is
     copied, never written to. ``.git``/``dist`` are skipped (not needed for a
@@ -95,12 +102,14 @@ def make_scratch_fork(helix_code_root: str, dest_dir: Optional[str] = None) -> s
     return str(dest)
 
 
-def run_build_tokens_gate(fork_path: str) -> BuildGateResult:
-    """Structural gate: `pnpm build:tokens` inside the (scratch or live) fork."""
+def run_pnpm_gate(fork_path: str, *pnpm_args: str) -> BuildGateResult:
+    """Generic structural gate: `pnpm <pnpm_args>` inside the (scratch or live)
+    fork, capturing pass/fail + timing. Same mechanism `build:tokens` proved in
+    Phase 2 (MR !51); Phase 3 reuses it verbatim for the other real gates."""
     start = time.monotonic()
     try:
         proc = subprocess.run(
-            ["pnpm", "build:tokens"],
+            ["pnpm", *pnpm_args],
             cwd=fork_path,
             capture_output=True,
             text=True,
@@ -122,11 +131,224 @@ def run_build_tokens_gate(fork_path: str) -> BuildGateResult:
     )
 
 
+def run_build_tokens_gate(fork_path: str) -> BuildGateResult:
+    """Structural gate: `pnpm build:tokens` inside the (scratch or live) fork."""
+    return run_pnpm_gate(fork_path, "build:tokens")
+
+
+def run_typecheck_gate(fork_path: str) -> BuildGateResult:
+    """Structural gate: `pnpm typecheck` inside the (scratch or live) fork."""
+    return run_pnpm_gate(fork_path, "typecheck")
+
+
+def run_build_storybook_gate(fork_path: str) -> BuildGateResult:
+    """Structural gate: `pnpm build-storybook` inside the (scratch or live) fork."""
+    return run_pnpm_gate(fork_path, "build-storybook")
+
+
+def run_all_structural_gates(fork_path: str) -> dict[str, BuildGateResult]:
+    """Phase 3 step 7: all 4 real gates against the cloned fork, in order.
+    `pnpm install --frozen-lockfile` gates the rest — on failure the other
+    three are omitted (not attempted against a broken install) rather than
+    reported as failed, so the MR body distinguishes "install broke" from
+    "install fine, typecheck/tokens/storybook broke"."""
+    gates: dict[str, BuildGateResult] = {
+        "pnpm install --frozen-lockfile": run_pnpm_gate(fork_path, "install", "--frozen-lockfile"),
+    }
+    if not gates["pnpm install --frozen-lockfile"].passed:
+        return gates
+    gates["pnpm typecheck"] = run_typecheck_gate(fork_path)
+    gates["pnpm build:tokens"] = run_build_tokens_gate(fork_path)
+    gates["pnpm build-storybook"] = run_build_storybook_gate(fork_path)
+    return gates
+
+
+# =========================================================================== #
+# Phase 3 — packager workflow entry (the 7-step mechanism against a LIVE fork)
+# =========================================================================== #
+
+
+def _now_iso() -> str:
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+
+def _blocking(exc) -> dict:
+    """{code, message, remediation} -> the ratified blocking_warning envelope
+    (see fork_ops.ForkOpsError / packaging.PackagerInputError / mr_ops.MrOpsError)."""
+    return {
+        "status": "failure",
+        "blocking_warning": {"code": exc.code, "message": exc.message, "remediation": exc.remediation},
+    }
+
+
+def _gate_outcomes(gates: dict[str, BuildGateResult]) -> list[mr_ops.GateOutcome]:
+    return [mr_ops.GateOutcome(name=name, passed=g.passed, duration_seconds=g.duration_seconds) for name, g in gates.items()]
+
+
+def overlay_packager_executor(step_input: StepInput, **kwargs) -> StepOutput:
+    """Phase 3 orchestrator. additional_data contract:
+
+      customer_slug        (required — fail-loud if blank, never defaulted)
+      baseline_ref          (default "master")
+      customer_token_map    (3c output: DTCG leaf-path -> customer $value)
+      known_uncovered         (optional FM1 exceptions: {rel_token_file: [{path,reason,owner}]})
+      elements                 (Path-A + Path-B combined: [{class_name, file_path}, ...])
+      incompatibilities          (flagged design gaps: [{token_path, nearest_neighbor}])
+      figma_file_key / figma_revision
+
+    Every failure surfaces as a ``blocking_warning`` (ratified convention) —
+    this never raises past its own boundary, so the workflow run always
+    returns. Structural-gate / MR failures still complete the run (per the
+    ratified "no pipeline-pause" contract for flagged items); only packager
+    input/infra errors (blank slug, missing token, GitLab unreachable, gate
+    failure) mark the run ``success=False``.
+    """
+    data = getattr(step_input, "additional_data", None) or {}
+    run_id = getattr(step_input, "run_id", None) or str(uuid.uuid4())
+    timestamp = _now_iso()
+
+    try:
+        slug = packaging.validate_customer_slug(data.get("customer_slug"))
+    except packaging.PackagerInputError as exc:
+        return StepOutput(step_name=STEP_NAME_PACKAGER, content=_blocking(exc), success=False)
+
+    baseline_ref = data.get("baseline_ref") or "master"
+    env = dict(os.environ)
+
+    try:
+        run_type = packaging.detect_run_type(slug, env=env)
+    except packaging.PackagerInputError as exc:
+        return StepOutput(step_name=STEP_NAME_PACKAGER, content=_blocking(exc), success=False)
+
+    token = env[packaging.ENV_TOKEN]
+    api_base = packaging._api_base(env[packaging.ENV_REPO_URL])
+    subgroup_url = env[packaging.ENV_SUBGROUP_URL]
+    subgroup_path = packaging._subgroup_path(subgroup_url)
+    project_path = packaging.client_fork_project_path(slug, subgroup_url=subgroup_url)
+
+    figma_source = mr_ops.FigmaSource(
+        file_key=data.get("figma_file_key", ""),
+        revision=data.get("figma_revision", ""),
+    )
+
+    try:
+        if run_type == "first_run":
+            subgroup_id = fork_ops.get_subgroup_id(subgroup_path, api_base, token)
+            fork_result = fork_ops.create_or_fetch_client_fork(slug, baseline_ref, env=env)
+            project = fork_ops.create_client_project(slug, subgroup_id, api_base, token)
+            fork_ops.seed_client_project(project, fork_ops.DEFAULT_BASELINE_CLEAN_URL, fork_result.resolved_sha, env=env)
+            fork_path = fork_ops.clone_or_fetch_existing_fork(project, env=env)
+            client_lock = lock_mod.HelixLock(
+                customer_slug=slug,
+                forked_from=lock_mod.ForkedFrom(repo="msq-turbo/helix-code", ref=baseline_ref, sha=fork_result.resolved_sha),
+            )
+            source_shifts: list[lock_mod.SourceShift] = []
+        else:
+            project = fork_ops.get_client_project(project_path, api_base, token)
+            fork_path = fork_ops.clone_or_fetch_existing_fork(project, env=env)
+            client_lock = lock_mod.read_lock(fork_path)
+            organism_sources = {
+                el["class_name"]: lock_mod.OrganismSource(source=el.get("source", baseline_ref), sha=el.get("sha", ""))
+                for el in data.get("elements", [])
+                if el.get("category") == "organisms" and el.get("class_name")
+            }
+            source_shifts = lock_mod.detect_source_shift(client_lock, organism_sources)
+    except (packaging.PackagerInputError, fork_ops.ForkOpsError, lock_mod.LockError) as exc:
+        return StepOutput(step_name=STEP_NAME_PACKAGER, content=_blocking(exc), success=False)
+
+    # Step 3: 3c token substitution (FM1 coverage gate) — Phase 2 mechanism, unmodified.
+    coverage_failure: str | None = None
+    if data.get("customer_token_map"):
+        sub_result = apply_token_substitution(
+            fork_path,
+            data["customer_token_map"],
+            known_uncovered={
+                rel: [KnownUncovered(**ku) for ku in kus] for rel, kus in (data.get("known_uncovered") or {}).items()
+            },
+            run_build_gate=False,  # the real gate runs once, below, alongside typecheck/storybook
+        )
+        if sub_result.status == "failure":
+            coverage_failure = sub_result.error
+
+    # Steps 4-5: Path-A + Path-B elements (already-produced package content, copied in).
+    elements = data.get("elements", [])
+    package_path = data.get("package_path")
+    applied_files: list[str] = []
+    if package_path and elements:
+        applied_files = packaging.apply_generated_elements(fork_path, package_path, elements)
+
+    # Step 6: barrel regen + Phase 4/5 hooks (KNOWN STUB — see packaging.story_gen_hook /
+    # cem_analyze_hook docstrings; Phase 4/5 haven't landed yet, forward-reference in the
+    # original spec, Desktop-confirmed sequencing bug, amendment 1).
+    barrel_added = packaging.regenerate_barrel(fork_path, elements) if elements else []
+    story_gen_result = packaging.story_gen_hook(fork_path, elements)
+    cem_result = packaging.cem_analyze_hook(fork_path)
+
+    # Step 7: real structural gates.
+    gates = run_all_structural_gates(fork_path)
+    gates_passed = all(g.passed for g in gates.values())
+
+    # helix-lock.json write/update (FM3) — always, even on a gate failure, so the
+    # next re-run still has an accurate prior-state baseline to diff against.
+    client_lock.runs.append(
+        lock_mod.RunRecord(run_id=run_id, timestamp=timestamp, figma=lock_mod.RunFigma(**vars(figma_source)))
+    )
+    for el in elements:
+        if el.get("category") == "organisms" and el.get("class_name"):
+            client_lock.organisms[el["class_name"]] = lock_mod.OrganismSource(
+                source=el.get("source", baseline_ref), sha=el.get("sha", "")
+            )
+    lock_mod.write_lock(fork_path, client_lock)
+
+    incompatibility_comments = [
+        mr_ops.render_incompatibility_comment(inc["token_path"], inc["nearest_neighbor"])
+        for inc in data.get("incompatibilities", [])
+    ]
+    shift_comments = [mr_ops.render_source_shift_comment(s) for s in source_shifts]
+
+    result = {
+        "status": "success" if gates_passed and coverage_failure is None else "failure",
+        "run_id": run_id,
+        "timestamp": timestamp,
+        "run_type": run_type,
+        "project": {"path_with_namespace": project.path_with_namespace, "web_url": project.web_url},
+        "applied_files": applied_files,
+        "barrel_added": barrel_added,
+        "story_gen": story_gen_result,  # None = KNOWN STUB (Phase 4 not landed)
+        "cem_analyze": cem_result,      # None = KNOWN STUB (Phase 5 not landed)
+        "structural_gates": {name: {"passed": g.passed, "duration_seconds": g.duration_seconds} for name, g in gates.items()},
+        "coverage_failure": coverage_failure,
+        "incompatibility_comments": incompatibility_comments,
+        "source_shift_comments": shift_comments,
+        "lock_path": f"{fork_path}/{lock_mod.LOCK_FILENAME}",
+    }
+
+    # Step 6/8: stacked MR bundle only against a real GitLab project id (>0) —
+    # a fake ClientProject in a unit test (id=0) never opens live MRs.
+    if project.id:
+        stage_summaries = {stage: f"Run {run_id}: {stage.replace('-', ' ')} changes." for stage in mr_ops.MR_STACK_ORDER}
+        stage_gates = {"organisms": _gate_outcomes(gates)}  # gates reported once, on the last (organisms) MR
+        try:
+            mrs = mr_ops.open_stacked_mr_bundle(
+                project.id, run_id, timestamp, figma_source, stage_summaries, stage_gates, api_base, token,
+            )
+        except mr_ops.MrOpsError as exc:
+            result["status"] = "failure"
+            result["blocking_warning"] = {"code": exc.code, "message": exc.message, "remediation": exc.remediation}
+            return StepOutput(step_name=STEP_NAME_PACKAGER, content=result, success=False)
+
+        result["merge_requests"] = {stage: {"iid": mr.iid, "web_url": mr.web_url} for stage, mr in mrs.items()}
+        for comment in [*incompatibility_comments, *shift_comments]:
+            mr_ops.post_mr_comment(project.id, mrs["organisms"].iid, comment, api_base, token)
+
+    return StepOutput(step_name=STEP_NAME_PACKAGER, content=result, success=result["status"] == "success")
+
+
 def apply_token_substitution(
     fork_path: str,
     customer_token_map: dict,
     *,
-    known_uncovered: Optional[dict[str, list[KnownUncovered]]] = None,
+    known_uncovered: dict[str, list[KnownUncovered]] | None = None,
     token_glob: str = DEFAULT_TOKEN_GLOB,
     run_build_gate: bool = True,
 ) -> TokenSubstitutionResult:
