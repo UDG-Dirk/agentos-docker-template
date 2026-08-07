@@ -23,11 +23,9 @@ from agents.overlay_packager.fork_ops import ForkOpsError, create_or_fetch_clien
 from agents.overlay_packager.step import (
     apply_token_substitution,
     make_scratch_fork,
-    run_build_tokens_gate,
 )
 from agents.overlay_packager.token_substitution import (
     CoverageGateError,
-    CoverageReport,
     KnownUncovered,
     assert_coverage,
     substitute_token_values,

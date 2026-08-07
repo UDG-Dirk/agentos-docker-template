@@ -16,9 +16,10 @@ from agents.reasoning_agent import reasoning_agent
 from agents.web_search import web_search
 from app.workflows.helix_baseline_reader import helix_baseline_reader_workflow
 from app.workflows.helix_client_extractor import helix_client_extractor_workflow
+from app.workflows.helix_component_code_generator import helix_component_code_generator_workflow
 from app.workflows.helix_composition_only_extractor import helix_composition_only_extractor_workflow
 from app.workflows.helix_figma_extractor import helix_figma_extractor_workflow
-from app.workflows.helix_component_code_generator import helix_component_code_generator_workflow
+from app.workflows.helix_overlay_packager import helix_overlay_packager_workflow
 from app.workflows.helix_theme_generator import helix_theme_generator_workflow
 from db import get_postgres_db
 from knowledge.dark_factory_kb import ingest as ingest_dark_factory_kb
@@ -40,7 +41,7 @@ try:
 
     _orig_default_serializer = _fmcp_base.default_serializer
 
-    def _helix_safe_serializer(data):  # noqa: ANN001, ANN202
+    def _helix_safe_serializer(data):
         if hasattr(data, "to_dict"):
             try:
                 data = data.to_dict()
@@ -115,7 +116,8 @@ agent_os = AgentOS(
     agents=[web_search, code_search, reasoning_agent, knowledge_agent],
     workflows=[helix_figma_extractor_workflow, helix_client_extractor_workflow,
                helix_composition_only_extractor_workflow, helix_baseline_reader_workflow,
-               helix_theme_generator_workflow, helix_component_code_generator_workflow],
+               helix_theme_generator_workflow, helix_component_code_generator_workflow,
+               helix_overlay_packager_workflow],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
     enable_mcp_server=True,
