@@ -303,6 +303,9 @@ Rule of thumb: agents for open questions, teams for routing, workflows for proce
 - **Proactive runs.** Every weekday morning, summarize overnight news for your portfolio and send to Slack.
 - **Periodic re-evaluation.** Wrap the eval suite as a scheduled workflow to catch behavior drift before users do.
 
+> Not to be confused with **GitLab CI/CD Pipeline Schedules** (e.g. the daily `build-cem` run —
+> see [`docs/ENV.md`](docs/ENV.md)), a separate mechanism configured in GitLab, not here.
+
 See [Agno scheduler docs](https://docs.agno.com/agent-os/scheduler) for the cron API.
 
 ### Interfaces

@@ -31,9 +31,15 @@ Prod AgentOS (`RUNTIME_ENV=prd`) requires a **Bearer RS256 JWT**, verified serve
 If you just need MCP/API **access**, don't clone or install anything:
 
 - **Self-serve via CI (best):** GitLab → **Build → Pipelines → Run pipeline** on `main`, set
-  `MINT_USER=<handle>` (+ optional `MINT_DAYS`, `MINT_SCOPES`) → open the **`mint-token`** job →
-  download the **`agno_mcp_token`** artifact (expires in 1 day). No key handling by anyone. Then go to
-  **step 4**. (Setup/rotation/revocation: [`../docs/AUTH_KEYS.md`](../docs/AUTH_KEYS.md).)
+  `MINT_USER=<handle>` (+ optional `MINT_DAYS`, `MINT_SCOPES`) → open the **`mint-token`** job page
+  → **Job artifacts → Download** the **`agno_mcp_token`** artifact (expires in 1 day). No key
+  handling by anyone. Save it, then place it before step 4:
+  ```bash
+  mkdir -p ~/.agno-keys && chmod 700 ~/.agno-keys
+  mv ~/Downloads/agno_mcp_token ~/.agno-keys/agno_mcp_token   # wherever your browser saved it
+  chmod 600 ~/.agno-keys/agno_mcp_token
+  ```
+  (Setup/rotation/revocation: [`../docs/AUTH_KEYS.md`](../docs/AUTH_KEYS.md).)
 - **Or ask the key-holder** to mint one and send you the token string:
   ```bash
   python3 scripts/mint_token.py --user <your-handle> --days 30
@@ -47,7 +53,7 @@ Minting needs **just two libraries — NOT the whole app**:
 git clone <clone-url-from-gitlab>          # canonical URL: GitLab → Clone
 cd "$(basename "$_" .git)"
 python3 -m venv .venv && source .venv/bin/activate
-pip install pyjwt cryptography             # ONLY these two
+pip3 install pyjwt cryptography            # ONLY these two
 ```
 > ⚠️ Do **NOT** run `pip install -r requirements.txt` just to mint — that's the entire AgentOS
 > service (agno, aiofile, …) and it **requires Python ≥3.12**, so on older Python it fails with

@@ -76,6 +76,22 @@ Sensitivity: **secret** = credential/never-log; **config** = non-secret.
 
 CI-only vars (not app env): `MINT_USER` `MINT_DAYS` `MINT_SCOPES` (mint), `BUILD_CEM` `HELIX_CODE_REF` `HELIX_CODE_REPO_URL` `CEM_REL_PATH` (build-cem).
 
+**Update 2026-08-07:** `build-cem` also runs on a **daily GitLab Schedule** (CI/CD >
+Schedules, id 20, "build-cem daily", cron `0 3 * * *` Europe/Berlin, target `main`) — it is
+no longer opt-in-only. Both the schedule and any manual `BUILD_CEM=1` run write to the SAME
+`cem/latest` generic-package location (last-write-wins) — whichever ran most recently wins,
+scheduled or manual. Check/change the cadence at CI/CD > Schedules in the project, not in
+`.gitlab-ci.yml` (schedules are GitLab UI-config, not committed code — no MR/review trail
+for changes to them).
+
+**CEM prerequisite transparency:** downstream HELIX workflow steps (e.g. `helix-baseline-reader`)
+consume the CEM this job produces — "last-write-wins" means a step could read CEM data up to
+~24h stale relative to the last manual trigger, if nobody's run it manually since the 3am
+schedule. **Naming collision to watch for:** this GitLab CI/CD *Pipeline Schedule* is a
+DIFFERENT mechanism from Agno's own application-level workflow scheduler (`scheduler=True` in
+`app/main.py`, see README.md's ["Scheduled tasks"](../README.md#scheduled-tasks) section) — a
+reader searching "schedule" could land on the wrong one.
+
 ## Discrepancy / dead-entry flags
 - **`HELIX_CODE_CEM_ARTIFACT_URL` (RESOLVED 2026-07-29 → stable package URL):** the old "latest-on-`main` `?job=build-cem`" artifact URL was fragile — it 404'd (build-cem is opt-in, not on `main`'s regular pipelines) and, once repointed, served a **12929-byte non-CEM page** → reader `CEM_MALFORMED`. **Fix (shipped):** `build-cem` now publishes to the **generic package registry** at a stable URL `…/api/v4/projects/<id>/packages/generic/cem/latest/custom-elements.json` (overwritten each run). No more pinned-job-URL re-pin. Download auth = a `read_api` token in `..._AUTH_HEADER` (unchanged; the registry download accepts `read_api`).
 - **`AGNO_PRIVATE_KEY`** lives in *both* the group CI var (for `mint-token`) and Coolify (historical) — intentional (two consumers), but keep both in sync on rotation.
