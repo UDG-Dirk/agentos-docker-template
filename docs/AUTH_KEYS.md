@@ -71,6 +71,9 @@ GitLab → **Build → Pipelines → Run pipeline** on `main`, set variables:
 - `MINT_USER=<handle>` (required — this is what actually gates/runs the `mint-token` job),
   `MINT_DAYS=30` (optional), `MINT_SCOPES="agents:run workflows:run"` (optional, space-separated
   scope names — see the full list in `scripts/mint_token.py`'s `DEFAULT_SCOPES`).
+  **Leaving `MINT_SCOPES` unset does not mean "no scopes"** — the script falls back to the full
+  `DEFAULT_SCOPES` list, minting a token with every scope the AgentOS surface understands. Set
+  `MINT_SCOPES` explicitly for a least-privilege token.
 Run → open the **`mint-token`** job page → **Job artifacts → Download** the **`agno_mcp_token`**
 artifact. Never printed to logs, never committed. Then wire into Claude Code per
 [`../scripts/README.md`](../scripts/README.md) (that doc also covers where to place the
