@@ -119,6 +119,7 @@ agent_os = AgentOS(
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
     enable_mcp_server=True,
+    cors_allowed_origins=["https://agent-ui.services.plygrnd.tech/"],
 )
 app = agent_os.get_app()
 
