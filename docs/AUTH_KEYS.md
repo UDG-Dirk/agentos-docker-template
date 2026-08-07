@@ -3,6 +3,10 @@
 How prod AgentOS auth works, and how the squad mints tokens **without** the private key ever
 touching git or living on one laptop. Bus-factor doc — this is the source of truth for key custody.
 
+> **Running HELIX locally?** `RUNTIME_ENV=dev` disables JWT auth entirely — no token, no key,
+> nothing to mint. Everything below is for the **deployed (PROD)** AgentOS only. See
+> [`SETUP.md`](SETUP.md) for local dev.
+
 ## The keypair (RS256, self-generated — "BYO")
 
 Auth is a **self-made RSA-2048 keypair**. There is no download from Agno/os.agno.com.
@@ -64,8 +68,24 @@ base64 copy (`agno_private.pem.b64`), that's for a *vault* field that dislikes m
 
 ### A. Self-serve via CI (no key handling) — preferred
 GitLab → **Build → Pipelines → Run pipeline** on `main`, set variables:
-- `MINT_USER=<handle>` (required), `MINT_DAYS=30` (optional), `MINT_SCOPES="agents:run workflows:run …"` (optional).
-Run → open the **`mint-token`** job → download the **`agno_mcp_token`** artifact (expires in 1 day). Never printed to logs, never committed. Then wire into Claude Code per [`../scripts/README.md`](../scripts/README.md).
+- `MINT_USER=<handle>` (required — this is what actually gates/runs the `mint-token` job),
+  `MINT_DAYS=30` (optional), `MINT_SCOPES="agents:run workflows:run"` (optional, space-separated
+  scope names — see the full list in `scripts/mint_token.py`'s `DEFAULT_SCOPES`).
+Run → open the **`mint-token`** job page → **Job artifacts → Download** the **`agno_mcp_token`**
+artifact. Never printed to logs, never committed. Then wire into Claude Code per
+[`../scripts/README.md`](../scripts/README.md) (that doc also covers where to place the
+downloaded file before wiring it in).
+
+**Two different expiries, don't confuse them:** the GitLab **artifact** expires in **1 day**
+(`expire_in: 1 day` in `.gitlab-ci.yml` — download it same-day or re-run the job); the **JWT
+itself** expires per `MINT_DAYS` (default 30) via its `exp` claim, independent of the artifact.
+Losing the artifact window just means re-running the job; the token keeps working until its own
+`exp`.
+
+**Blast radius of a single issued token:** whoever holds it can act as `MINT_USER` against prod
+AgentOS for whatever scopes it carries, until it expires or the keypair is rotated. Treat it like
+any other bearer credential — don't paste it into chat, tickets, or version control; if one leaks,
+rotating the keypair (below) revokes every outstanding token, not just that one.
 
 ### B. Key-holder mints locally
 ```bash
@@ -74,7 +94,7 @@ python3 scripts/mint_token.py --user <handle> --days 30   # uses ~/.agno-keys/ag
 Send the token over a secure channel.
 
 ### C. Requester self-mints (only if they hold the key)
-`pip install pyjwt cryptography` (NOT `-r requirements.txt`), place the key at `~/.agno-keys/agno_private.pem` (chmod 600), run as in B. Spreads the secret — avoid unless necessary.
+`pip3 install pyjwt cryptography` (NOT `-r requirements.txt`), place the key at `~/.agno-keys/agno_private.pem` (chmod 600), run as in B. Spreads the secret — avoid unless necessary.
 
 ## Rotate (new keypair) — for handover or after a suspected leak
 ```bash
